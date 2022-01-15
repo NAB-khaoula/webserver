@@ -6,7 +6,7 @@
 /*   By: ybouddou <ybouddou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/13 08:57:33 by ybouddou          #+#    #+#             */
-/*   Updated: 2022/01/13 15:14:36 by ybouddou         ###   ########.fr       */
+/*   Updated: 2022/01/15 18:58:30 by ybouddou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,8 +29,6 @@ int		accept_connection(int sockfd)
 
 void	handle_connection(WebServ *webserv, struct kevent event)
 {
-	//NOTE add my parsing;
-	//NOTE send the response;
 	Request	request;
 	char	*buffer = new char[event.data];
 	char	*response = new char[1024];
