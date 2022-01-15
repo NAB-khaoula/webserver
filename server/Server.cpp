@@ -6,7 +6,7 @@
 /*   By: ybouddou <ybouddou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/13 08:57:33 by ybouddou          #+#    #+#             */
-/*   Updated: 2022/01/15 18:58:30 by ybouddou         ###   ########.fr       */
+/*   Updated: 2022/01/15 19:17:12 by ybouddou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,11 +30,11 @@ int		accept_connection(int sockfd)
 void	handle_connection(WebServ *webserv, struct kevent event)
 {
 	Request	request;
-	char	*buffer = new char[event.data];
+	char	*buffer = new char[event.data + 1];
 	char	*response = new char[1024];
 
-	memset(buffer, 0, sizeof(event.data));
 	recv(event.ident, buffer, event.data, 0);
+	buffer[event.data] = '\0';
 	request.parseRequest(buffer);
 	std::cout << buffer << std::endl;
 	Response resp(request, webserv->servers);
@@ -54,11 +54,11 @@ void	multipleServers(WebServ *webserv)
 	webserv->it = webserv->servers.begin();
 	while (webserv->it < webserv->servers.end())
 	{
-		memset(&change, 0, sizeof(webserv->change));
+		memset(&webserv->event, 0, sizeof(webserv->event));
 		webserv->port = stoi((*webserv->it).get_listen());
 		sock.SetupSocket(webserv->port, (*webserv->it).get_host());
-		EV_SET(&change, sock.getSockfd(), EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, NULL);
-		kevent(webserv->kq, &change, 1, NULL, 0, NULL);
+		EV_SET(&webserv->event, sock.getSockfd(), EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, NULL);
+		kevent(webserv->kq, &webserv->event, 1, NULL, 0, NULL);
 		webserv->sockets.push_back(sock);
 		webserv->it++;
 	}
@@ -81,29 +81,21 @@ bool	isServer(std::vector<Sockets> sockets, int sockfd)
 
 void	multipleClient(WebServ *webserv)
 {
-	int				i;
-
-	webserv->nfds = 20;
 	while (1)
 	{
-		memset(webserv->event, 0, sizeof(webserv->event));
-		webserv->nev = kevent(webserv->kq, NULL, 0, webserv->event, webserv->nfds, NULL);
+		webserv->nev = kevent(webserv->kq, NULL, 0, &webserv->event, 1, NULL);
 		if (webserv->nev < 0)
 			throw "kevent";
-		i = -1;
-		while (++i < webserv->nev)
-		{
-			if (webserv->event[i].flags & EV_EOF)
-				close(webserv->event[i].ident);
-			else if (isServer(webserv->sockets, webserv->event[i].ident))
+			if (webserv->event.flags & EV_EOF)
+				close(webserv->event.ident);
+			else if (isServer(webserv->sockets, webserv->event.ident))
 			{
-				webserv->acceptfd = accept_connection(webserv->event[i].ident);
-				EV_SET(&webserv->change, webserv->acceptfd, EVFILT_READ, EV_ADD, 0, 0, NULL);
-				kevent(webserv->kq, &webserv->change, 1, NULL, 0, NULL);
+				webserv->acceptfd = accept_connection(webserv->event.ident);
+				EV_SET(&webserv->event, webserv->acceptfd, EVFILT_READ, EV_ADD, 0, 0, NULL);
+				kevent(webserv->kq, &webserv->event, 1, NULL, 0, NULL);
 			}
-			else if (webserv->event[i].filter & EVFILT_READ)
-				handle_connection(webserv, webserv->event[i]);
-		}
+			else if (webserv->event.filter & EVFILT_READ)
+				handle_connection(webserv, webserv->event);
 	}
 }
 
