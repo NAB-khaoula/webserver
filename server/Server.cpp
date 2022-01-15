@@ -6,7 +6,7 @@
 /*   By: ybouddou <ybouddou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/13 08:57:33 by ybouddou          #+#    #+#             */
-/*   Updated: 2022/01/15 19:17:12 by ybouddou         ###   ########.fr       */
+/*   Updated: 2022/01/15 19:26:52 by ybouddou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -86,54 +86,15 @@ void	multipleClient(WebServ *webserv)
 		webserv->nev = kevent(webserv->kq, NULL, 0, &webserv->event, 1, NULL);
 		if (webserv->nev < 0)
 			throw "kevent";
-			if (webserv->event.flags & EV_EOF)
-				close(webserv->event.ident);
-			else if (isServer(webserv->sockets, webserv->event.ident))
-			{
-				webserv->acceptfd = accept_connection(webserv->event.ident);
-				EV_SET(&webserv->event, webserv->acceptfd, EVFILT_READ, EV_ADD, 0, 0, NULL);
-				kevent(webserv->kq, &webserv->event, 1, NULL, 0, NULL);
-			}
-			else if (webserv->event.filter & EVFILT_READ)
-				handle_connection(webserv, webserv->event);
+		if (webserv->event.flags & EV_EOF)
+			close(webserv->event.ident);
+		else if (isServer(webserv->sockets, webserv->event.ident))
+		{
+			webserv->acceptfd = accept_connection(webserv->event.ident);
+			EV_SET(&webserv->event, webserv->acceptfd, EVFILT_READ, EV_ADD, 0, 0, NULL);
+			kevent(webserv->kq, &webserv->event, 1, NULL, 0, NULL);
+		}
+		else if (webserv->event.filter & EVFILT_READ)
+			handle_connection(webserv, webserv->event);
 	}
 }
-
-// void	multipleClient(int sockfd)
-// {
-// 	int		acceptfd;
-// 	int		i;
-// 	int		max_socket;
-	
-// 	fd_set	current_sockets;
-// 	fd_set	ready_sockets;
-// 	FD_ZERO(&current_sockets);
-// 	FD_SET(sockfd, &current_sockets);
-// 	max_socket = sockfd;
-// 	while (1)
-// 	{
-// 		ready_sockets = current_sockets;
-// 		std::cout << "    \e[1;32mWaiting for requests ...\e[0m \n\n";
-// 		if ((select(max_socket + 1, &ready_sockets, NULL, NULL, NULL)) < 0)
-// 			throw "select failed";
-// 		i = -1;
-// 		while (++i <= max_socket)
-// 		{
-// 			if (FD_ISSET(i, &current_sockets))
-// 			{
-// 				if (i == sockfd)
-// 				{
-// 					acceptfd = accept_connection(sockfd);
-// 					FD_SET(acceptfd, &current_sockets);
-// 					if (acceptfd > max_socket)
-// 						max_socket = acceptfd;
-// 				}
-// 				else
-// 				{
-// 					handle_connection(i);
-// 					FD_CLR(i, &current_sockets);
-// 				}
-// 			}
-// 		}
-// 	}
-// }
