@@ -1,0 +1,486 @@
+#include "Server.hpp"
+
+Server::Server()
+{
+    _root  = "";
+    _listen = "";
+    _host   = "";
+    _client_max_body = "";
+    _brace_server = 0;
+    _brace_location = 0;
+}
+
+
+void    errors(int index, int &nb_line, std::string line)
+{
+    static std::string arr[] = 
+    {
+        "Syntax Error: invalid number of arguments in 'server' directive.",
+        "Syntax Error: invalid number of arguments in 'location' directive.",
+        "Syntax Error: directive 'server' has no opening '{'.",
+        "Syntax Error: unknown directive " + line + ".",
+        "Syntax Error: host not found in " + line +  " of the 'listen' directive",
+        "Syntax Error: invalid port in " + line + " of the 'listen' directive",
+        "Syntax Error: unknown " + line + " of the 'host' directive",
+        "Syntax Error: invalid number of arguments in 'server_name' directive",
+        "Syntax Error: 'client_max_body_size' directive invalid value",
+        "Syntax Error: invalid value " + line +  " in 'error_page' directive",
+        "Syntax Error: invalid number of arguments in " + line + " directive",
+        "error11",
+        "error12",
+        "error13",
+        "error14"
+    };
+    std::string str = std::to_string(nb_line);
+
+    throw "|line " + str + "| " + arr[index];
+}
+
+bool isNumber(std::string s)
+{
+    for (int i = 0; i < s.length(); i++)
+        if (isdigit(s[i]) == false)
+            return false;
+    return true;
+}
+
+std::string& rightTrim(std::string& str)
+{
+    str.erase(str.find_last_not_of(" \t") + 1);
+    return str;
+}
+std::string& leftTrim(std::string& str)
+{
+    str.erase(0, str.find_first_not_of(" \t"));
+    return str;
+}
+
+std::string                             Server::get_root(){return _root;}
+std::string                             Server::get_listen(){return _listen;}
+std::string                             Server::get_host(){return _host;}
+std::map<std::string, std::string>      &Server::get_server_names(){return  _server_names;}
+std::string                             Server::get_client_max_body(){return _client_max_body;}
+std::map<int, std::string>              &Server::get_err_pages(){return _err_pages;}
+std::vector<Location>                   &Server::get_location() {return _location;}
+int                                     Server::get_brace_server() {return _brace_server;}
+int                                     Server::get_brace_location() {return _brace_location;}
+
+void    Server::set_root(std::string root, int &nb_line)
+{
+    root = rightTrim(root);
+    if (root.find(" ") != std::string::npos || root.find("\t") != std::string::npos)
+        errors(10, nb_line, "root");
+    else
+        _root = root;
+}
+
+void    Server::set_listen(std::string listen, int &nb_line)
+{
+    listen = rightTrim(listen);
+    int i = 0, len = 0;
+    while (listen[i] && i < 5)
+    {
+        if (isdigit(listen[i]) == false)
+            errors(4, nb_line, listen);
+        i++;
+        len++;
+    }
+    if (len == 2 || len == 4)
+        _listen = listen;
+    else
+        errors(5, nb_line, listen);
+}
+void    Server::set_host(std::string host, int &nb_line)
+{
+    host = rightTrim(host);
+    std::vector<std::string> vec = ft_splitSpace(host, '.');
+    
+    if (vec.size() == 4)
+    {
+        for (size_t i = 0; i < vec.size(); i++)
+        {
+            if (vec[i].empty() || isNumber(vec[i]) == false)
+                errors(6, nb_line, host);
+            int nb = atoi(vec[i].c_str());
+            if (nb >= 0 && nb <= 255)
+            {
+                if (i != vec.size() - 1)
+                    _host += std::to_string(nb) + ".";
+                else
+                    _host += std::to_string(nb);
+            }
+            else
+            {
+                std::string str = std::to_string(nb);
+                errors(6, nb_line, str);
+            }
+        }
+    }
+    else
+        errors(6, nb_line, host);
+}
+void    Server::set_server_names(std::string value, int &nb_line)
+{
+    if (value.empty())
+        errors(7, nb_line, "server_name");
+    std::vector<std::string> vec = ft_splitSpace(value, ' ');
+    for (size_t i = 0; i < vec.size(); i++)
+    {
+        if (_server_names.find(vec[i]) == _server_names.end())
+            _server_names.insert(std::make_pair(vec[i], vec[i]));
+    }
+
+}
+void    Server::set_client_max_body(std::string client_max_body, int &nb_line)
+{   
+    client_max_body = rightTrim(client_max_body);
+    int i = 0;
+    int check = 0;
+    while (client_max_body[i])
+    {
+        if (isdigit(client_max_body[i]))
+            i++;
+        else if (client_max_body[i] == 'm' && !check && isdigit(client_max_body[i - 1]) && client_max_body[i + 1] == '\0')
+        {
+            check++;
+            i++;
+        }
+        else
+            errors(8, nb_line, client_max_body);
+    }
+    if (!check)
+        errors(8, nb_line, client_max_body);
+    else
+    {
+        _client_max_body = client_max_body;
+        // std::cout << _client_max_body << std::endl;
+    }   
+}
+void    Server::set_err_pages(std::string value, int &nb_line)
+{
+    value = rightTrim(value);
+    size_t pos = 0;
+    if ((pos = value.find(" ")) != std::string::npos)
+    {
+        std::string f_str = value.substr(0, pos);
+        int key;
+        if (isNumber(f_str))
+            key = atoi(f_str.c_str());
+        else
+            errors(9, nb_line, f_str); 
+        int i = 0;
+        std::string s_str = value.erase(0, pos + 1);
+        while (s_str[i])
+        {
+            if (s_str[i] == ' ' || s_str[i] == '\t')
+                errors(9, nb_line, s_str);
+            i++;
+        }
+        if (_err_pages.find(key) == _err_pages.end())
+            _err_pages[key] = s_str;
+    }
+    else
+        errors(9, nb_line, value);
+}
+void    Server::set_location(Location &locat)
+{
+    _location.push_back(locat);
+}
+void    Server::set_brace_server(int brace_server) {_brace_server = brace_server;}
+void    Server::set_brace_location(int brace_location) {_brace_location = brace_location;}
+void    Server::clear()
+{
+    _listen = "";
+    _host = "";
+    _server_names.clear();
+    _client_max_body = "";
+    _err_pages.clear();
+    _root = "";
+    _location.clear();
+    _brace_server = 0;
+    _brace_location = 0;
+}
+
+//NOTE
+
+void    print_attr(std::vector<Server> &vec_serv)
+{
+    for (size_t i = 0; i < vec_serv.size(); i++)
+    {
+    std::cout << "============= Server" << i + 1  << "===========" << std::endl;
+        std::cout << vec_serv[i].get_listen() << std::endl;
+        std::cout << vec_serv[i].get_host() << std::endl;
+        for (std::map<std::string, std::string>::iterator it = vec_serv[i].get_server_names().begin(); it != vec_serv[i].get_server_names().end(); it++)
+        {
+            std::cout << it->first << " | " << it->second << std::endl;
+        }
+        for (std::map<int, std::string>::iterator it = vec_serv[i].get_err_pages().begin(); it != vec_serv[i].get_err_pages().end(); it++)
+        {
+            std::cout << it->first << " | " << it->second << std::endl;
+        }
+        std::cout << vec_serv[i].get_root() << std::endl;
+        std::cout << "============= Locations ===========" << std::endl;
+        for (size_t j = 0; j < vec_serv[i].get_location().size(); j++)
+        {
+            std::cout << "============= Sub Locations" << j + 1 << "===========" << std::endl;
+            std::cout << vec_serv[i].get_location()[j].get_path() << std::endl;
+            std::cout << vec_serv[i].get_location()[j].get_match() << std::endl;
+            std::cout << vec_serv[i].get_location()[j].get_autoindex() << std::endl;
+            for (size_t k = 0; k <vec_serv[i].get_location()[j].get_index().size() ; k++)
+            {
+                std::cout << vec_serv[i].get_location()[j].get_index()[k] << " \t";
+            }
+			std::cout << std::endl;
+            for (size_t l = 0; l < vec_serv[i].get_location()[j].get_methods().size(); l++)
+            {
+                std::cout << vec_serv[i].get_location()[j].get_methods()[l] << std::endl;
+            }
+            std::cout << vec_serv[i].get_location()[j].get_return() << std::endl;
+            std::cout << vec_serv[i].get_location()[j].get_upload() << std::endl;
+        }
+        
+    }
+
+}
+
+void fill_location(std::string &key, std::string &value, Location &locat, Server &serv, int &nb_line)
+{
+    if (!key.compare("autoindex"))
+        locat.set_autoindex(value, nb_line);
+    else if (!key.compare("index"))
+        locat.set_index(value, nb_line);
+    else if (key == "allow_methods")
+    {
+        locat.set_methods(value, nb_line);
+    }
+    else if (key == "return")
+        locat.set_return(value);
+    else if (key == "upload_store")
+        locat.set_upload(value);
+    else
+    {
+        std::cout << "dkhal location\n";
+        errors(4, nb_line, key);
+    }
+
+}
+void    fill_server(std::string key, std::string value, std::string &line, std::vector<Server> &vec_serv, Server &serv, Location &locat, int &nb_line)
+{
+    if (serv.get_brace_server() == 2)
+    {
+        // std::cout << key << "|" << value << std::endl;
+        if (!key.compare("listen"))
+            serv.set_listen(value, nb_line);
+        else if (!key.compare("host"))
+            serv.set_host(value, nb_line);
+        else if (!key.compare("server_name"))
+            serv.set_server_names(value, nb_line);
+        else if (!key.compare("client_max_body_size"))
+            serv.set_client_max_body(value, nb_line);
+        else if (!key.compare("error_page"))
+            serv.set_err_pages(value, nb_line);
+        else if (!key.compare("root"))
+            serv.set_root(value, nb_line);
+        else if (line.find("}") != std::string::npos && serv.get_brace_location() == 2)
+        {
+            serv.set_brace_location(0);
+            serv.set_location(locat);
+            locat.clear();
+        }
+        else if (line.find("}") != std::string::npos && serv.get_brace_server() == 2)
+        {
+            serv.set_brace_server(0);
+            vec_serv.push_back(serv);
+            serv.clear();
+        }
+        else if (serv.get_brace_location() == 2)
+            fill_location(key, value, locat, serv, nb_line);
+        else
+        {
+            std::cout << "dkhal hnahhh"<< std::endl;
+            errors(3, nb_line, key);
+        }
+    }
+    else
+    {
+        std::cout << "dkhal yes\n";
+        errors(2, nb_line, "");
+    }
+}
+
+void    check_braces(std::string &line, Server &serv, Location &locat, int &nb_line)
+{
+    std::string str_key;
+    std::string str_value;
+    int i = 0, j = 0, k = 0;
+
+    if ((k = line.find("#")) != std::string::npos)
+        line.erase(k, line.length());
+    while (line[i] && line[i] != '{')
+        i++;
+    if (line[i] == '{')
+    {
+        str_key = get_key(line, j);
+        str_value = get_value(line, j);
+        // std::cout << str_key << "|" << str_value << std::endl;
+        if (str_key.empty() && serv.get_brace_server() == 1)
+			serv.set_brace_server(2);
+        else if (str_key.empty() && serv.get_brace_location() == 1)
+			serv.set_brace_location(2);
+        else if (!str_key.compare("server"))
+        {
+            if (!str_value.empty())
+                errors(0, nb_line, str_value);
+            serv.set_brace_server(2);
+        }
+        else if (!str_key.compare("location"))
+        {
+            if (str_value.empty())
+                errors(1, nb_line, str_value);
+            serv.set_brace_location(2);
+            locat.set_path(str_value, nb_line);
+        }
+		line.erase(0, i + 1);
+    }
+    else if (!line[i] && (line.find("server") != std::string::npos || line.find("location") != std::string::npos))
+    {
+        str_key = get_key(line, j);
+        str_value = get_value(line, j);
+        if (!str_key.compare("server") && str_value.empty())
+        {
+            if (serv.get_brace_server())
+            {
+                std::cout << "emmm\n";
+                errors(2, nb_line, "");
+            }
+            serv.set_brace_server(1);
+            line.clear();
+        }
+        else if (!str_key.compare("location") && !str_value.empty())
+        {
+            if (serv.get_brace_location())
+            {
+                // std::cout << "dkhal\n";
+                // std::cout << str_key << "|" << str_value << std::endl;
+                errors(3, nb_line, "");
+            }
+            locat.set_path(str_value, nb_line);
+            serv.set_brace_location(1);
+            line.clear();
+        }
+        else if (!str_key.compare("server"))
+        {
+            // std::cout << "emmm\n";
+            errors(0, nb_line, str_key);
+        }
+        else if (!str_key.compare("location"))
+        {
+            // std::cout << "emmm\n";
+            errors(1, nb_line, str_key);
+        }
+    }
+    // std::cout << line << std::endl;
+}
+
+void    check_semi(std::string line, int &nb_line)
+{
+    int i = 0;
+    std::string key = get_key(line, i);
+    std::string value = get_value(line, i);
+
+    int len = value.length() - 1;
+    if (value[len] != ';' && key.compare("}"))
+    {
+        // std::cout << key << "|" << value << std::endl;
+        errors(0, nb_line, value);
+    }
+}
+
+std::vector<Server>     begin_parser()
+{
+    std::ifstream               myReadFile;
+    std::vector<Server>         vec_server;
+    Server                      serv;
+    Location                    locat;
+    std::vector<std::string>    split;
+    std::string                 line, str_key, str_value;
+    int i = 0, j = 0, k;
+
+    myReadFile.open("./parsing/webserv.conf");
+    while (std::getline(myReadFile, line))
+    {
+        i++;
+        leftTrim(rightTrim(line));
+        check_braces(line, serv, locat, i);
+        if (line.empty())
+            continue;
+        check_semi(line, i);
+        std::cout << line << std::endl;
+        split = ft_splitSpace(line, ';');
+        k = 0;
+        while (k < split.size())
+        {
+            j = 0;
+            str_key  = get_key(split.at(k), j);
+            str_value = get_value(split.at(k), j);
+            k++;
+            if (!str_key.empty() || !str_value.empty())
+            {
+                // std::cout << str_key << "|" << str_value << std::endl;
+                fill_server(str_key, str_value, line, vec_server, serv, locat, i);
+            }
+        }
+    }
+    if (serv.get_brace_server())
+        errors(5, i, "");
+    myReadFile.close();
+    // print_attr(vec_server);
+    return vec_server;
+}
+
+
+std::vector<std::string>    ft_splitSpace(std::string str, char c)
+{
+    // std::string space_delimiter = " ";
+    std::vector<std::string> words;
+
+    size_t pos = 0;
+    while ((pos = str.find(c)) != std::string::npos)
+    {
+        words.push_back(str.substr(0, pos));
+        str.erase(0, pos + 1);
+    }
+    words.push_back(str);
+    return words;
+}
+
+std::string     get_key(std::string &str, int &i)
+{
+    std::string ret;
+    int j = 0;
+
+    while (str[i] == ' ' || str[i] == '\t')
+        i++;
+    while (str[j + i] && str[j + i] != ' ' && str[j + i] != '\t' && str[j + i] != '\n' && str[j + i] != '{')
+        j++;
+    
+    ret = str.substr(i, j);
+    i += j;
+    return ret;
+}
+
+std::string get_value(std::string &str, int &i)
+{
+    std::string ret;
+    int j = 0;
+
+    while (str[i] == ' ' || str[i] == '\t')
+        i++;
+    while (str[j + i] && str[j + i] != '{')
+        j++;
+    
+    ret = str.substr(i, j);
+    return ret;
+}
+
+Server::~Server(){}
