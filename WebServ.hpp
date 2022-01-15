@@ -3,13 +3,12 @@
 /*                                                        :::      ::::::::   */
 /*   WebServ.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ybouddou <ybouddou@student.42.fr>          +#+  +:+       +#+        */
+/*   By: mbelaman <mbelaman@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/08 16:33:37 by ybouddou          #+#    #+#             */
-/*   Updated: 2022/01/15 19:16:39 by ybouddou         ###   ########.fr       */
+/*   Updated: 2022/01/15 20:31:15 by mbelaman         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
-
 
 #include <iostream>
 #include <string>
