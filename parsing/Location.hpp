@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <vector>
+#include <map>
 
 class Location
 {
@@ -12,8 +13,10 @@ private:
     std::string                 _autoindex;
     std::vector<std::string>    _arr_index;
     std::vector<std::string>    _arr_methods;
-    std::string                 _return;
+    std::map<int, std::string>  _return;
     std::string                 _upload;
+    std::string                 _cgi;
+    std::string                 _upload_enble;
 
 public:
     Location();
@@ -23,16 +26,20 @@ public:
     std::string                  get_autoindex();
     std::vector<std::string>     get_index();
     std::vector<std::string>     get_methods();
-    std::string                  get_return();
+    std::map<int, std::string>   &get_return();
     std::string                  get_upload();
+    std::string                  get_upload_enble();
+    std::string                  get_cgi();
 
     void                        set_path(std::string, int &);
     void                        set_match(bool);
     void                        set_autoindex(std::string, int &);
     void                        set_index(std::string, int &);
     void                        set_methods(std::string, int &);
-    void                        set_return(std::string);
-    void                        set_upload(std::string);
+    void                        set_return(std::string, int  &);
+    void                        set_upload(std::string, int &);
+    void                        set_upload_enble(std::string, int &);
+    void                        set_cgi(std::string, int &);
     void                        clear();
     ~Location();
 };
@@ -42,4 +49,5 @@ std::vector<std::string>    delete_brace(std::string str, int &);
 void                        errors(int index, int &, std::string);
 std::string&                rightTrim(std::string& str);
 std::string&                leftTrim(std::string& str);
+bool                        isNumber(std::string s);
 #endif

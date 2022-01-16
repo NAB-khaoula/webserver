@@ -6,7 +6,7 @@
 /*   By: mbelaman <mbelaman@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/08 16:33:37 by ybouddou          #+#    #+#             */
-/*   Updated: 2022/01/15 20:31:15 by mbelaman         ###   ########.fr       */
+/*   Updated: 2022/01/16 09:36:51 by mbelaman         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,9 +28,9 @@
 
 typedef struct	WevServ
 {
-	std::vector<Sockets>	sockets;
+	// std::vector<Sockets>	sockets;
 	std::vector<Server>		servers;
-	std::vector<Server>::iterator	it;
+	// std::vector<Server>::iterator	it;
 	struct kevent	event;
 	int				kq;
 	int				port;
