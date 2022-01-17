@@ -1,5 +1,6 @@
 {
     "files.associations": {
+        "vector": "cpp",
         "__bit_reference": "cpp",
         "__config": "cpp",
         "__debug": "cpp",
@@ -61,6 +62,6 @@
         "typeinfo": "cpp",
         "unordered_map": "cpp",
         "utility": "cpp",
-        "vector": "cpp"
+        "__memory": "cpp"
     }
 }

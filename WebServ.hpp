@@ -3,13 +3,12 @@
 /*                                                        :::      ::::::::   */
 /*   WebServ.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ybouddou <ybouddou@student.42.fr>          +#+  +:+       +#+        */
+/*   By: mbelaman <mbelaman@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/08 16:33:37 by ybouddou          #+#    #+#             */
-/*   Updated: 2022/01/15 19:16:39 by ybouddou         ###   ########.fr       */
+/*   Updated: 2022/01/16 09:36:51 by mbelaman         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
-
 
 #include <iostream>
 #include <string>
@@ -29,9 +28,9 @@
 
 typedef struct	WevServ
 {
-	std::vector<Sockets>	sockets;
+	// std::vector<Sockets>	sockets;
 	std::vector<Server>		servers;
-	std::vector<Server>::iterator	it;
+	// std::vector<Server>::iterator	it;
 	struct kevent	event;
 	int				kq;
 	int				port;

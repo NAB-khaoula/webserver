@@ -20,6 +20,7 @@ private:
     std::map<int, std::string>            _err_pages;
     std::string                           _root;
     std::vector<Location>                 _location;
+    std::map<std::string, Location>       _map_loc;
     int                                   _brace_server;
     int                                   _brace_location;
 public:
@@ -33,6 +34,7 @@ public:
     std::map<std::string, std::string>          &get_server_names();
     std::string                                 get_client_max_body();
     std::map<int, std::string>                  &get_err_pages();
+    std::map<std::string, Location>             &get_map_loc();
     std::vector<Location>                       &get_location();
     int                                         get_brace_server();
     int                                         get_brace_location();
@@ -46,6 +48,7 @@ public:
     void                            set_client_max_body(std::string, int &);
     void                            set_err_pages(std::string, int &);
     void                            set_location(Location &);
+    void                            set_map_loc(Location &, int &);
     void                            set_brace_server(int);
     void                            set_brace_location(int);
     void                            clear();
