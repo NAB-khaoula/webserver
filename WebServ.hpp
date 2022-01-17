@@ -28,9 +28,9 @@
 
 typedef struct	WevServ
 {
-	// std::vector<Sockets>	sockets;
+	std::vector<Sockets>	sockets;
 	std::vector<Server>		servers;
-	// std::vector<Server>::iterator	it;
+	std::vector<Server>::iterator	it;
 	struct kevent	event;
 	int				kq;
 	int				port;
