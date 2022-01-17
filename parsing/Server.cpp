@@ -35,7 +35,7 @@ void    errors(int index, int &nb_line, std::string line)
         "Syntax Error: invalid number of arguments in 'upload_enable' directive",//17
         "Syntax Error: invalid value " + line +  " in 'return' directive",//18
         "Syntax Error: invalid number of arguments in " + line + " directive.",//19
-        "error11"
+        "Syntax Error: duplicate location " + line//20
     };
     std::string str = std::to_string(nb_line);
     throw "|line " + str + "| " + arr[index];
@@ -146,7 +146,8 @@ void    Server::set_client_max_body(std::string client_max_body, int &nb_line)
     {
         if (isdigit(client_max_body[i]))
             i++;
-        else if (client_max_body[i] == 'm' && !check && isdigit(client_max_body[i - 1]) && client_max_body[i + 1] == '\0')
+        else if ((client_max_body[i] == 'm' || client_max_body[i] == 'M' || client_max_body[i] == 'k' || client_max_body[i] == 'K' || client_max_body[i] == 'g' || client_max_body[i] == 'G') &&
+                !check && isdigit(client_max_body[i - 1]) && client_max_body[i + 1] == '\0')
         {
             check++;
             i++;
@@ -159,7 +160,6 @@ void    Server::set_client_max_body(std::string client_max_body, int &nb_line)
     else
     {
         _client_max_body = client_max_body;
-        // std::cout << _client_max_body << std::endl;
     }   
 }
 void    Server::set_err_pages(std::string value, int &nb_line)
@@ -198,8 +198,11 @@ void    Server::set_map_loc(Location &locat, int &nb_line)
 {
     if (_map_loc.find(locat.get_path()) == _map_loc.end())
         _map_loc[locat.get_path()] = locat;
-    else 
-        errors(13, nb_line, "");
+    else
+    {
+        std::cout << "dkhal1337\n";
+        errors(20, nb_line, locat.get_path());
+    }
 }
 
 void    Server::set_brace_server(int brace_server) {_brace_server = brace_server;}
@@ -492,7 +495,10 @@ std::vector<Server>     begin_parser()
         }
     }
     if (serv.get_brace_server())
+    {
+        std::cout << "dkhal\n";
         errors(5, i, "");
+    }
     myReadFile.close();
     // print_attr(vec_server);
     return vec_server;
