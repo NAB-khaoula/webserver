@@ -5,8 +5,8 @@
 #include <vector>
 #include <string>
 
-#define METHOD	0
-#define PATH	1
+#define METHOD		0
+#define PATH		1
 #define HTTPVERSION	2
 
 class Request{

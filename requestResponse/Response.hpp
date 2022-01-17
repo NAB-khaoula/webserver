@@ -29,9 +29,10 @@ class Response
 		Response(Request requestClient,std::vector<Server> configParsed);
 		~Response();
 		bool		compareStrings(std::string first, std::string seconde);
-		int			lookingForFileRequested();
-		Server		choosingVirtualServer();
-		Location	choosingLocation();
+		int			findFileRequested();
+		Server		findVirtualServer();
+		Location	findLocation();
+		bool		allowedMethods();
 		std::string	&buildResponse();
 		std::string	indexFound();
 		std::string	indexNotFound();
