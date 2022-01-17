@@ -33,19 +33,26 @@ Server	Response::choosingVirtualServer()
 	return serverConfigData[defaultServerIndex];
 }
 
-// Location	Response::choosingLocation()
-// {
-// 	for(std::map<std::string, Location>::iterator it = virtualServer.get_map_loc().begin(); it != virtualServer.get_map_loc().end(); it++)
-// 	{
-		
-// 	}
-// }
+Location	Response::choosingLocation()
+{
+	size_t pos = 0;
+	for(std::map<std::string, Location>::iterator it = virtualServer.get_map_loc().begin(); it != virtualServer.get_map_loc().end(); it++)
+	{
+		if (it->second.get_match()){
+			if(clientRequest.getStartLine()[PATH].compare(it->first))
+				return it->second;
+		}
+		else{
+			// if (clientRequest.getStartLine()[PATH].find(it->first))
+		}
+	}
+}
 
 int     Response::lookingForFileRequested()
 {
 	this->virtualServer = this->choosingVirtualServer();
-	// this->filePath = virtualServer.get_root();
-	// location = this->choosingLocation();
+	this->filePath = virtualServer.get_root();
+	this->location = this->choosingLocation();
 	return (200);
 }
 
@@ -55,10 +62,10 @@ std::string	&Response::buildResponse(){
 	{
 		stringJoinedResponse = indexFound();
 	}
-	// else if (this->statusCode == NOTFOUND)
-	// {
-	//     stringJoinedResponse = indexNotFound();
-	// }
+	else if (this->statusCode == NOTFOUND)
+	{
+	    stringJoinedResponse = indexNotFound();
+	}
 	// else if (this->statusCode == FORBIDDEN)
 	// {
 	//     stringJoinedResponse = indexForbidden();
