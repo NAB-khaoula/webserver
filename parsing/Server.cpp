@@ -415,7 +415,7 @@ std::vector<Server>     begin_parser()
         if (line.empty())
             continue;
         check_semi(line, i);
-        std::cout << line << std::endl;
+        // std::cout << line << std::endl;
         split = ft_splitSpace(line, ';');
         k = 0;
         while (k < split.size())

@@ -57,6 +57,7 @@ void	multipleServers(WebServ *webserv)
 		memset(&webserv->event, 0, sizeof(webserv->event));
 		webserv->port = stoi((*webserv->it).get_listen());
 		sock.SetupSocket(webserv->port, (*webserv->it).get_host());
+		std::cout << webserv->port << " | " << (*webserv->it).get_host() << std::endl;
 		EV_SET(&webserv->event, sock.getSockfd(), EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, NULL);
 		kevent(webserv->kq, &webserv->event, 1, NULL, 0, NULL);
 		webserv->sockets.push_back(sock);

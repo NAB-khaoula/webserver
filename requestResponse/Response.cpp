@@ -22,9 +22,8 @@ Server	Response::choosingVirtualServer()
 		if(!(compareStrings((serverConfigData[i]).get_listen(), hostPort[1])))
 		{
 			defaultServerIndex = i;
-			// for (std::map<std::string, std::string>::iterator it = (serverConfigData[i].get_server_names()).begin(); it != (serverConfigData[i].get_server_names()).end())
-			// for(int j = 0; j < (serverConfigData[i].get_server_names()).size(); j++)
-			// 	if(!(compareStrings((serverConfigData[i].get_server_names())[j], hostPort[0])))
+			for (std::map<std::string, std::string>::iterator it = (serverConfigData[i].get_server_names()).begin(); it != (serverConfigData[i].get_server_names()).end(); it++)
+				if(!(compareStrings(it->first, hostPort[0])))
 					return serverConfigData[i];
 		}
 	}
@@ -34,12 +33,14 @@ Server	Response::choosingVirtualServer()
 int     Response::lookingForFileRequested()
 {
 	this->virtualServer = this->choosingVirtualServer();
-	this->filePath = virtualServer.get_root();
+	// std::cout << virtualServer.get_listen() << std::endl;
+	// std::cout << virtualServer.get_host() << std::endl;
+	// this->filePath = virtualServer.get_root();
 	// for (int i = 0; i < (virtualServer.get_location()).size() ; i++)
 	// {
 	// 	// if (virtualServer.get_location().at(i).get_methods().find)
 	// }
-	return (404);
+	return (200);
 }
 
 std::string	&Response::buildResponse(){
