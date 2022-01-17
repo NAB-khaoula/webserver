@@ -1,8 +1,8 @@
 #include "Response.hpp"
 
-Response::Response(){}
+// Response::Response(){}
 
-Response::Response(Request requestClient, std::vector<Server> configParsed): statusCode(-1), charResponse(NULL), stringJoinedResponse(std::string()), clientRequest(requestClient), serverConfigData(configParsed)
+Response::Response(Request requestClient, std::vector<Server> configParsed): statusCode(-1), stringJoinedResponse(std::string()), clientRequest(requestClient), serverConfigData(configParsed)
 {}
 
 Response::~Response()
@@ -17,28 +17,36 @@ Server	Response::choosingVirtualServer()
 {
 	int	defaultServerIndex = 0;
 	std::vector<std::string> hostPort = ft_splitSpace(((clientRequest.getHttpHeaders()).find("Host"))->second, ':');
+	//NOTE need to add default server is size == 1;
 	for(int i = 0; i < serverConfigData.size(); i++)
 	{
 		if(!(compareStrings((serverConfigData[i]).get_listen(), hostPort[1])))
 		{
 			defaultServerIndex = i;
-			for(int j = 0; j < (serverConfigData[i].get_server_names()).size(); j++)
-				if(!(compareStrings((serverConfigData[i].get_server_names())[j], hostPort[0])))
+			if (!(compareStrings((serverConfigData[i]).get_host(), hostPort[0])))
+					return serverConfigData[i];
+			for (std::map<std::string, std::string>::iterator it = (serverConfigData[i].get_server_names()).begin(); it != (serverConfigData[i].get_server_names()).end(); it++)
+				if(!(compareStrings(it->first, hostPort[0])))
 					return serverConfigData[i];
 		}
 	}
 	return serverConfigData[defaultServerIndex];
 }
 
+// Location	Response::choosingLocation()
+// {
+// 	for(std::map<std::string, Location>::iterator it = virtualServer.get_map_loc().begin(); it != virtualServer.get_map_loc().end(); it++)
+// 	{
+		
+// 	}
+// }
+
 int     Response::lookingForFileRequested()
 {
 	this->virtualServer = this->choosingVirtualServer();
-	this->filePath = virtualServer.get_root();
-	for (int i = 0; i < (virtualServer.get_location()).size() ; i++)
-	{
-		// if (virtualServer.get_location().at(i).get_methods().find)
-	}
-	return (404);
+	// this->filePath = virtualServer.get_root();
+	// location = this->choosingLocation();
+	return (200);
 }
 
 std::string	&Response::buildResponse(){

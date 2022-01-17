@@ -46,7 +46,6 @@ void			Request::SplitFirstLine(std::string &requestString)
 		this->startLine.push_back(strSplited.substr(0, pos));
 		strSplited.erase(0, pos + 1);
 	}
-	std::cout << "need to be deleted" << std::endl;
 	this->startLine.push_back(strSplited);
 }
 
