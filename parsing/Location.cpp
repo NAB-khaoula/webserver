@@ -37,7 +37,11 @@ void    Location::set_path(std::string path, int &nb_line)
         path.find(";") != std::string::npos)
         errors(1, nb_line, path);
     else
+    {
+        if ((pos = path.find('*')) != std::string::npos)
+            path.erase(pos, 1);
         _path = path;
+    }
 }
 
 void    Location::set_match(bool    match)
