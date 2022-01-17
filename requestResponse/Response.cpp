@@ -17,7 +17,8 @@ Server	Response::choosingVirtualServer()
 {
 	int	defaultServerIndex = 0;
 	std::vector<std::string> hostPort = ft_splitSpace(((clientRequest.getHttpHeaders()).find("Host"))->second, ':');
-	//NOTE need to add default server is size == 1;
+	if (hostPort.size() == 1)
+		hostPort.push_back("80");
 	for(int i = 0; i < serverConfigData.size(); i++)
 	{
 		if(!(compareStrings((serverConfigData[i]).get_listen(), hostPort[1])))
@@ -52,7 +53,7 @@ int     Response::lookingForFileRequested()
 {
 	this->virtualServer = this->choosingVirtualServer();
 	this->filePath = virtualServer.get_root();
-	this->location = this->choosingLocation();
+	// this->location = this->choosingLocation();
 	return (200);
 }
 
