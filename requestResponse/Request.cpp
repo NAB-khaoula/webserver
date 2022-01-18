@@ -23,6 +23,7 @@ Request    &Request::parseRequest(char *buffer)
 	std::string		requestString(buffer);
 
 	SplitFirstLine(requestString);
+	startLine.at(PATH).erase(0,1);
 	this->httpHeaders = this->SplitHeader(ft_splitCrlf(ft_splitCrlf(requestString, "\r\n\r\n").at(0), "\r\n"), ':');
 	//NOTE printing Data;
 	// for(int i = 0; i < startLine.size(); i++)
