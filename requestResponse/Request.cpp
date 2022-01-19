@@ -1,6 +1,6 @@
 #include "Request.hpp"
 
-Request::Request(): startLine(std::vector<std::string>()), httpHeaders(std::map<std::string, std::string>()){}
+Request::Request(): requestLine(std::vector<std::string>()), httpHeaders(std::map<std::string, std::string>()){}
 
 Request::~Request(){}
 
@@ -23,11 +23,11 @@ Request    &Request::parseRequest(char *buffer)
 	std::string		requestString(buffer);
 
 	SplitFirstLine(requestString);
-	startLine.at(PATH).erase(0,1);
+	requestLine.at(PATH).erase(0,1);
 	this->httpHeaders = this->SplitHeader(ft_splitCrlf(ft_splitCrlf(requestString, "\r\n\r\n").at(0), "\r\n"), ':');
 	//NOTE printing Data;
-	// for(int i = 0; i < startLine.size(); i++)
-	// 	std::cout << "|" << startLine[i] << "|" << std::endl;
+	// for(int i = 0; i < requestLine.size(); i++)
+	// 	std::cout << "|" << requestLine[i] << "|" << std::endl;
 	// for(std::map<std::string, std::string>::iterator i = httpHeaders.begin(); i != httpHeaders.end(); i++)
 	// {
 	// 	std::cout << "|" << i->first << "|" << " & " << "|" << i->second << "|" << std::endl;
@@ -44,10 +44,10 @@ void			Request::SplitFirstLine(std::string &requestString)
 	requestString.erase(0, pos + 2);
 	while((pos = strSplited.find(' ')) != std::string::npos)
 	{
-		this->startLine.push_back(strSplited.substr(0, pos));
+		this->requestLine.push_back(strSplited.substr(0, pos));
 		strSplited.erase(0, pos + 1);
 	}
-	this->startLine.push_back(strSplited);
+	this->requestLine.push_back(strSplited);
 }
 
 std::map<std::string, std::string>    Request::SplitHeader(std::vector<std::string> vect, char c)
@@ -63,20 +63,20 @@ std::map<std::string, std::string>    Request::SplitHeader(std::vector<std::stri
 }
 
 
-std::vector<std::string>	&Request::getStartLine(){
-	return startLine;
+std::vector<std::string>	&Request::getRequestLine(){
+	return requestLine;
 }
 
 std::string					&Request::getMethod(){
-	return startLine.at(METHOD);
+	return requestLine.at(METHOD);
 }
 
 std::string					&Request::getPath(){
-	return startLine.at(PATH);
+	return requestLine.at(PATH);
 }
 
 std::string					&Request::getHttpVersion(){
-	return startLine.at(HTTPVERSION);
+	return requestLine.at(HTTPVERSION);
 }
 
 std::map<std::string, std::string>	&Request::getHttpHeaders(){

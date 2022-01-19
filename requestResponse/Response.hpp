@@ -39,6 +39,7 @@ class Response
 		std::string	indexFound();
 		std::string	indexNotFound();
 		std::string	indexForbidden();
+		std::string	indexMovedPermanently();
 };
 
 #endif
