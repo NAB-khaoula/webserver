@@ -4,7 +4,7 @@ Request::Request(): startLine(std::vector<std::string>()), httpHeaders(std::map<
 
 Request::~Request(){}
 
-std::vector<std::string>    Request::ft_splitCrlf(std::string str, const std::string &c)
+std::vector<std::string>    Request::ft_splitCrlf(std::string &str, const std::string &c)
 {
     std::vector<std::string> words;
 
@@ -23,6 +23,7 @@ Request    &Request::parseRequest(char *buffer)
 	std::string		requestString(buffer);
 
 	SplitFirstLine(requestString);
+	startLine.at(PATH).erase(0,1);
 	this->httpHeaders = this->SplitHeader(ft_splitCrlf(ft_splitCrlf(requestString, "\r\n\r\n").at(0), "\r\n"), ':');
 	//NOTE printing Data;
 	// for(int i = 0; i < startLine.size(); i++)
@@ -64,6 +65,18 @@ std::map<std::string, std::string>    Request::SplitHeader(std::vector<std::stri
 
 std::vector<std::string>	&Request::getStartLine(){
 	return startLine;
+}
+
+std::string					&Request::getMethod(){
+	return startLine.at(METHOD);
+}
+
+std::string					&Request::getPath(){
+	return startLine.at(PATH);
+}
+
+std::string					&Request::getHttpVersion(){
+	return startLine.at(HTTPVERSION);
 }
 
 std::map<std::string, std::string>	&Request::getHttpHeaders(){

@@ -1,6 +1,6 @@
 #include "Response.hpp"
 
-// Response::Response(){}
+Response::Response(){}
 
 Response::Response(Request requestClient, std::vector<Server> configParsed): statusCode(-1), stringJoinedResponse(std::string()), clientRequest(requestClient), serverConfigData(configParsed)
 {}
@@ -13,15 +13,17 @@ bool	Response::compareStrings(std::string first, std::string second)
 	return (first.compare(second));
 }
 
-Server	Response::choosingVirtualServer()
+Server	Response::findVirtualServer()
 {
 	int	defaultServerIndex = 0;
 	std::vector<std::string> hostPort = ft_splitSpace(((clientRequest.getHttpHeaders()).find("Host"))->second, ':');
-	//NOTE need to add default server is size == 1;
+	if (hostPort.size() == 1)
+		hostPort.push_back("80");
 	for(int i = 0; i < serverConfigData.size(); i++)
 	{
 		if(!(compareStrings((serverConfigData[i]).get_listen(), hostPort[1])))
 		{
+			//FIXME Store the first match !!!!
 			defaultServerIndex = i;
 			if (!(compareStrings((serverConfigData[i]).get_host(), hostPort[0])))
 					return serverConfigData[i];
@@ -33,36 +35,63 @@ Server	Response::choosingVirtualServer()
 	return serverConfigData[defaultServerIndex];
 }
 
-// Location	Response::choosingLocation()
-// {
-// 	for(std::map<std::string, Location>::iterator it = virtualServer.get_map_loc().begin(); it != virtualServer.get_map_loc().end(); it++)
-// 	{
-		
-// 	}
-// }
-
-int     Response::lookingForFileRequested()
+Location	Response::findLocation()
 {
-	this->virtualServer = this->choosingVirtualServer();
-	// this->filePath = virtualServer.get_root();
-	// location = this->choosingLocation();
-	return (200);
+	size_t		pos = 0;
+	Location	location;
+	for(std::map<std::string, Location>::iterator it = virtualServer.get_map_loc().begin(); it != virtualServer.get_map_loc().end(); it++)
+	{
+		if (!(it->first.compare("/")))
+			location = it->second;
+			if(!(clientRequest.getStartLine()[PATH].compare(it->first)))
+				return it->second;
+	}
+	return location;
+}
+
+bool	Response::allowedMethods(){
+	for (int i = 0; i < location.get_methods().size(); i++){
+		if (!(location.get_methods().at(i).compare(clientRequest.getStartLine()[METHOD])))
+			return true;
+	}
+	return false;
+}
+
+bool	Response::findFile(std::string &filename){
+	std::ifstream f(filename.c_str());
+	return f.good();
+}
+
+int     Response::findFileRequested()
+{
+	this->virtualServer = this->findVirtualServer();
+	this->filePath = virtualServer.get_root() + '/' + clientRequest.getStartLine().at(PATH);
+	this->location = this->findLocation();
+	if(allowedMethods())
+	{
+		if(findFile(filePath))
+			return (OK);
+		else
+			return (NOTFOUND);
+	}
+	else
+		return (FORBIDDEN);
 }
 
 std::string	&Response::buildResponse(){
-	this->statusCode = lookingForFileRequested();
+	this->statusCode = findFileRequested();
 	if (this->statusCode == OK)
 	{
 		stringJoinedResponse = indexFound();
 	}
-	// else if (this->statusCode == NOTFOUND)
-	// {
-	//     stringJoinedResponse = indexNotFound();
-	// }
-	// else if (this->statusCode == FORBIDDEN)
-	// {
-	//     stringJoinedResponse = indexForbidden();
-	// }
+	else if (this->statusCode == NOTFOUND)
+	{
+	    stringJoinedResponse = indexNotFound();
+	}
+	else if (this->statusCode == FORBIDDEN)
+	{
+	    stringJoinedResponse = indexForbidden();
+	}
 	return stringJoinedResponse;
 }
 
@@ -72,7 +101,7 @@ std::string Response::indexFound(){
 	std::string		htmlString;
 	indexFile.open("requestResponse/index.html");
 	stringJoinedResponse += (clientRequest.getStartLine())[2]; 
-	stringJoinedResponse += "200 OK \n";
+	stringJoinedResponse += " 200 OK \n";
 	while(std::getline(indexFile, str))
 		htmlString += str;
 	stringJoinedResponse += "Content-Length: ";
@@ -90,7 +119,25 @@ std::string Response::indexNotFound(){
 	std::string		htmlString;
 	indexFile.open("requestResponse/notFound.html");
 	stringJoinedResponse += (clientRequest.getStartLine())[2]; 
-	stringJoinedResponse += "200 OK \n";
+	stringJoinedResponse += " 404 NOTFOUND \n";
+	while(std::getline(indexFile, str))
+		htmlString += str;
+	stringJoinedResponse += "Content-Length: ";
+	stringJoinedResponse += std::to_string(htmlString.length());
+	stringJoinedResponse += "\n";
+	stringJoinedResponse += "Connection: close\n";
+	stringJoinedResponse += "Content-Type: text/html\n\n";
+	stringJoinedResponse += htmlString;
+	return stringJoinedResponse;
+}
+
+std::string Response::indexForbidden(){
+	std::ifstream	indexFile;
+	std::string		str;
+	std::string		htmlString;
+	indexFile.open("requestResponse/forbidden.html");
+	stringJoinedResponse += (clientRequest.getStartLine())[2]; 
+	stringJoinedResponse += " 403 Forbidden \n";
 	while(std::getline(indexFile, str))
 		htmlString += str;
 	stringJoinedResponse += "Content-Length: ";
