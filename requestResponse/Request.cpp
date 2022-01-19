@@ -26,16 +26,12 @@ Request    &Request::parseRequest(char *buffer)
 	startLine.at(PATH).erase(0,1);
 	this->httpHeaders = this->SplitHeader(ft_splitCrlf(ft_splitCrlf(requestString, "\r\n\r\n").at(0), "\r\n"), ':');
 	//NOTE printing Data;
-	std::cout << "***** mojahid ljamil ********" << std::endl;
-	for(int i = 0; i < startLine.size(); i++)
-		std::cout << "|" << startLine[i] << "|" << std::endl;
-	for(std::map<std::string, std::string>::iterator i = httpHeaders.begin(); i != httpHeaders.end(); i++)
-	{
-		std::cout << "|" << i->first << "|" << " & " << "|" << i->second << "|" << std::endl;
-	}
-	std::cout << "***** left request ********" << std::endl;
-	std::cout << requestString << std::endl;
-	std::cout << "***** mojahid ljamil ********" << std::endl;
+	// for(int i = 0; i < startLine.size(); i++)
+	// 	std::cout << "|" << startLine[i] << "|" << std::endl;
+	// for(std::map<std::string, std::string>::iterator i = httpHeaders.begin(); i != httpHeaders.end(); i++)
+	// {
+	// 	std::cout << "|" << i->first << "|" << " & " << "|" << i->second << "|" << std::endl;
+	// }
 	return(*this);
 }
 

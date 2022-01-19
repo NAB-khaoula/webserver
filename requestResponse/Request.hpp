@@ -11,6 +11,7 @@
 
 class Request{
 	protected:
+		// adding file descriptor;
 		std::vector<std::string>			startLine;
 		std::map<std::string, std::string>	httpHeaders;
 	public:
