@@ -6,10 +6,10 @@ CFLAGS = -Wall -Wextra -Werror
 SRC =	main.cpp\
 		parsing/Location.cpp\
 		parsing/Server.cpp\
-		server/Server.cpp\
-		server/Sockets.cpp\
-		requestResponse/Request.cpp\
-		requestResponse/Response.cpp\
+		# server/Server.cpp\
+		# server/Sockets.cpp\
+		# requestResponse/Request.cpp\
+		# requestResponse/Response.cpp\
 
 OBJ = $(SRC:.cpp=.o)
 
