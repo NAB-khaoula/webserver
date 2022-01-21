@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ybouddou <ybouddou@student.42.fr>          +#+  +:+       +#+        */
+/*   By: conanyedo <conanyedo@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/13 08:57:33 by ybouddou          #+#    #+#             */
-/*   Updated: 2022/01/15 19:26:52 by ybouddou         ###   ########.fr       */
+/*   Updated: 2022/01/21 18:30:25 by conanyedo        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,9 +21,9 @@ int		accept_connection(int sockfd)
 	uint16_t			client_port;
 
 	acceptfd = accept(sockfd, (struct sockaddr *) &clientadd, &add_len);
-	inet_ntop(AF_INET, &clientadd, client_address, 6000);
-	client_port = ntohs(clientadd.sin_port);
-	std::cout << "Accepted fd : " << acceptfd << " Connection from " << client_address << ", port " << client_port << "\n\n";
+	// inet_ntop(AF_INET, &clientadd, client_address, 6000);
+	// client_port = ntohs(clientadd.sin_port);
+	// std::cout << "Accepted fd : " << acceptfd << " Connection from " << client_address << ", port " << client_port << "\n\n";
 	return (acceptfd);
 }
 
@@ -87,7 +87,7 @@ void	multipleClient(WebServ *webserv)
 		webserv->ready_set = webserv->current_set;
 		if (select(webserv->max_fd + 1, &webserv->ready_set, NULL, NULL, NULL) < 0)
 			throw "Select";
-		while(++i < webserv->max_fd)
+		while(++i <= webserv->max_fd)
 		{
 			if (FD_ISSET(i, &webserv->ready_set))
 			{
