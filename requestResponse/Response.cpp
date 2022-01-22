@@ -2,7 +2,8 @@
 
 Response::Response(){}
 
-Response::Response(Request requestClient, std::vector<Server> configParsed): statusCode(-1), stringJoinedResponse(std::string()), clientRequest(requestClient), serverConfigData(configParsed)
+Response::Response(Request requestClient, std::vector<Server> configParsed): statusCode(-1), stringJoinedResponse(std::string()), \
+clientRequest(requestClient), serverConfigData(configParsed)
 {}
 
 Response::~Response()
@@ -43,15 +44,15 @@ Location	Response::findLocation()
 	{
 		if (!(it->first.compare("/")))
 			location = it->second;
-			if(!(clientRequest.getStartLine()[PATH].compare(it->first)))
-				return it->second;
+		if(!(clientRequest.getPath().compare(it->first)))
+			return it->second;
 	}
 	return location;
 }
 
 bool	Response::allowedMethods(){
 	for (int i = 0; i < location.get_methods().size(); i++){
-		if (!(location.get_methods().at(i).compare(clientRequest.getStartLine()[METHOD])))
+		if (!(location.get_methods().at(i).compare(clientRequest.getMethod())))
 			return true;
 	}
 	return false;
@@ -65,14 +66,19 @@ bool	Response::findFile(std::string &filename){
 int     Response::findFileRequested()
 {
 	this->virtualServer = this->findVirtualServer();
-	this->filePath = virtualServer.get_root() + '/' + clientRequest.getStartLine().at(PATH);
+	this->filePath = virtualServer.get_root() + '/' + clientRequest.getPath();
 	this->location = this->findLocation();
+	std::cout << location.get_path() << std::endl;
 	if(allowedMethods())
 	{
-		if(findFile(filePath))
-			return (OK);
-		else
-			return (NOTFOUND);
+		// if(findFile(filePath))
+		// {
+			if (location.get_return().empty())
+				return (OK);
+			return (MOVEDPERMANENTLY);
+		// }
+		// else
+			// return (NOTFOUND);
 	}
 	else
 		return (FORBIDDEN);
@@ -92,6 +98,8 @@ std::string	&Response::buildResponse(){
 	{
 	    stringJoinedResponse = indexForbidden();
 	}
+	else if (this->statusCode == MOVEDPERMANENTLY)
+		stringJoinedResponse = indexMovedPermanently();
 	return stringJoinedResponse;
 }
 
@@ -100,7 +108,7 @@ std::string Response::indexFound(){
 	std::string		str;
 	std::string		htmlString;
 	indexFile.open("requestResponse/index.html");
-	stringJoinedResponse += (clientRequest.getStartLine())[2]; 
+	stringJoinedResponse += (clientRequest.getRequestLine())[2]; 
 	stringJoinedResponse += " 200 OK \n";
 	while(std::getline(indexFile, str))
 		htmlString += str;
@@ -118,7 +126,7 @@ std::string Response::indexNotFound(){
 	std::string		str;
 	std::string		htmlString;
 	indexFile.open("requestResponse/notFound.html");
-	stringJoinedResponse += (clientRequest.getStartLine())[2]; 
+	stringJoinedResponse += (clientRequest.getRequestLine())[2]; 
 	stringJoinedResponse += " 404 NOTFOUND \n";
 	while(std::getline(indexFile, str))
 		htmlString += str;
@@ -136,7 +144,7 @@ std::string Response::indexForbidden(){
 	std::string		str;
 	std::string		htmlString;
 	indexFile.open("requestResponse/forbidden.html");
-	stringJoinedResponse += (clientRequest.getStartLine())[2]; 
+	stringJoinedResponse += (clientRequest.getRequestLine())[2]; 
 	stringJoinedResponse += " 403 Forbidden \n";
 	while(std::getline(indexFile, str))
 		htmlString += str;
@@ -145,6 +153,25 @@ std::string Response::indexForbidden(){
 	stringJoinedResponse += "\n";
 	stringJoinedResponse += "Connection: close\n";
 	stringJoinedResponse += "Content-Type: text/html\n\n";
+	stringJoinedResponse += htmlString;
+	return stringJoinedResponse;
+}
+
+std::string Response::indexMovedPermanently(){
+	std::ifstream	indexFile;
+	std::string		str;
+	std::string		htmlString;
+	indexFile.open("requestResponse/movedPermanently.html");
+	stringJoinedResponse += (clientRequest.getRequestLine())[2]; 
+	stringJoinedResponse += " 301 Moved Permanently \n";
+	while(std::getline(indexFile, str))
+		htmlString += str;
+	stringJoinedResponse += "Content-Length: ";
+	stringJoinedResponse += std::to_string(htmlString.length());
+	stringJoinedResponse += "\n";
+	stringJoinedResponse += "Connection: keep-alive\n";
+	stringJoinedResponse += "Content-Type: text/html\n";
+	stringJoinedResponse += "Location: redirect.html\r\n\r\n";
 	stringJoinedResponse += htmlString;
 	return stringJoinedResponse;
 }
