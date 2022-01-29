@@ -22,7 +22,7 @@ int		main()
 		// print_attr(webserv.servers);
 		multipleServers(&webserv);
 	}
-	catch(std::string err)
+	catch(const char* err)
 	{
 		std::cout << err << std::endl;
 	}

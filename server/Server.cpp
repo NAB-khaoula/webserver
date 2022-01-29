@@ -51,14 +51,22 @@ void	multipleServers(WebServ *webserv)
 
 	FD_ZERO(&webserv->current_set);
 	webserv->it = webserv->servers.begin();
-	while (webserv->it < webserv->servers.end())
+	try
 	{
-		webserv->port = stoi((*webserv->it).get_listen());
-		sock.SetupSocket(webserv->port, (*webserv->it).get_host());
-		FD_SET(sock.getSockfd(), &webserv->current_set);
-		webserv->max_fd = sock.getSockfd();
-		webserv->sockets.push_back(sock);
-		webserv->it++;
+		while (webserv->it < webserv->servers.end())
+		{
+			webserv->port = stoi((*webserv->it).get_listen());
+			sock.SetupSocket(webserv->port, (*webserv->it).get_host());
+			FD_SET(sock.getSockfd(), &webserv->current_set);
+			webserv->max_fd = sock.getSockfd();
+			webserv->sockets.push_back(sock);
+			webserv->it++;
+		}
+	}
+	catch (char const *e)
+	{
+		perror(e);
+		// std::cout << e << std::endl;
 	}
 	multipleClient(webserv);
 }

@@ -68,17 +68,16 @@ int     Response::findFileRequested()
 	this->virtualServer = this->findVirtualServer();
 	this->filePath = virtualServer.get_root() + '/' + clientRequest.getPath();
 	this->location = this->findLocation();
-	std::cout << location.get_path() << std::endl;
 	if(allowedMethods())
 	{
-		// if(findFile(filePath))
-		// {
+		if(findFile(filePath))
+		{
 			if (location.get_return().empty())
 				return (OK);
 			return (MOVEDPERMANENTLY);
-		// }
-		// else
-			// return (NOTFOUND);
+		}
+		else
+			return (NOTFOUND);
 	}
 	else
 		return (FORBIDDEN);
