@@ -45,7 +45,7 @@ std::string    runCgi()
         }
     }
     close(fd[0]);
-    return str;
+    return str.substr(str.find("\r\n\r\n"), str.length());
 }
 
 
@@ -53,6 +53,7 @@ int main()
 {
     std::string str = runCgi();
     std::cout << str << std::endl;
+    
     return 0;
 }
 
