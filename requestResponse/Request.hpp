@@ -13,6 +13,7 @@ class Request{
 	protected:
 		// adding file descriptor;
 		std::vector<std::string>			requestLine;
+		std::map<std::string, std::string>	URLVariable;
 		std::map<std::string, std::string>	httpHeaders;
 	public:
 		Request();

@@ -24,8 +24,8 @@ Server	Response::findVirtualServer()
 	{
 		if(!(compareStrings((serverConfigData[i]).get_listen(), hostPort[1])))
 		{
-			//FIXME Store the first match !!!!
-			defaultServerIndex = i;
+			if(((serverConfigData[i]).get_listen()) != ((serverConfigData[i + 1]).get_listen()))
+				defaultServerIndex = i;
 			if (!(compareStrings((serverConfigData[i]).get_host(), hostPort[0])))
 					return serverConfigData[i];
 			for (std::map<std::string, std::string>::iterator it = (serverConfigData[i].get_server_names()).begin(); it != (serverConfigData[i].get_server_names()).end(); it++)
