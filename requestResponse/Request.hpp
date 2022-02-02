@@ -27,6 +27,7 @@ class Request{
 		Request								&parseRequest(char *);
 		std::map<std::string, std::string>	SplitHeader(std::vector<std::string> vect, char c);
 		void								SplitFirstLine(std::string& requestString);
+		void								parseParam(std::string	&variableURL, size_t &pos);
 };
 
 #endif

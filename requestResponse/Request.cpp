@@ -38,6 +38,19 @@ Request    &Request::parseRequest(char *buffer)
 	return(*this);
 }
 
+void			Request::parseParam(std::string	&variableURL, size_t &pos)
+{
+	std::string	tempURL;
+	tempURL = variableURL.substr(pos + 1);
+	variableURL.erase(pos);
+	while(pos != std::string::npos)
+	{
+		pos = tempURL.find('&');
+		URLVariable[tempURL.substr(0, tempURL.find('='))] = tempURL.substr(tempURL.find('=') + 1, pos - tempURL.find('=') - 1);
+		tempURL.erase(0, pos + 1);
+	}
+}
+
 void			Request::SplitFirstLine(std::string &requestString)
 {
 	size_t			pos = 0;
@@ -53,16 +66,7 @@ void			Request::SplitFirstLine(std::string &requestString)
 	}
 	this->requestLine.push_back(strSplited);
 	if ((pos = requestLine[1].find('?')) != std::string::npos)
-	{
-		variableURL = requestLine[1].substr(pos + 1);
-		requestLine[1].erase(pos);
-		while(pos != std::string::npos)
-		{
-			pos = variableURL.find('&');
-			URLVariable[variableURL.substr(0, variableURL.find('='))] = variableURL.substr(variableURL.find('=') + 1, pos - variableURL.find('=') - 1);
-			variableURL.erase(0, pos + 1);
-		}
-	}
+		this->parseParam(requestLine[1], pos);
 }
 
 std::map<std::string, std::string>    Request::SplitHeader(std::vector<std::string> vect, char c)
