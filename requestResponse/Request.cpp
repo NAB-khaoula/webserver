@@ -1,10 +1,10 @@
 #include "Request.hpp"
 
-Request::Request(): startLine(std::vector<std::string>()), httpHeaders(std::map<std::string, std::string>()){}
+Request::Request(): requestLine(std::vector<std::string>()), httpHeaders(std::map<std::string, std::string>()){}
 
 Request::~Request(){}
 
-std::vector<std::string>    Request::ft_splitCrlf(std::string str, const std::string &c)
+std::vector<std::string>    Request::ft_splitCrlf(std::string &str, const std::string &c)
 {
     std::vector<std::string> words;
 
@@ -25,8 +25,12 @@ Request    &Request::parseRequest(char *buffer)
 	SplitFirstLine(requestString);
 	this->httpHeaders = this->SplitHeader(ft_splitCrlf(ft_splitCrlf(requestString, "\r\n\r\n").at(0), "\r\n"), ':');
 	//NOTE printing Data;
-	// for(int i = 0; i < startLine.size(); i++)
-	// 	std::cout << "|" << startLine[i] << "|" << std::endl;
+	// for(int i = 0; i < requestLine.size(); i++)
+	// 	std::cout << "|" << requestLine[i] << "|" << std::endl;
+	// for(std::map<std::string, std::string>::iterator i = URLVariable.begin(); i != URLVariable.end(); i++)
+	// {
+	// 	std::cout << "|" << i->first << "|" << " ******* " << "|" << i->second << "|" << std::endl;
+	// }
 	// for(std::map<std::string, std::string>::iterator i = httpHeaders.begin(); i != httpHeaders.end(); i++)
 	// {
 	// 	std::cout << "|" << i->first << "|" << " & " << "|" << i->second << "|" << std::endl;
@@ -34,19 +38,36 @@ Request    &Request::parseRequest(char *buffer)
 	return(*this);
 }
 
+void			Request::parseParam(std::string	&variableURL, size_t &pos)
+{
+	//FIXME - need to fix no '=' case eg(?page=1&something+else&user=john)!!!!!
+	std::string	tempURL;
+	tempURL = variableURL.substr(pos + 1);
+	variableURL.erase(pos);
+	while(pos != std::string::npos)
+	{
+		pos = tempURL.find('&');
+		URLVariable[tempURL.substr(0, tempURL.find('='))] = tempURL.substr(tempURL.find('=') + 1, pos - tempURL.find('=') - 1);
+		tempURL.erase(0, pos + 1);
+	}
+}
+
 void			Request::SplitFirstLine(std::string &requestString)
 {
 	size_t			pos = 0;
 	std::string		strSplited;
+	std::string		variableURL;
 	pos = requestString.find('\r');
 	strSplited = requestString.substr(0, pos);
 	requestString.erase(0, pos + 2);
 	while((pos = strSplited.find(' ')) != std::string::npos)
 	{
-		this->startLine.push_back(strSplited.substr(0, pos));
+		this->requestLine.push_back(strSplited.substr(0, pos));
 		strSplited.erase(0, pos + 1);
 	}
-	this->startLine.push_back(strSplited);
+	this->requestLine.push_back(strSplited);
+	if ((pos = requestLine[1].find('?')) != std::string::npos)
+		this->parseParam(requestLine[1], pos);
 }
 
 std::map<std::string, std::string>    Request::SplitHeader(std::vector<std::string> vect, char c)
@@ -62,8 +83,20 @@ std::map<std::string, std::string>    Request::SplitHeader(std::vector<std::stri
 }
 
 
-std::vector<std::string>	&Request::getStartLine(){
-	return startLine;
+std::vector<std::string>	&Request::getRequestLine(){
+	return requestLine;
+}
+
+std::string					&Request::getMethod(){
+	return requestLine.at(METHOD);
+}
+
+std::string					&Request::getPath(){
+	return requestLine.at(PATH);
+}
+
+std::string					&Request::getHttpVersion(){
+	return requestLine.at(HTTPVERSION);
 }
 
 std::map<std::string, std::string>	&Request::getHttpHeaders(){

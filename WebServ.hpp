@@ -6,10 +6,9 @@
 /*   By: ybouddou <ybouddou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/08 16:33:37 by ybouddou          #+#    #+#             */
-/*   Updated: 2022/01/16 14:34:42 by ybouddou         ###   ########.fr       */
+/*   Updated: 2022/02/04 13:59:01 by ybouddou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
-
 
 #include <iostream>
 #include <string>
@@ -17,7 +16,7 @@
 
 #include <sys/socket.h>
 #include <sys/select.h>
-#include <sys/event.h>
+// #include <sys/event.h>
 #include <poll.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -29,13 +28,16 @@
 
 typedef struct	WevServ
 {
-	std::vector<Sockets>	sockets;
+	// std::vector<Sockets>	sockets;
 	std::vector<Server>		servers;
 	std::vector<Server>::iterator	it;
-	struct kevent	event;
-	int				kq;
+	// struct kevent	event;
+	// int				kq;
+	// int				nev;
+	fd_set			current_set;
+	fd_set			ready_set;
 	int				port;
-	int				nev;
+	int				max_fd;
 	int				acceptfd;
 	int				sockfd;
 }				WebServ;
