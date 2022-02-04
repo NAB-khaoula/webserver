@@ -6,7 +6,7 @@
 /*   By: ybouddou <ybouddou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/13 08:57:33 by ybouddou          #+#    #+#             */
-/*   Updated: 2022/01/15 19:26:52 by ybouddou         ###   ########.fr       */
+/*   Updated: 2022/01/18 16:37:04 by ybouddou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,9 +21,9 @@ int		accept_connection(int sockfd)
 	uint16_t			client_port;
 
 	acceptfd = accept(sockfd, (struct sockaddr *) &clientadd, &add_len);
-	inet_ntop(AF_INET, &clientadd, client_address, 6000);
-	client_port = ntohs(clientadd.sin_port);
-	std::cout << "Accepted fd : " << acceptfd << " Connection from " << client_address << ", port " << client_port << "\n\n";
+	// inet_ntop(AF_INET, &clientadd, client_address, 6000);
+	// client_port = ntohs(clientadd.sin_port);
+	// std::cout << "Accepted fd : " << acceptfd << " Connection from " << client_address << ", port " << client_port << "\n\n";
 	return (acceptfd);
 }
 
@@ -39,7 +39,10 @@ void	handle_connection(WebServ *webserv, struct kevent event)
 	std::cout << buffer << std::endl;
 	Response resp(request, webserv->servers);
 	delete[] buffer;
+	// HTTP/1.1 200 OK\r\nContent-Length: 1024\nConnection: close\nContent-Type: text/html\n\nHelloooooo
 	std::strcpy(response, (resp.buildResponse()).c_str());
+	// std::cout << response << std::endl;
+	// std::strcpy(response, "HTTP/1.1 200 OK\r\nContent-Length: 10\nConnection: close\nContent-Type: text/html\n\nHelloooooo");
 	send(event.ident, response, strlen(response), 0);
 	delete[] response;
 	close(event.ident);
@@ -48,7 +51,6 @@ void	handle_connection(WebServ *webserv, struct kevent event)
 void	multipleServers(WebServ *webserv)
 {
 	Sockets		sock;
-	struct kevent	change;
 
 	webserv->kq = kqueue();
 	webserv->it = webserv->servers.begin();

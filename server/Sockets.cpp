@@ -18,6 +18,7 @@ int		Sockets::SetupSocket(int port, std::string host)
 	if (host.empty())
 		host = "127.0.0.1";
 	servadd.sin_addr.s_addr = inet_addr(host.c_str());
+	// servadd.sin_addr.s_addr = htonl(INADDR_ANY);
 	servadd.sin_port = htons(port);
 	
 	if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &flag, sizeof(int)) < 0)

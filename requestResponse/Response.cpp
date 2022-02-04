@@ -22,9 +22,9 @@ Server	Response::choosingVirtualServer()
 		if(!(compareStrings((serverConfigData[i]).get_listen(), hostPort[1])))
 		{
 			defaultServerIndex = i;
-			for(int j = 0; j < (serverConfigData[i].get_server_names()).size(); j++)
-				if(!(compareStrings((serverConfigData[i].get_server_names())[j], hostPort[0])))
-					return serverConfigData[i];
+			for (std::map<std::string, std::string>::iterator it = (serverConfigData[i].get_server_names()).begin(); it != (serverConfigData[i].get_server_names()).end(); it++)
+                if(!(compareStrings(it->first, hostPort[0])))
+                    return serverConfigData[i];
 		}
 	}
 	return serverConfigData[defaultServerIndex];
@@ -32,13 +32,13 @@ Server	Response::choosingVirtualServer()
 
 int     Response::lookingForFileRequested()
 {
-	this->virtualServer = this->choosingVirtualServer();
-	this->filePath = virtualServer.get_root();
-	for (int i = 0; i < (virtualServer.get_location()).size() ; i++)
-	{
-		// if (virtualServer.get_location().at(i).get_methods().find)
-	}
-	return (404);
+	// this->virtualServer = this->choosingVirtualServer();
+	// this->filePath = virtualServer.get_root();
+	// for (int i = 0; i < (virtualServer.get_location()).size() ; i++)
+	// {
+	// 	// if (virtualServer.get_location().at(i).get_methods().find)
+	// }
+	return (200);
 }
 
 std::string	&Response::buildResponse(){
@@ -64,7 +64,7 @@ std::string Response::indexFound(){
 	std::string		htmlString;
 	indexFile.open("requestResponse/index.html");
 	stringJoinedResponse += (clientRequest.getStartLine())[2]; 
-	stringJoinedResponse += "200 OK \n";
+	stringJoinedResponse += " 200 OK \n";
 	while(std::getline(indexFile, str))
 		htmlString += str;
 	stringJoinedResponse += "Content-Length: ";
@@ -82,7 +82,7 @@ std::string Response::indexNotFound(){
 	std::string		htmlString;
 	indexFile.open("requestResponse/notFound.html");
 	stringJoinedResponse += (clientRequest.getStartLine())[2]; 
-	stringJoinedResponse += "200 OK \n";
+	stringJoinedResponse += " 200 OK \n";
 	while(std::getline(indexFile, str))
 		htmlString += str;
 	stringJoinedResponse += "Content-Length: ";

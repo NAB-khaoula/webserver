@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mbelaman <mbelaman@student.42.fr>          +#+  +:+       +#+        */
+/*   By: ybouddou <ybouddou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/08 16:32:15 by ybouddou          #+#    #+#             */
-/*   Updated: 2022/01/15 16:39:29 by mbelaman         ###   ########.fr       */
+/*   Updated: 2022/01/16 13:19:07 by ybouddou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,9 +22,11 @@ int		main()
 		// print_attr(webserv.servers);
 		multipleServers(&webserv);
 	}
-	catch(std::string err)
+	catch(const char* err)
 	{
-		std::cout << err << std::endl;
+		perror("Error");
+		std::cout << err;
+		std::cout << std::endl;
 	}
 	return (0);
 }
