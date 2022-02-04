@@ -47,7 +47,7 @@ void    errors(int index, int &nb_line, std::string line)
         "Syntax Error: duplicate upload_enable " + line//29
     };
     std::string str = std::to_string(nb_line);
-    throw "|line " + str + "| " + arr[index];
+    throw std::runtime_error("|line " + str + "| " + arr[index]);
 }
 
 bool isNumber(std::string s)
