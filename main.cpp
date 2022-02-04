@@ -6,7 +6,7 @@
 /*   By: mbelaman <mbelaman@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/08 16:32:15 by ybouddou          #+#    #+#             */
-/*   Updated: 2022/01/19 13:11:51 by mbelaman         ###   ########.fr       */
+/*   Updated: 2022/01/20 17:52:17 by mbelaman         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,8 +19,8 @@ int		main()
 		WebServ	webserv;
 		
 		webserv.servers = begin_parser();
-		// print_attr(webserv.servers);
-		multipleServers(&webserv);
+		print_attr(webserv.servers);
+		// multipleServers(&webserv);
 	}
 	catch(const char* err)
 	{

@@ -64,4 +64,5 @@ void                        fill_server(std::string, std::string, std::vector<Se
 void                        fill_location(std::string &, std::string &, Location &, Server &, int &);
 void                        print_attr(std::vector<Server> &vec_serv);
 std::vector<Server>         begin_parser();
+std::string                 runCgi();
 #endif

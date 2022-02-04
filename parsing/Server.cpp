@@ -35,7 +35,16 @@ void    errors(int index, int &nb_line, std::string line)
         "Syntax Error: invalid number of arguments in 'upload_enable' directive",//17
         "Syntax Error: invalid value " + line +  " in 'return' directive",//18
         "Syntax Error: invalid number of arguments in " + line + " directive.",//19
-        "Syntax Error: duplicate location " + line//20
+        "Syntax Error: duplicate location " + line,//20
+        "Syntax Error: duplicate listen " + line,//21
+        "Syntax Error: duplicate host " + line,//22
+        "Syntax Error: duplicate client_max_body_size " + line,//23
+        "Syntax Error: duplicate root " + line,//24
+        "Syntax Error: duplicate autoindex " + line,//25
+        "Syntax Error: duplicate allow_methods " + line,//26
+        "Syntax Error: duplicate return " + line,//27
+        "Syntax Error: duplicate upload_store " + line,//28
+        "Syntax Error: duplicate upload_enable " + line//29
     };
     std::string str = std::to_string(nb_line);
     throw "|line " + str + "| " + arr[index];
@@ -73,57 +82,73 @@ int                                     Server::get_brace_location() {return _br
 
 void    Server::set_root(std::string root, int &nb_line)
 {
-    root = rightTrim(root);
-    if (root.find(" ") != std::string::npos || root.find("\t") != std::string::npos)
-        errors(10, nb_line, "root");
+    if (this->get_root().empty())
+    {
+        root = rightTrim(root);
+        if (root.find(" ") != std::string::npos || root.find("\t") != std::string::npos)
+            errors(10, nb_line, "root");
+        else
+            _root = root;
+    }
     else
-        _root = root;
+        errors(24, nb_line, root);
 }
 
 void    Server::set_listen(std::string listen, int &nb_line)
 {
-    listen = rightTrim(listen);
-    int i = 0, len = 0;
-    while (listen[i] && i < 5)
+    if (this->get_listen().empty())
     {
-        if (isdigit(listen[i]) == false)
-            errors(4, nb_line, listen);
-        i++;
-        len++;
+        listen = rightTrim(listen);
+        int i = 0, len = 0;
+        while (listen[i] && i < 5)
+        {
+            if (isdigit(listen[i]) == false)
+                errors(4, nb_line, listen);
+            i++;
+            len++;
+        }
+        if (len == 2 || len == 4)
+            _listen = listen;
+        else
+            errors(5, nb_line, listen);
+
     }
-    if (len == 2 || len == 4)
-        _listen = listen;
     else
-        errors(5, nb_line, listen);
+        errors(21, nb_line, listen);
 }
 void    Server::set_host(std::string host, int &nb_line)
 {
-    host = rightTrim(host);
-    std::vector<std::string> vec = ft_splitSpace(host, '.');
-    
-    if (vec.size() == 4)
+    if (this->get_host().empty())
     {
-        for (size_t i = 0; i < vec.size(); i++)
+        host = rightTrim(host);
+        std::vector<std::string> vec = ft_splitSpace(host, '.');
+    
+        if (vec.size() == 4)
         {
-            if (vec[i].empty() || isNumber(vec[i]) == false)
-                errors(6, nb_line, host);
-            int nb = atoi(vec[i].c_str());
-            if (nb >= 0 && nb <= 255)
+            for (size_t i = 0; i < vec.size(); i++)
             {
-                if (i != vec.size() - 1)
-                    _host += std::to_string(nb) + ".";
+                if (vec[i].empty() || isNumber(vec[i]) == false)
+                    errors(6, nb_line, host);
+                int nb = atoi(vec[i].c_str());
+                if (nb >= 0 && nb <= 255)
+                {
+                    if (i != vec.size() - 1)
+                        _host += std::to_string(nb) + ".";
+                    else
+                        _host += std::to_string(nb);
+                }
                 else
-                    _host += std::to_string(nb);
-            }
-            else
-            {
-                std::string str = std::to_string(nb);
-                errors(6, nb_line, str);
+                {
+                    std::string str = std::to_string(nb);
+                    errors(6, nb_line, str);
+                }
             }
         }
+        else
+            errors(6, nb_line, host);
     }
     else
-        errors(6, nb_line, host);
+        errors(22, nb_line, host);
 }
 void    Server::set_server_names(std::string value, int &nb_line)
 {
@@ -138,50 +163,52 @@ void    Server::set_server_names(std::string value, int &nb_line)
 
 }
 void    Server::set_client_max_body(std::string client_max_body, int &nb_line)
-{   
-    client_max_body = rightTrim(client_max_body);
-    int i = 0;
-    int check = 0;
-    while (client_max_body[i])
+{
+    if (this->get_client_max_body().empty())
     {
-        if (isdigit(client_max_body[i]))
-            i++;
-        else if ((client_max_body[i] == 'm' || client_max_body[i] == 'M' || client_max_body[i] == 'k' || client_max_body[i] == 'K' || client_max_body[i] == 'g' || client_max_body[i] == 'G') &&
-                !check && isdigit(client_max_body[i - 1]) && client_max_body[i + 1] == '\0')
+            client_max_body = rightTrim(client_max_body);
+        int i = 0;
+        int check = 0;
+        while (client_max_body[i])
         {
-            check++;
-            i++;
+            if (isdigit(client_max_body[i]))
+                i++;
+            else if ((client_max_body[i] == 'm' || client_max_body[i] == 'M' || client_max_body[i] == 'k' || client_max_body[i] == 'K' || client_max_body[i] == 'g' || client_max_body[i] == 'G') &&
+                    !check && isdigit(client_max_body[i - 1]) && client_max_body[i + 1] == '\0')
+            {
+                check++;
+                i++;
+            }
+            else
+                errors(8, nb_line, client_max_body);
         }
-        else
+        if (!check)
             errors(8, nb_line, client_max_body);
-    }
-    if (!check)
-        errors(8, nb_line, client_max_body);
-    else
-    {
-        i = 0;
-        if ((i = client_max_body.find("m")) != std::string::npos || (i = client_max_body.find("M")) != std::string::npos)
-        {
-            client_max_body = client_max_body.substr(0, i);
-            size_t nb = (long long)atoi(client_max_body.c_str()) * 1048576;
-            _client_max_body = std::to_string(nb);
-            std::cout << _client_max_body << std::endl;
-        }
-        else if ((i = client_max_body.find("k")) != std::string::npos || (i = client_max_body.find("K")) != std::string::npos)
-        {
-            client_max_body = client_max_body.substr(0, i);
-            size_t nb = (long long)atoi(client_max_body.c_str()) * 1024;
-            _client_max_body = std::to_string(nb);
-            std::cout << _client_max_body << std::endl;
-        }
         else
         {
-            client_max_body = client_max_body.substr(0, i);
-            size_t nb = (long long)atoi(client_max_body.c_str()) * 1073741824;
-            _client_max_body = std::to_string(nb);
-            std::cout << _client_max_body << std::endl;
-        }
-    }   
+            i = 0;
+            if ((i = client_max_body.find("m")) != std::string::npos || (i = client_max_body.find("M")) != std::string::npos)
+            {
+                client_max_body = client_max_body.substr(0, i);
+                size_t nb = (long long)atoi(client_max_body.c_str()) * 1048576;
+                _client_max_body = std::to_string(nb);
+            }
+            else if ((i = client_max_body.find("k")) != std::string::npos || (i = client_max_body.find("K")) != std::string::npos)
+            {
+                client_max_body = client_max_body.substr(0, i);
+                size_t nb = (long long)atoi(client_max_body.c_str()) * 1024;
+                _client_max_body = std::to_string(nb);
+            }
+            else
+            {
+                client_max_body = client_max_body.substr(0, i);
+                size_t nb = (long long)atoi(client_max_body.c_str()) * 1073741824;
+                _client_max_body = std::to_string(nb);
+            }
+        }   
+    }
+    else
+        errors(23, nb_line, client_max_body);
 }
 void    Server::set_err_pages(std::string value, int &nb_line)
 {
@@ -352,7 +379,6 @@ void    fill_server(std::string key, std::string value, std::string &line, std::
 {
     if (serv.get_brace_server() == 2)
     {
-        // std::cout << key << "|" << value << std::endl;
         if (!key.compare("listen"))
             serv.set_listen(value, nb_line);
         else if (!key.compare("host"))
@@ -409,7 +435,6 @@ void    check_braces(std::string &line, Server &serv, Location &locat, int &nb_l
     {
         str_key = get_key(line, j);
         str_value = get_value(line, j);
-        // std::cout << str_key << "|" << str_value << std::endl;
         if (str_key.empty() && serv.get_brace_server() == 1)
 			serv.set_brace_server(2);
         else if (str_key.empty() && serv.get_brace_location() == 1)
@@ -448,7 +473,6 @@ void    check_braces(std::string &line, Server &serv, Location &locat, int &nb_l
             if (serv.get_brace_location())
             {
                 std::cout << "dkhal\n";
-                // std::cout << str_key << "|" << str_value << std::endl;
                 errors(3, nb_line, "");
             }
             // std::cout << str_value << std::endl;
@@ -467,7 +491,6 @@ void    check_braces(std::string &line, Server &serv, Location &locat, int &nb_l
             errors(1, nb_line, str_key);
         }
     }
-    // std::cout << line << std::endl;
 }
 
 void    check_semi(std::string line, int &nb_line)
@@ -500,7 +523,6 @@ std::vector<Server>     begin_parser()
         if (line.empty())
             continue;
         check_semi(line, i);
-        // std::cout << line << std::endl;
         split = ft_splitSpace(line, ';');
         k = 0;
         while (k < split.size())
@@ -510,29 +532,21 @@ std::vector<Server>     begin_parser()
             str_value = get_value(split.at(k), j);
             k++;
             if (!str_key.empty() || !str_value.empty())
-            {
-                // std::cout << str_key << "|" << str_value << std::endl;
                 fill_server(str_key, str_value, line, vec_server, serv, locat, i);
-            }
         }
     }
     if (serv.get_brace_server())
-    {
-        std::cout << "dkhal\n";
         errors(5, i, "");
-    }
     myReadFile.close();
-    // print_attr(vec_server);
     return vec_server;
 }
 
 
 std::vector<std::string>    ft_splitSpace(std::string str, char c)
 {
-    // std::string space_delimiter = " ";
     std::vector<std::string> words;
-
     size_t pos = 0;
+    
     while ((pos = str.find(c)) != std::string::npos)
     {
         words.push_back(str.substr(0, pos));
