@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: conanyedo <conanyedo@student.42.fr>        +#+  +:+       +#+        */
+/*   By: ybouddou <ybouddou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/13 08:57:33 by ybouddou          #+#    #+#             */
-/*   Updated: 2022/01/21 18:30:25 by conanyedo        ###   ########.fr       */
+/*   Updated: 2022/02/04 15:34:55 by ybouddou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,46 +27,41 @@ int		accept_connection(int sockfd)
 	return (acceptfd);
 }
 
-void	handle_connection(WebServ *webserv, int fd)
+void	handle_connection(WebServ *webserv, struct kevent event)
 {
 	Request	request;
-	char	*buffer = new char[1024];
+	char	*buffer = new char[event.data + 1];
 	char	*response = new char[1024];
 
-	memset(buffer, '\0', 1024);
-	recv(fd, buffer, 1024, 0);
+	recv(event.ident, buffer, event.data, 0);
+	buffer[event.data] = '\0';
 	request.parseRequest(buffer);
 	std::cout << buffer << std::endl;
 	Response resp(request, webserv->servers);
 	delete[] buffer;
 	std::strcpy(response, (resp.buildResponse()).c_str());
-	send(fd, response, strlen(response), 0);
+	send(event.ident, response, strlen(response), 0);
 	delete[] response;
-	close(fd);
+	close(event.ident);
 }
 
 void	multipleServers(WebServ *webserv)
 {
 	Sockets		sock;
+	struct kevent	change;
 
-	FD_ZERO(&webserv->current_set);
+	webserv->kq = kqueue();
 	webserv->it = webserv->servers.begin();
-	try
+	while (webserv->it < webserv->servers.end())
 	{
-		while (webserv->it < webserv->servers.end())
-		{
-			webserv->port = stoi((*webserv->it).get_listen());
-			sock.SetupSocket(webserv->port, (*webserv->it).get_host());
-			FD_SET(sock.getSockfd(), &webserv->current_set);
-			webserv->max_fd = sock.getSockfd();
-			webserv->sockets.push_back(sock);
-			webserv->it++;
-		}
-	}
-	catch (char const *e)
-	{
-		perror(e);
-		// std::cout << e << std::endl;
+		memset(&webserv->event, 0, sizeof(webserv->event));
+		webserv->port = stoi((*webserv->it).get_listen());
+		sock.SetupSocket(webserv->port, (*webserv->it).get_host());
+		std::cout << webserv->port << " | " << (*webserv->it).get_host() << std::endl;
+		EV_SET(&webserv->event, sock.getSockfd(), EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, NULL);
+		kevent(webserv->kq, &webserv->event, 1, NULL, 0, NULL);
+		webserv->sockets.push_back(sock);
+		webserv->it++;
 	}
 	multipleClient(webserv);
 }
@@ -87,78 +82,57 @@ bool	isServer(std::vector<Sockets> sockets, int sockfd)
 
 void	multipleClient(WebServ *webserv)
 {
-	int		i;
-
 	while (1)
 	{
-		i = -1;
-		webserv->ready_set = webserv->current_set;
-		if (select(webserv->max_fd + 1, &webserv->ready_set, NULL, NULL, NULL) < 0)
-			throw "Select";
-		while(++i <= webserv->max_fd)
+		webserv->nev = kevent(webserv->kq, NULL, 0, &webserv->event, 1, NULL);
+		if (webserv->nev < 0)
+			throw std::runtime_error("kevent");
+		if (webserv->event.flags & EV_EOF)
+			close(webserv->event.ident);
+		else if (isServer(webserv->sockets, webserv->event.ident))
 		{
-			if (FD_ISSET(i, &webserv->ready_set))
-			{
-				if (isServer(webserv->sockets, i))
-				{
-					webserv->acceptfd = accept_connection(i);
-					FD_SET(webserv->acceptfd, &webserv->current_set);
-					if (webserv->acceptfd > webserv->max_fd)
-						webserv->max_fd = webserv->acceptfd;
-				}
-				else
-				{
-					handle_connection(webserv, i);
-					FD_CLR(i, &webserv->current_set);
-				}
-			}
+			webserv->acceptfd = accept_connection(webserv->event.ident);
+			EV_SET(&webserv->event, webserv->acceptfd, EVFILT_READ, EV_ADD, 0, 0, NULL);
+			kevent(webserv->kq, &webserv->event, 1, NULL, 0, NULL);
 		}
+		else if (webserv->event.filter & EVFILT_READ)
+			handle_connection(webserv, webserv->event);
 	}
 }
 
-// void	handle_connection(WebServ *webserv, struct kevent event)
+// void	handle_connection(WebServ *webserv, int fd)
 // {
 // 	Request	request;
-// 	char	*buffer = new char[event.data + 1];
+// 	char	*buffer = new char[1024];
 // 	char	*response = new char[1024];
 
-// 	recv(event.ident, buffer, event.data, 0);
-// 	buffer[event.data] = '\0';
+// 	memset(buffer, '\0', 1024);
+// 	recv(fd, buffer, 1024, 0);
 // 	request.parseRequest(buffer);
 // 	std::cout << buffer << std::endl;
 // 	Response resp(request, webserv->servers);
 // 	delete[] buffer;
+// 	// HTTP/1.1 200 OK\r\nContent-Length: 1024\nConnection: close\nContent-Type: text/html\n\nHelloooooo
 // 	std::strcpy(response, (resp.buildResponse()).c_str());
-// 	send(event.ident, response, strlen(response), 0);
+// 	send(fd, response, strlen(response), 0);
 // 	delete[] response;
-// 	close(event.ident);
+// 	close(fd);
 // }
 
 // void	multipleServers(WebServ *webserv)
 // {
 // 	Sockets		sock;
-// 	struct kevent	change;
 
-// 	webserv->kq = kqueue();
+// 	FD_ZERO(&webserv->current_set);
 // 	webserv->it = webserv->servers.begin();
 // 	while (webserv->it < webserv->servers.end())
 // 	{
-// 		// try
-// 		// {
-// 			memset(&webserv->event, 0, sizeof(webserv->event));
-// 			webserv->port = stoi((*webserv->it).get_listen());
-// 			sock.SetupSocket(webserv->port, (*webserv->it).get_host());
-// 			std::cout << webserv->port << " | " << (*webserv->it).get_host() << std::endl;
-// 			EV_SET(&webserv->event, sock.getSockfd(), EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, NULL);
-// 			kevent(webserv->kq, &webserv->event, 1, NULL, 0, NULL);
-// 			webserv->sockets.push_back(sock);
-// 			webserv->it++;
-// 		// }
-// 		// catch(char const *e)
-// 		// {
-// 		// 	std::cout << e << std::endl;
-// 		// 	break;
-// 		// }
+// 		webserv->port = stoi((*webserv->it).get_listen());
+// 		sock.SetupSocket(webserv->port, (*webserv->it).get_host());
+// 		FD_SET(sock.getSockfd(), &webserv->current_set);
+// 		webserv->max_fd = sock.getSockfd();
+// 		webserv->sockets.push_back(sock);
+// 		webserv->it++;
 // 	}
 // 	multipleClient(webserv);
 // }
@@ -179,20 +153,31 @@ void	multipleClient(WebServ *webserv)
 
 // void	multipleClient(WebServ *webserv)
 // {
+// 	int		i;
+
 // 	while (1)
 // 	{
-// 		webserv->nev = kevent(webserv->kq, NULL, 0, &webserv->event, 1, NULL);
-// 		if (webserv->nev < 0)
-// 			throw "kevent";
-// 		if (webserv->event.flags & EV_EOF)
-// 			close(webserv->event.ident);
-// 		else if (isServer(webserv->sockets, webserv->event.ident))
+// 		i = -1;
+// 		webserv->ready_set = webserv->current_set;
+// 		if (select(webserv->max_fd + 1, &webserv->ready_set, NULL, NULL, NULL) < 0)
+// 			throw "Select";
+// 		while(++i <= webserv->max_fd)
 // 		{
-// 			webserv->acceptfd = accept_connection(webserv->event.ident);
-// 			EV_SET(&webserv->event, webserv->acceptfd, EVFILT_READ, EV_ADD, 0, 0, NULL);
-// 			kevent(webserv->kq, &webserv->event, 1, NULL, 0, NULL);
+// 			if (FD_ISSET(i, &webserv->ready_set))
+// 			{
+// 				if (isServer(webserv->sockets, i))
+// 				{
+// 					webserv->acceptfd = accept_connection(i);
+// 					FD_SET(webserv->acceptfd, &webserv->current_set);
+// 					if (webserv->acceptfd > webserv->max_fd)
+// 						webserv->max_fd = webserv->acceptfd;
+// 				}
+// 				else
+// 				{
+// 					handle_connection(webserv, i);
+// 					FD_CLR(i, &webserv->current_set);
+// 				}
+// 			}
 // 		}
-// 		else if (webserv->event.filter & EVFILT_READ)
-// 			handle_connection(webserv, webserv->event);
 // 	}
 // }

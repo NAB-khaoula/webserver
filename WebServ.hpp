@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   WebServ.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mbelaman <mbelaman@student.42.fr>          +#+  +:+       +#+        */
+/*   By: ybouddou <ybouddou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/08 16:33:37 by ybouddou          #+#    #+#             */
-/*   Updated: 2022/01/20 17:52:01 by mbelaman         ###   ########.fr       */
+/*   Updated: 2022/02/04 15:24:58 by ybouddou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@
 
 #include <sys/socket.h>
 #include <sys/select.h>
-// #include <sys/event.h>
+#include <sys/event.h>
 #include <poll.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -28,12 +28,12 @@
 
 typedef struct	WevServ
 {
-	// std::vector<Sockets>	sockets;
+	std::vector<Sockets>	sockets;
 	std::vector<Server>		servers;
 	std::vector<Server>::iterator	it;
-	// struct kevent	event;
-	// int				kq;
-	// int				nev;
+	struct kevent	event;
+	int				kq;
+	int				nev;
 	fd_set			current_set;
 	fd_set			ready_set;
 	int				port;

@@ -22,11 +22,11 @@ int		Sockets::SetupSocket(int port, std::string host)
 	servadd.sin_port = htons(port);
 	
 	if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &flag, sizeof(int)) < 0)
-		throw "setsockopt failed";
+		throw std::runtime_error("setsockopt failed");
 	if (bind(sockfd, (const struct sockaddr *) &servadd, sizeof(servadd)) < 0)
-		throw "bind failed";
+		throw std::runtime_error("bind failed");
 	if (listen(sockfd, 0) < 0)
-		throw "listen failed";
+		throw std::runtime_error("listen failed");
 	// getsockname(sockfd, (struct sockaddr *) &servadd, (socklen_t *)sizeof(servadd));
 	// std::cout << "Local IP address is: " << inet_ntoa(servadd.sin_addr) << "\n"; 
 	// std::cout << "Local port is: " << ntohs(servadd.sin_port) << "\n";
