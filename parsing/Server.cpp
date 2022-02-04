@@ -379,7 +379,6 @@ void    fill_server(std::string key, std::string value, std::string &line, std::
 {
     if (serv.get_brace_server() == 2)
     {
-        // std::cout << key << "|" << value << std::endl;
         if (!key.compare("listen"))
             serv.set_listen(value, nb_line);
         else if (!key.compare("host"))
@@ -436,7 +435,6 @@ void    check_braces(std::string &line, Server &serv, Location &locat, int &nb_l
     {
         str_key = get_key(line, j);
         str_value = get_value(line, j);
-        // std::cout << str_key << "|" << str_value << std::endl;
         if (str_key.empty() && serv.get_brace_server() == 1)
 			serv.set_brace_server(2);
         else if (str_key.empty() && serv.get_brace_location() == 1)
@@ -475,7 +473,6 @@ void    check_braces(std::string &line, Server &serv, Location &locat, int &nb_l
             if (serv.get_brace_location())
             {
                 std::cout << "dkhal\n";
-                // std::cout << str_key << "|" << str_value << std::endl;
                 errors(3, nb_line, "");
             }
             // std::cout << str_value << std::endl;
@@ -494,7 +491,6 @@ void    check_braces(std::string &line, Server &serv, Location &locat, int &nb_l
             errors(1, nb_line, str_key);
         }
     }
-    // std::cout << line << std::endl;
 }
 
 void    check_semi(std::string line, int &nb_line)
@@ -527,7 +523,6 @@ std::vector<Server>     begin_parser()
         if (line.empty())
             continue;
         check_semi(line, i);
-        // std::cout << line << std::endl;
         split = ft_splitSpace(line, ';');
         k = 0;
         while (k < split.size())
@@ -537,29 +532,21 @@ std::vector<Server>     begin_parser()
             str_value = get_value(split.at(k), j);
             k++;
             if (!str_key.empty() || !str_value.empty())
-            {
-                // std::cout << str_key << "|" << str_value << std::endl;
                 fill_server(str_key, str_value, line, vec_server, serv, locat, i);
-            }
         }
     }
     if (serv.get_brace_server())
-    {
-        std::cout << "dkhal\n";
         errors(5, i, "");
-    }
     myReadFile.close();
-    // print_attr(vec_server);
     return vec_server;
 }
 
 
 std::vector<std::string>    ft_splitSpace(std::string str, char c)
 {
-    // std::string space_delimiter = " ";
     std::vector<std::string> words;
-
     size_t pos = 0;
+    
     while ((pos = str.find(c)) != std::string::npos)
     {
         words.push_back(str.substr(0, pos));

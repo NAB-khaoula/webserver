@@ -1,4 +1,5 @@
 #include "Server.hpp"
+#include "../requestResponse/Request.hpp"
 #include <sys/types.h>
 #include <unistd.h>
 #include <fcntl.h>
@@ -10,14 +11,14 @@ std::string    runCgi()
     };
 
     const char *env[] = {
-        "SCRIPT_FILENAME=/Users/mbelaman/Desktop/webserver/parsing/index.php", 
-        "REQUEST_METHOD=GET", 
-        "SERVER_PROTOCOL=\"HTTP/1.1\"", 
-        "PATH_INFO=/Users/mbelaman/Desktop/webserver",
-        "REDIRECT_STATUS=0"
+        "SCRIPT_FILENAME=index.php", 
+        "REQUEST_METHOD=GET",
+        "REDIRECT_STATUS=0",
+        "PATH_INFO=/Users/mbelaman/Desktop/webserver/parsing/"
     };
     pid_t       pid;
     int         fd[2];
+    int         r;
     char        buffer[1024];
     std::string str;
 
@@ -38,7 +39,6 @@ std::string    runCgi()
     else
     {
         close(fd[1]);
-        int r;
         while ((r = read(fd[0], buffer, sizeof(buffer))))
         {
             str.append(buffer, r);
@@ -53,7 +53,6 @@ int main()
 {
     std::string str = runCgi();
     std::cout << str << std::endl;
-    
     return 0;
 }
 
