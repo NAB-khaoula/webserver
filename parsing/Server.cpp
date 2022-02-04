@@ -159,7 +159,28 @@ void    Server::set_client_max_body(std::string client_max_body, int &nb_line)
         errors(8, nb_line, client_max_body);
     else
     {
-        _client_max_body = client_max_body;
+        i = 0;
+        if ((i = client_max_body.find("m")) != std::string::npos || (i = client_max_body.find("M")) != std::string::npos)
+        {
+            client_max_body = client_max_body.substr(0, i);
+            size_t nb = (long long)atoi(client_max_body.c_str()) * 1048576;
+            _client_max_body = std::to_string(nb);
+            std::cout << _client_max_body << std::endl;
+        }
+        else if ((i = client_max_body.find("k")) != std::string::npos || (i = client_max_body.find("K")) != std::string::npos)
+        {
+            client_max_body = client_max_body.substr(0, i);
+            size_t nb = (long long)atoi(client_max_body.c_str()) * 1024;
+            _client_max_body = std::to_string(nb);
+            std::cout << _client_max_body << std::endl;
+        }
+        else
+        {
+            client_max_body = client_max_body.substr(0, i);
+            size_t nb = (long long)atoi(client_max_body.c_str()) * 1073741824;
+            _client_max_body = std::to_string(nb);
+            std::cout << _client_max_body << std::endl;
+        }
     }   
 }
 void    Server::set_err_pages(std::string value, int &nb_line)
@@ -234,6 +255,7 @@ void    print_attr(std::vector<Server> &vec_serv)
         {
             std::cout << it->first << " | " << it->second << std::endl;
         }
+        std::cout << vec_serv[i].get_client_max_body() << std::endl;
         for (std::map<int, std::string>::iterator it = vec_serv[i].get_err_pages().begin(); it != vec_serv[i].get_err_pages().end(); it++)
         {
             std::cout << it->first << " | " << it->second << std::endl;
