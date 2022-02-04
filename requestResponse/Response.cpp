@@ -58,123 +58,141 @@ bool	Response::allowedMethods(){
 	return false;
 }
 
-bool	Response::findFile(std::string &filename){
-	std::ifstream f(filename.c_str());
-	return f.good();
+bool	Response::findFile(std::string filename){
+	return (!access(filename.c_str(), F_OK) && !access(filename.c_str(), R_OK) && !access(filename.c_str(), W_OK));
 }
 
 int     Response::findFileRequested()
 {
+	struct stat buf;
 	this->virtualServer = this->findVirtualServer();
-	this->filePath = virtualServer.get_root() + '/' + clientRequest.getPath();
+	this->filePath = virtualServer.get_root() + clientRequest.getPath();
 	this->location = this->findLocation();
 	std::cout << location.get_path() << std::endl;
+	std::cout << filePath << std::endl;
 	if(allowedMethods())
 	{
-		// if(findFile(filePath))
-		// {
-			if (location.get_return().empty())
-				return (OK);
+		if(findFile(filePath))
+		{
+			stat(filePath.c_str(), &buf);
+			// if(!S_ISDIR(buf.st_mode))
+			// {
+				if (location.get_return().empty())
+				{
+					statusMessage = std::string("OK");
+					return (OK);
+				}
+			// }
+			// else{
+			// 	if (findFile((filePath + "/index.html")))
+			// 	{
+			// 		filePath += "/index.html";
+					// statusMessage = std::string("OK");
+					// return (OK);
+			// 	}
+			// 	else
+			// 	{
+			// 		filePath += "/";
+					// statusMessage = std::string("MOVEDPERMANENTLY");
+					// return (MOVEDPERMANENTLY);
+			// 	}
+			// }
+			statusMessage = std::string("MOVEDPERMANENTLY");
 			return (MOVEDPERMANENTLY);
-		// }
-		// else
-			// return (NOTFOUND);
+		}
+		else
+		{
+			statusMessage = std::string("NOTFOUND");
+			return (NOTFOUND);
+		}
 	}
-	else
-		return (FORBIDDEN);
+	statusMessage = std::string("FORBIDDEN");
+	return (FORBIDDEN);
 }
 
 std::string	&Response::buildResponse(){
 	this->statusCode = findFileRequested();
-	if (this->statusCode == OK)
-	{
-		stringJoinedResponse = indexFound();
-	}
-	else if (this->statusCode == NOTFOUND)
-	{
-	    stringJoinedResponse = indexNotFound();
-	}
-	else if (this->statusCode == FORBIDDEN)
-	{
-	    stringJoinedResponse = indexForbidden();
-	}
-	else if (this->statusCode == MOVEDPERMANENTLY)
-		stringJoinedResponse = indexMovedPermanently();
-	return stringJoinedResponse;
+	return indexFound();
 }
 
-std::string Response::indexFound(){
+std::string &Response::indexFound(){
 	std::ifstream	indexFile;
 	std::string		str;
 	std::string		htmlString;
-	indexFile.open("requestResponse/index.html");
+	indexFile.open(filePath);
 	stringJoinedResponse += (clientRequest.getRequestLine())[2]; 
-	stringJoinedResponse += " 200 OK \n";
+	stringJoinedResponse += std::to_string(statusCode) + " ";
+	stringJoinedResponse += statusMessage + " \r\n";
 	while(std::getline(indexFile, str))
 		htmlString += str;
 	stringJoinedResponse += "Content-Length: ";
 	stringJoinedResponse += std::to_string(htmlString.length());
-	stringJoinedResponse += "\n";
-	stringJoinedResponse += "Connection: close\n";
-	stringJoinedResponse += "Content-Type: text/html\n\n";
+	stringJoinedResponse += "\r\n";
+	// if (statusCode == MOVEDPERMANENTLY)
+	// {
+	// 	stringJoinedResponse += "Location: ";
+	// 	stringJoinedResponse +=	"/\r\n"; 
+	// }	
+	stringJoinedResponse += "Connection: close\r\n";
+	stringJoinedResponse += "Content-Type: text/html\r\n\r\n";
 	stringJoinedResponse += htmlString;
 	return stringJoinedResponse;
 }
 
-std::string Response::indexNotFound(){
-	std::ifstream	indexFile;
-	std::string		str;
-	std::string		htmlString;
-	indexFile.open("requestResponse/notFound.html");
-	stringJoinedResponse += (clientRequest.getRequestLine())[2]; 
-	stringJoinedResponse += " 404 NOTFOUND \n";
-	while(std::getline(indexFile, str))
-		htmlString += str;
-	stringJoinedResponse += "Content-Length: ";
-	stringJoinedResponse += std::to_string(htmlString.length());
-	stringJoinedResponse += "\n";
-	stringJoinedResponse += "Connection: close\n";
-	stringJoinedResponse += "Content-Type: text/html\n\n";
-	stringJoinedResponse += htmlString;
-	return stringJoinedResponse;
-}
+// std::string Response::indexNotFound(){
+// 	std::ifstream	indexFile;
+// 	std::string		str;
+// 	std::string		htmlString;
+// 	indexFile.open("requestResponse/notFound.html");
+// 	stringJoinedResponse += (clientRequest.getRequestLine())[2]; 
+// 	stringJoinedResponse += " 404 NOTFOUND \n";
+// 	while(std::getline(indexFile, str))
+// 		htmlString += str;
+// 	stringJoinedResponse += "Content-Length: ";
+// 	stringJoinedResponse += std::to_string(htmlString.length());
+// 	stringJoinedResponse += "\n";
+// 	stringJoinedResponse += "Connection: close\n";
+// 	stringJoinedResponse += "Content-Type: text/html\n\n";
+// 	stringJoinedResponse += htmlString;
+// 	return stringJoinedResponse;
+// }
 
-std::string Response::indexForbidden(){
-	std::ifstream	indexFile;
-	std::string		str;
-	std::string		htmlString;
-	indexFile.open("requestResponse/forbidden.html");
-	stringJoinedResponse += (clientRequest.getRequestLine())[2]; 
-	stringJoinedResponse += " 403 Forbidden \n";
-	while(std::getline(indexFile, str))
-		htmlString += str;
-	stringJoinedResponse += "Content-Length: ";
-	stringJoinedResponse += std::to_string(htmlString.length());
-	stringJoinedResponse += "\n";
-	stringJoinedResponse += "Connection: close\n";
-	stringJoinedResponse += "Content-Type: text/html\n\n";
-	stringJoinedResponse += htmlString;
-	return stringJoinedResponse;
-}
+// std::string Response::indexForbidden(){
+// 	std::ifstream	indexFile;
+// 	std::string		str;
+// 	std::string		htmlString;
+// 	indexFile.open("requestResponse/forbidden.html");
+// 	stringJoinedResponse += (clientRequest.getRequestLine())[2]; 
+// 	stringJoinedResponse += " 403 Forbidden \n";
+// 	while(std::getline(indexFile, str))
+// 		htmlString += str;
+// 	stringJoinedResponse += "Content-Length: ";
+// 	stringJoinedResponse += std::to_string(htmlString.length());
+// 	stringJoinedResponse += "\n";
+// 	stringJoinedResponse += "Connection: close\n";
+// 	stringJoinedResponse += "Content-Type: text/html\n\n";
+// 	stringJoinedResponse += htmlString;
+// 	return stringJoinedResponse;
+// }
 
-std::string Response::indexMovedPermanently(){
-	std::ifstream	indexFile;
-	std::string		str;
-	std::string		htmlString;
-	indexFile.open("requestResponse/movedPermanently.html");
-	stringJoinedResponse += (clientRequest.getRequestLine())[2]; 
-	stringJoinedResponse += " 301 Moved Permanently \n";
-	while(std::getline(indexFile, str))
-		htmlString += str;
-	stringJoinedResponse += "Content-Length: ";
-	stringJoinedResponse += std::to_string(htmlString.length());
-	stringJoinedResponse += "\n";
-	stringJoinedResponse += "Connection: keep-alive\n";
-	stringJoinedResponse += "Content-Type: text/html\n";
-	stringJoinedResponse += "Location: redirect.html\r\n\r\n";
-	stringJoinedResponse += htmlString;
-	return stringJoinedResponse;
-}
+// std::string Response::indexMovedPermanently(){
+// 	std::ifstream	indexFile;
+// 	std::string		str;
+// 	std::string		htmlString;
+// 	indexFile.open("requestResponse/movedPermanently.html");
+// 	stringJoinedResponse += (clientRequest.getRequestLine())[2]; 
+// 	stringJoinedResponse += " 301 Moved Permanently \n";
+// 	while(std::getline(indexFile, str))
+// 		htmlString += str;
+// 	stringJoinedResponse += "Content-Length: ";
+// 	stringJoinedResponse += std::to_string(htmlString.length());
+// 	stringJoinedResponse += "\n";
+// 	stringJoinedResponse += "Connection: keep-alive\n";
+// 	stringJoinedResponse += "Content-Type: text/html\n";
+// 	stringJoinedResponse += "Location: redirect.html\r\n\r\n";
+// 	stringJoinedResponse += htmlString;
+// 	return stringJoinedResponse;
+// }
 
 
 

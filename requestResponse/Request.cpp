@@ -40,6 +40,7 @@ Request    &Request::parseRequest(char *buffer)
 
 void			Request::parseParam(std::string	&variableURL, size_t &pos)
 {
+	//FIXME - need to fix no '=' case eg(?page=1&something+else&user=john)!!!!!
 	std::string	tempURL;
 	tempURL = variableURL.substr(pos + 1);
 	variableURL.erase(pos);

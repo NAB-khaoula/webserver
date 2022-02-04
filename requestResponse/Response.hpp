@@ -4,6 +4,9 @@
 #include <string>
 #include <vector>
 #include <fstream>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 #include <map>
 #include <ctime>
 #include <fstream>
@@ -19,6 +22,7 @@ class Response
 {
 	private:
 		int							statusCode;
+		std::string					statusMessage;
 		std::string					filePath;
 		Location					location;
 		std::string					stringJoinedResponse;
@@ -34,12 +38,12 @@ class Response
 		Server		findVirtualServer();
 		Location	findLocation();
 		bool		allowedMethods();
-		bool		findFile(std::string &filename);
+		bool		findFile(std::string filename);
 		std::string	&buildResponse();
-		std::string	indexFound();
-		std::string	indexNotFound();
-		std::string	indexForbidden();
-		std::string	indexMovedPermanently();
+		std::string	&indexFound();
+		// std::string	indexNotFound();
+		// std::string	indexForbidden();
+		// std::string	indexMovedPermanently();
 };
 
 #endif
