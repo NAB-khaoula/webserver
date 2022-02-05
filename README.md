@@ -6,7 +6,8 @@
 * [NOTE](#NOTE)
 
 ## General info
-FT_CONTAINERS is a re-implementation of the various container types of the C++ standard template library. 
+This project is an introduction to HTTP server. It can be tested with a real browser. 
+HTTP is one of the most used protocols on the internet.
 
 ## Technologies
 Project is created with:
