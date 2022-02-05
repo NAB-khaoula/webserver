@@ -8,9 +8,9 @@
 ## General info :
 * A user agent, commonly a web browser or web crawler, initiates communication by **requesting** a specific resource and the **server responds** with the content of that resource or an error message if unable to do so.
 * WEBPAGES delivered are most frequently HTML documents, which may include images, style sheets, and scripts in addition to the text content.
-* This communication between client and server takes place using the *Hypertext Transfer Protocol (HTTP).
+* This communication between client and server takes place using the *Hypertext Transfer Protocol (HTTP)*.
 * HTTP is the foundation of data communication for the World Wide Web, where hypertext documents include hyperlinks to other resources that the user can easily access.
-* The primary function of a *web server is to store, process, and deliver web pages to clients.
+* The primary function of a *web server* is to store, process, and deliver web pages to clients.
 
 ## Technologies :
 Project is created with:
