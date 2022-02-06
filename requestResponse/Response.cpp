@@ -24,7 +24,7 @@ Server	*Response::findVirtualServer()
 	{
 		if(!(compareStrings((serverConfigData[i]).get_listen(), hostPort[1])))
 		{
-			if(((serverConfigData[i]).get_listen()) != ((serverConfigData[i + 1]).get_listen()))
+			if(i && ((serverConfigData[i - 1]).get_listen()) != ((serverConfigData[i]).get_listen()))
 				defaultServerIndex = i;
 			if (!(compareStrings((serverConfigData[i]).get_host(), hostPort[0])))
 					return (new Server(serverConfigData[i]));
@@ -68,7 +68,7 @@ int     Response::findFileRequested()
 	this->virtualServer = this->findVirtualServer();
 	this->filePath = virtualServer->get_root() + clientRequest.getPath();
 	this->location = this->findLocation();
-	std::cout << location.get_path() << std::endl;
+	// std::cout << location.get_path() << std::endl;
 	std::cout << filePath << std::endl;
 	if(allowedMethods())
 	{
@@ -120,7 +120,7 @@ std::string &Response::indexFound(){
 	std::string		str;
 	std::string		htmlString;
 	indexFile.open(filePath);
-	stringJoinedResponse += (clientRequest.getRequestLine())[2]; 
+	stringJoinedResponse += (clientRequest.getRequestLine())[2] + " "; 
 	stringJoinedResponse += std::to_string(statusCode) + " ";
 	stringJoinedResponse += statusMessage + " \r\n";
 	while(std::getline(indexFile, str))

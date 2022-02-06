@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mbelaman <mbelaman@student.42.fr>          +#+  +:+       +#+        */
+/*   By: ybouddou <ybouddou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/13 08:57:33 by ybouddou          #+#    #+#             */
-/*   Updated: 2022/02/06 16:36:14 by mbelaman         ###   ########.fr       */
+/*   Updated: 2022/02/06 18:32:24 by ybouddou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,10 +36,11 @@ void	handle_connection(t_WebServ *webserv, struct kevent event)
 	recv(event.ident, buffer, event.data, 0);
 	buffer[event.data] = '\0';
 	request.parseRequest(buffer);
-	std::cout << buffer << std::endl;
+	// std::cout << buffer << std::endl;
 	Response resp(request, webserv->servers);
 	delete[] buffer;
 	std::strcpy(response, (resp.buildResponse()).c_str());
+	// std::cout << response << std::endl;
 	send(event.ident, response, strlen(response), 0);
 	delete[] response;
 	close(event.ident);
