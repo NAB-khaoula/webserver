@@ -60,8 +60,15 @@ public:
 
 std::string                 get_key(std::string &, int &);
 std::string                 get_value(std::string &, int &);
-std::vector<std::string>    ft_splitSpace(std::string str, char c);
-std::vector<std::string>    delete_brace(std::string str);
+std::vector<std::string>    ft_splitSpace(std::string, char);
+std::vector<std::string>    delete_brace(std::string );
+void                        check_braces(std::string &, struct ws &, int &);
+void                        check_semi(std::string, int &);
+void                        errors(int, int &, std::string);
+bool                        isNumber(std::string s);
+int                         check_directive(std::string);
+std::string                 &rightTrim(std::string& str);
+std::string                 &leftTrim(std::string& str);
 void                        fill_server(std::string, std::string, std::string &, struct ws &, int &);
 void                        fill_location(std::string &, std::string &, struct ws &, int &);
 void                        print_attr(struct ws &);

@@ -6,6 +6,7 @@ CFLAGS = -Wall -Wextra -Werror
 SRC =	main.cpp\
 		parsing/Location.cpp\
 		parsing/Server.cpp\
+		parsing/tools.cpp\
 		server/Server.cpp\
 		server/Sockets.cpp\
 		requestResponse/Request.cpp\

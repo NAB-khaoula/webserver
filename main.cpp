@@ -6,7 +6,7 @@
 /*   By: mbelaman <mbelaman@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/08 16:32:15 by ybouddou          #+#    #+#             */
-/*   Updated: 2022/02/06 17:12:45 by mbelaman         ###   ########.fr       */
+/*   Updated: 2022/02/06 18:18:24 by mbelaman         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,6 @@ int		main()
 	}
 	catch(const std::exception& err)
 	{
-		perror("Error");
 		std::cout << err.what();
 		std::cout << std::endl;
 	}
