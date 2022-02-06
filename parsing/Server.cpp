@@ -94,23 +94,27 @@ void    Server::set_root(std::string root, int &nb_line)
         errors(24, nb_line, root);
 }
 
-void    Server::set_listen(std::string listen, int &nb_line)
+void    Server::set_listen(std::string listen, t_WebServ &ws, int &nb_line)
 {
     if (this->get_listen().empty())
     {
         listen = rightTrim(listen);
         int i = 0, len = 0;
-        while (listen[i] && i < 5)
+        while (listen[i] /*&& i < 5*/)
         {
             if (isdigit(listen[i]) == false)
                 errors(4, nb_line, listen);
             i++;
             len++;
         }
-        if (len == 2 || len == 4)
-            _listen = listen;
-        else
-            errors(5, nb_line, listen);
+        _listen = listen;
+        
+        if (ws.ports.find(_listen) == ws.ports.end())
+            ws.ports.insert(std::make_pair(_listen, stoi(_listen)));
+        // if (len == 2 || len == 4)
+        //     _listen = listen;
+        // else
+        //     errors(5, nb_line, listen);
 
     }
     else
@@ -271,23 +275,29 @@ void    Server::clear()
 
 //NOTE
 
-void    print_attr(std::vector<Server> &vec_serv)
+void    print_attr(t_WebServ &ws)
 {
-    for (size_t i = 0; i < vec_serv.size(); i++)
+    std::cout << "All Ports : " << std::endl;
+    for (std::map<std::string, int>::iterator it = ws.ports.begin(); it != ws.ports.end(); it++)
+    {
+        std::cout << it->first << " | " << it->second << std::endl;
+    }
+    
+    for (size_t i = 0; i < ws.servers.size(); i++)
     {
         std::cout << "============= Server" << i + 1  << "===========" << std::endl;
-        std::cout << vec_serv[i].get_listen() << std::endl;
-        std::cout << vec_serv[i].get_host() << std::endl;
-        for (std::map<std::string, std::string>::iterator it = vec_serv[i].get_server_names().begin(); it != vec_serv[i].get_server_names().end(); it++)
+        std::cout << ws.servers[i].get_listen() << std::endl;
+        std::cout << ws.servers[i].get_host() << std::endl;
+        for (std::map<std::string, std::string>::iterator it = ws.servers[i].get_server_names().begin(); it != ws.servers[i].get_server_names().end(); it++)
         {
             std::cout << it->first << " | " << it->second << std::endl;
         }
-        std::cout << vec_serv[i].get_client_max_body() << std::endl;
-        for (std::map<int, std::string>::iterator it = vec_serv[i].get_err_pages().begin(); it != vec_serv[i].get_err_pages().end(); it++)
+        std::cout << ws.servers[i].get_client_max_body() << std::endl;
+        for (std::map<int, std::string>::iterator it = ws.servers[i].get_err_pages().begin(); it != ws.servers[i].get_err_pages().end(); it++)
         {
             std::cout << it->first << " | " << it->second << std::endl;
         }
-        std::cout << vec_serv[i].get_root() << std::endl;
+        std::cout << ws.servers[i].get_root() << std::endl;
         std::cout << "============= Locations ===========" << std::endl;
         // for (size_t j = 0; j < vec_serv[i].get_location().size(); j++)
         // {
@@ -310,7 +320,7 @@ void    print_attr(std::vector<Server> &vec_serv)
         //     std::cout << vec_serv[i].get_location()[j].get_cgi() << std::endl;
         // }
         int j = 0;
-        for (std::map<std::string, Location>::iterator it = vec_serv[i].get_map_loc().begin(); it != vec_serv[i].get_map_loc().end(); it++)
+        for (std::map<std::string, Location>::iterator it = ws.servers[i].get_map_loc().begin(); it != ws.servers[i].get_map_loc().end(); it++)
         {
             std::cout << "============= Sub Locations" << j + 1 << "===========" << std::endl;
             std::cout << it->first << std::endl;
@@ -341,22 +351,22 @@ void    print_attr(std::vector<Server> &vec_serv)
 
 }
 
-void fill_location(std::string &key, std::string &value, Location &locat, Server &serv, int &nb_line)
+void fill_location(std::string &key, std::string &value, t_WebServ &ws, int &nb_line)
 {
     if (!key.compare("autoindex"))
-        locat.set_autoindex(value, nb_line);
+        ws.locat.set_autoindex(value, nb_line);
     else if (!key.compare("index"))
-        locat.set_index(value, nb_line);
+        ws.locat.set_index(value, nb_line);
     else if (key == "allow_methods")
-        locat.set_methods(value, nb_line);
+        ws.locat.set_methods(value, nb_line);
     else if (!key.compare("return"))
-        locat.set_return(value, nb_line);
+        ws.locat.set_return(value, nb_line);
     else if (!key.compare("fastcgi_pass"))
-        locat.set_cgi(value, nb_line);
+        ws.locat.set_cgi(value, nb_line);
     else if (!key.compare("upload_enable"))
-        locat.set_upload_enble(value, nb_line);
+        ws.locat.set_upload_enble(value, nb_line);
     else if (!key.compare("upload_store"))
-        locat.set_upload(value, nb_line);
+        ws.locat.set_upload(value, nb_line);
     else
     {
         std::cout << "dkhal location\n";
@@ -375,38 +385,40 @@ int check_directive(std::string key)
     return 1;
 }
 
-void    fill_server(std::string key, std::string value, std::string &line, std::vector<Server> &vec_serv, Server &serv, Location &locat, int &nb_line)
+void    fill_server(std::string key, std::string value, std::string &line, t_WebServ &ws, int &nb_line)
 {
-    if (serv.get_brace_server() == 2)
+    if (ws.serv->get_brace_server() == 2)
     {
         if (!key.compare("listen"))
-            serv.set_listen(value, nb_line);
+            ws.serv->set_listen(value, ws, nb_line);
         else if (!key.compare("host"))
-            serv.set_host(value, nb_line);
+            ws.serv->set_host(value, nb_line);
         else if (!key.compare("server_name"))
-            serv.set_server_names(value, nb_line);
+            ws.serv->set_server_names(value, nb_line);
         else if (!key.compare("client_max_body_size"))
-            serv.set_client_max_body(value, nb_line);
+            ws.serv->set_client_max_body(value, nb_line);
         else if (!key.compare("error_page"))
-            serv.set_err_pages(value, nb_line);
+            ws.serv->set_err_pages(value, nb_line);
         else if (!key.compare("root"))
-            serv.set_root(value, nb_line);
-        else if (line.find("}") != std::string::npos && serv.get_brace_location() == 2)
+            ws.serv->set_root(value, nb_line);
+        else if (line.find("}") != std::string::npos && ws.serv->get_brace_location() == 2)
         {
-            serv.set_brace_location(0);
-            serv.set_location(locat);
-            serv.set_map_loc(locat, nb_line);
-            locat.clear();
+            ws.serv->set_brace_location(0);
+            ws.serv->set_location(ws.locat);
+            ws.serv->set_map_loc(ws.locat, nb_line);
+            ws.locat.clear();
         }
-        else if (line.find("}") != std::string::npos && serv.get_brace_server() == 2)
+        else if (line.find("}") != std::string::npos && ws.serv->get_brace_server() == 2)
         {
-            serv.set_brace_server(0);
-            vec_serv.push_back(serv);
-            serv.clear();
+            ws.serv->set_brace_server(0);
+            ws.servers.push_back(*ws.serv);
+            delete ws.serv;
+            ws.serv = new Server();
+            // ws.serv->clear();
         }
-        else if (serv.get_brace_location() == 2)
-            fill_location(key, value, locat, serv, nb_line);
-        else if (!check_directive(key) && serv.get_brace_location() == 1)
+        else if (ws.serv->get_brace_location() == 2)
+            fill_location(key, value, ws, nb_line);
+        else if (!check_directive(key) && ws.serv->get_brace_location() == 1)
             errors(11, nb_line, key);
         else
         {
@@ -421,7 +433,7 @@ void    fill_server(std::string key, std::string value, std::string &line, std::
     }
 }
 
-void    check_braces(std::string &line, Server &serv, Location &locat, int &nb_line)
+void    check_braces(std::string &line, t_WebServ &ws, int &nb_line)
 {
     std::string str_key;
     std::string str_value;
@@ -435,22 +447,22 @@ void    check_braces(std::string &line, Server &serv, Location &locat, int &nb_l
     {
         str_key = get_key(line, j);
         str_value = get_value(line, j);
-        if (str_key.empty() && serv.get_brace_server() == 1)
-			serv.set_brace_server(2);
-        else if (str_key.empty() && serv.get_brace_location() == 1)
-			serv.set_brace_location(2);
+        if (str_key.empty() && ws.serv->get_brace_server() == 1)
+			ws.serv->set_brace_server(2);
+        else if (str_key.empty() && ws.serv->get_brace_location() == 1)
+			ws.serv->set_brace_location(2);
         else if (!str_key.compare("server"))
         {
             if (!str_value.empty())
                 errors(0, nb_line, str_value);
-            serv.set_brace_server(2);
+            ws.serv->set_brace_server(2);
         }
         else if (!str_key.compare("location"))
         {
             if (str_value.empty())
                 errors(1, nb_line, str_value);
-            serv.set_brace_location(2);
-            locat.set_path(str_value, nb_line);
+            ws.serv->set_brace_location(2);
+            ws.locat.set_path(str_value, nb_line);
         }
 		line.erase(0, i + 1);
     }
@@ -460,24 +472,24 @@ void    check_braces(std::string &line, Server &serv, Location &locat, int &nb_l
         str_value = get_value(line, j);
         if (!str_key.compare("server") && str_value.empty())
         {
-            if (serv.get_brace_server())
+            if (ws.serv->get_brace_server())
             {
                 std::cout << "emmm1\n";
                 errors(2, nb_line, "");
             }
-            serv.set_brace_server(1);
+            ws.serv->set_brace_server(1);
             line.clear();
         }
         else if (!str_key.compare("location") && !str_value.empty())
         {
-            if (serv.get_brace_location())
+            if (ws.serv->get_brace_location())
             {
                 std::cout << "dkhal\n";
                 errors(3, nb_line, "");
             }
             // std::cout << str_value << std::endl;
-            locat.set_path(str_value, nb_line);
-            serv.set_brace_location(1);
+            ws.locat.set_path(str_value, nb_line);
+            ws.serv->set_brace_location(1);
             line.clear();
         }
         else if (!str_key.compare("server"))
@@ -504,22 +516,22 @@ void    check_semi(std::string line, int &nb_line)
         errors(19, nb_line, key);
 }
 
-std::vector<Server>     begin_parser()
+void     begin_parser(t_WebServ &ws)
 {
     std::ifstream               myReadFile;
-    std::vector<Server>         vec_server;
-    Server                      serv;
-    Location                    locat;
+    // Server                      serv;
+    // Location                    locat;
     std::vector<std::string>    split;
     std::string                 line, str_key, str_value;
     int i = 0, j = 0, k;
 
+    ws.serv = new Server();
     myReadFile.open("./parsing/webserv.conf");
     while (std::getline(myReadFile, line))
     {
         i++;
         leftTrim(rightTrim(line));
-        check_braces(line, serv, locat, i);
+        check_braces(line, ws, i);
         if (line.empty())
             continue;
         check_semi(line, i);
@@ -532,13 +544,13 @@ std::vector<Server>     begin_parser()
             str_value = get_value(split.at(k), j);
             k++;
             if (!str_key.empty() || !str_value.empty())
-                fill_server(str_key, str_value, line, vec_server, serv, locat, i);
+                fill_server(str_key, str_value, line, ws, i);
         }
     }
-    if (serv.get_brace_server())
+    if (ws.serv->get_brace_server())
         errors(5, i, "");
     myReadFile.close();
-    return vec_server;
+    delete ws.serv;
 }
 
 

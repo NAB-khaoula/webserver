@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ybouddou <ybouddou@student.42.fr>          +#+  +:+       +#+        */
+/*   By: mbelaman <mbelaman@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/08 16:32:15 by ybouddou          #+#    #+#             */
-/*   Updated: 2022/02/04 15:34:34 by ybouddou         ###   ########.fr       */
+/*   Updated: 2022/02/06 17:12:45 by mbelaman         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,10 +16,10 @@ int		main()
 {
 	try
 	{
-		WebServ	webserv;
+		ws	webserv;
 		
-		webserv.servers = begin_parser();
-		// print_attr(webserv.servers);
+		begin_parser(webserv);
+		// print_attr(webserv);
 		multipleServers(&webserv);
 	}
 	catch(const std::exception& err)
