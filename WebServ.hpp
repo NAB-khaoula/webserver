@@ -6,7 +6,7 @@
 /*   By: ybouddou <ybouddou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/08 16:33:37 by ybouddou          #+#    #+#             */
-/*   Updated: 2022/02/04 15:24:58 by ybouddou         ###   ########.fr       */
+/*   Updated: 2022/02/04 19:02:06 by ybouddou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,10 +34,10 @@ typedef struct	WevServ
 	struct kevent	event;
 	int				kq;
 	int				nev;
-	fd_set			current_set;
-	fd_set			ready_set;
+	// fd_set			current_set;
+	// fd_set			ready_set;
 	int				port;
-	int				max_fd;
+	// int				max_fd;
 	int				acceptfd;
 	int				sockfd;
 }				WebServ;
