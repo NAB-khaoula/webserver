@@ -519,8 +519,6 @@ void    check_semi(std::string line, int &nb_line)
 void     begin_parser(t_WebServ &ws)
 {
     std::ifstream               myReadFile;
-    // Server                      serv;
-    // Location                    locat;
     std::vector<std::string>    split;
     std::string                 line, str_key, str_value;
     int i = 0, j = 0, k;

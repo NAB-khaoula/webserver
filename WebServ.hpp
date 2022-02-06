@@ -6,7 +6,7 @@
 /*   By: mbelaman <mbelaman@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/08 16:33:37 by ybouddou          #+#    #+#             */
-/*   Updated: 2022/02/06 17:01:29 by mbelaman         ###   ########.fr       */
+/*   Updated: 2022/02/06 17:22:07 by mbelaman         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,8 +47,6 @@ typedef struct	ws
 	// fd_set			current_set;
 	// fd_set			ready_set;
 	// int				max_fd;
-	ws () : serv() {
-	}
 }				t_WebServ;
 
 
