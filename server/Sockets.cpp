@@ -8,15 +8,15 @@ Sockets::~Sockets()
 {
 }
 
-int		Sockets::SetupSocket(int port, std::string host)
+int		Sockets::SetupSocket(int port)
 {
 	int		flag = 1;
 
 	sockfd = socket(AF_INET, SOCK_STREAM, 0);
 	bzero(&servadd, sizeof(servadd));
 	servadd.sin_family = AF_INET;
-	if (host.empty())
-		host = "127.0.0.1";
+	// if (host.empty())
+	// 	host = "127.0.0.1";
 	// servadd.sin_addr.s_addr = inet_addr(host.c_str());
 	servadd.sin_addr.s_addr = htonl(INADDR_ANY);
 	servadd.sin_port = htons(port);

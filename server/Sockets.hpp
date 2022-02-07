@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Sockets.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ybouddou <ybouddou@student.42.fr>          +#+  +:+       +#+        */
+/*   By: mbelaman <mbelaman@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/13 08:44:06 by ybouddou          #+#    #+#             */
-/*   Updated: 2022/01/13 11:50:10 by ybouddou         ###   ########.fr       */
+/*   Updated: 2022/02/06 16:33:22 by mbelaman         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@
 #include "../parsing/Server.hpp"
 #include <sys/socket.h>
 #include <sys/select.h>
-// #include <sys/event.h>
+#include <sys/event.h>
 #include <poll.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -29,7 +29,7 @@ class Sockets
 	public:
 		Sockets();	
 		~Sockets();
-		int	SetupSocket(int port, std::string host);
+		int	SetupSocket(int port);
 		int	getSockfd() const;
 };
 

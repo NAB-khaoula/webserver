@@ -7,8 +7,9 @@
 #include <map>
 #include <cstring>
 #include "Location.hpp"
+#include "../WebServ.hpp"
 
-class Parser;
+struct ws;
 
 class Server
 {
@@ -32,6 +33,7 @@ public:
     std::string                                 get_listen();
     std::string                                 get_host();
     std::map<std::string, std::string>          &get_server_names();
+    std::map<std::string, std::string>          &get_ports();
     std::string                                 get_client_max_body();
     std::map<int, std::string>                  &get_err_pages();
     std::map<std::string, Location>             &get_map_loc();
@@ -42,7 +44,7 @@ public:
     
     //NOTE - Setters
     void                            set_root(std::string, int &);
-    void                            set_listen(std::string, int &);
+    void                            set_listen(std::string, struct ws &, int &);
     void                            set_host(std::string, int &);
     void                            set_server_names(std::string, int &);
     void                            set_client_max_body(std::string, int &);
@@ -58,11 +60,18 @@ public:
 
 std::string                 get_key(std::string &, int &);
 std::string                 get_value(std::string &, int &);
-std::vector<std::string>    ft_splitSpace(std::string str, char c);
-std::vector<std::string>    delete_brace(std::string str);
-void                        fill_server(std::string, std::string, std::vector<Server> &, Server &, Location &, int &);
-void                        fill_location(std::string &, std::string &, Location &, Server &, int &);
-void                        print_attr(std::vector<Server> &vec_serv);
-std::vector<Server>         begin_parser();
+std::vector<std::string>    ft_splitSpace(std::string, char);
+std::vector<std::string>    delete_brace(std::string );
+void                        check_braces(std::string &, struct ws &, int &);
+void                        check_semi(std::string, int &);
+void                        errors(int, int &, std::string);
+bool                        isNumber(std::string s);
+int                         check_directive(std::string);
+std::string                 &rightTrim(std::string& str);
+std::string                 &leftTrim(std::string& str);
+void                        fill_server(std::string, std::string, std::string &, struct ws &, int &);
+void                        fill_location(std::string &, std::string &, struct ws &, int &);
+void                        print_attr(struct ws &);
+void                        begin_parser(struct ws &);
 std::string                 runCgi();
 #endif

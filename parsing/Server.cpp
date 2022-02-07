@@ -10,65 +10,6 @@ Server::Server()
     _brace_location = 0;
 }
 
-
-void    errors(int index, int &nb_line, std::string line)
-{
-    static std::string arr[] = 
-    {
-        "Syntax Error: invalid number of arguments in 'server' directive.",//0
-        "Syntax Error: invalid number of arguments in 'location' directive.",//1
-        "Syntax Error: directive 'server' has no opening '{' OR unexpected '{'.",//2
-        "Syntax Error: unknown directive " + line + ".",//3
-        "Syntax Error: host not found in " + line +  " of the 'listen' directive",//4
-        "Syntax Error: invalid port in " + line + " of the 'listen' directive",//5
-        "Syntax Error: unknown " + line + " of the 'host' directive",//6
-        "Syntax Error: invalid number of arguments in 'server_name' directive",//7
-        "Syntax Error: 'client_max_body_size' directive invalid value",//8
-        "Syntax Error: invalid value " + line +  " in 'error_page' directive",//9
-        "Syntax Error: invalid number of arguments in " + line + " directive",//10
-        "Syntax Error: directive 'location' has no opening '{'.",//11
-        "Syntax Error: invalid number of arguments in 'autoindex' directive",//12
-        "Syntax Error: invalid number of arguments in 'index' directive",//13
-        "Syntax Error: invalid number of arguments in 'allow_methods' directive",//14
-        "Syntax Error: invalid number of arguments in 'fastcgi_pass' directive",//15
-        "Syntax Error: invalid number of arguments in 'upload_store' directive",//16
-        "Syntax Error: invalid number of arguments in 'upload_enable' directive",//17
-        "Syntax Error: invalid value " + line +  " in 'return' directive",//18
-        "Syntax Error: invalid number of arguments in " + line + " directive.",//19
-        "Syntax Error: duplicate location " + line,//20
-        "Syntax Error: duplicate listen " + line,//21
-        "Syntax Error: duplicate host " + line,//22
-        "Syntax Error: duplicate client_max_body_size " + line,//23
-        "Syntax Error: duplicate root " + line,//24
-        "Syntax Error: duplicate autoindex " + line,//25
-        "Syntax Error: duplicate allow_methods " + line,//26
-        "Syntax Error: duplicate return " + line,//27
-        "Syntax Error: duplicate upload_store " + line,//28
-        "Syntax Error: duplicate upload_enable " + line//29
-    };
-    std::string str = std::to_string(nb_line);
-    throw std::runtime_error("|line " + str + "| " + arr[index]);
-}
-
-bool isNumber(std::string s)
-{
-    for (int i = 0; i < s.length(); i++)
-        if (isdigit(s[i]) == false)
-            return false;
-    return true;
-}
-
-std::string& rightTrim(std::string& str)
-{
-    str.erase(str.find_last_not_of(" \t") + 1);
-    return str;
-}
-std::string& leftTrim(std::string& str)
-{
-    str.erase(0, str.find_first_not_of(" \t"));
-    return str;
-}
-
 std::string                             Server::get_root(){return _root;}
 std::string                             Server::get_listen(){return _listen;}
 std::string                             Server::get_host(){return _host;}
@@ -94,23 +35,29 @@ void    Server::set_root(std::string root, int &nb_line)
         errors(24, nb_line, root);
 }
 
-void    Server::set_listen(std::string listen, int &nb_line)
+void    Server::set_listen(std::string listen, t_WebServ &ws, int &nb_line)
 {
     if (this->get_listen().empty())
     {
         listen = rightTrim(listen);
         int i = 0, len = 0;
-        while (listen[i] && i < 5)
+        if (listen == "")
+            errors(5, nb_line, listen);
+        while (listen[i] /*&& i < 5*/)
         {
             if (isdigit(listen[i]) == false)
                 errors(4, nb_line, listen);
             i++;
             len++;
         }
-        if (len == 2 || len == 4)
-            _listen = listen;
-        else
-            errors(5, nb_line, listen);
+        _listen = listen;
+        
+        if (ws.ports.find(_listen) == ws.ports.end())
+            ws.ports.insert(std::make_pair(_listen, stoi(_listen)));
+        // if (len == 2 || len == 4)
+        //     _listen = listen;
+        // else
+        //     errors(5, nb_line, listen);
 
     }
     else
@@ -247,279 +194,88 @@ void    Server::set_map_loc(Location &locat, int &nb_line)
     if (_map_loc.find(locat.get_path()) == _map_loc.end())
         _map_loc[locat.get_path()] = locat;
     else
-    {
-        std::cout << "dkhal1337\n";
         errors(20, nb_line, locat.get_path());
-    }
 }
 
 void    Server::set_brace_server(int brace_server) {_brace_server = brace_server;}
 void    Server::set_brace_location(int brace_location) {_brace_location = brace_location;}
-void    Server::clear()
-{
-    _listen = "";
-    _host = "";
-    _server_names.clear();
-    _client_max_body = "";
-    _err_pages.clear();
-    _root = "";
-    _location.clear();
-    _map_loc.clear();
-    _brace_server = 0;
-    _brace_location = 0;
-}
 
-//NOTE
-
-void    print_attr(std::vector<Server> &vec_serv)
-{
-    for (size_t i = 0; i < vec_serv.size(); i++)
-    {
-        std::cout << "============= Server" << i + 1  << "===========" << std::endl;
-        std::cout << vec_serv[i].get_listen() << std::endl;
-        std::cout << vec_serv[i].get_host() << std::endl;
-        for (std::map<std::string, std::string>::iterator it = vec_serv[i].get_server_names().begin(); it != vec_serv[i].get_server_names().end(); it++)
-        {
-            std::cout << it->first << " | " << it->second << std::endl;
-        }
-        std::cout << vec_serv[i].get_client_max_body() << std::endl;
-        for (std::map<int, std::string>::iterator it = vec_serv[i].get_err_pages().begin(); it != vec_serv[i].get_err_pages().end(); it++)
-        {
-            std::cout << it->first << " | " << it->second << std::endl;
-        }
-        std::cout << vec_serv[i].get_root() << std::endl;
-        std::cout << "============= Locations ===========" << std::endl;
-        // for (size_t j = 0; j < vec_serv[i].get_location().size(); j++)
-        // {
-        //     std::cout << "============= Sub Locations" << j + 1 << "===========" << std::endl;
-        //     std::cout << vec_serv[i].get_location()[j].get_path() << std::endl;
-        //     std::cout << vec_serv[i].get_location()[j].get_match() << std::endl;
-        //     std::cout << vec_serv[i].get_location()[j].get_autoindex() << std::endl;
-        //     for (size_t k = 0; k <vec_serv[i].get_location()[j].get_index().size() ; k++)
-        //     {
-        //         std::cout << vec_serv[i].get_location()[j].get_index()[k] << " \t";
-        //     }
-		// 	std::cout << std::endl;
-        //     for (size_t l = 0; l < vec_serv[i].get_location()[j].get_methods().size(); l++)
-        //     {
-        //         std::cout << vec_serv[i].get_location()[j].get_methods()[l] << std::endl;
-        //     }
-        //     std::cout << vec_serv[i].get_location()[j].get_return() << std::endl;
-        //     std::cout << vec_serv[i].get_location()[j].get_upload_enble() << std::endl;
-        //     std::cout << vec_serv[i].get_location()[j].get_upload() << std::endl;
-        //     std::cout << vec_serv[i].get_location()[j].get_cgi() << std::endl;
-        // }
-        int j = 0;
-        for (std::map<std::string, Location>::iterator it = vec_serv[i].get_map_loc().begin(); it != vec_serv[i].get_map_loc().end(); it++)
-        {
-            std::cout << "============= Sub Locations" << j + 1 << "===========" << std::endl;
-            std::cout << it->first << std::endl;
-            std::cout << it->second.get_match() << std::endl;
-            std::cout << it->second.get_autoindex() << std::endl;
-            for (size_t i = 0; i < it->second.get_index().size(); i++)
-            {
-                std::cout << it->second.get_index()[i] << "|";
-            }
-            std::cout << "\n";
-            for (size_t i = 0; i < it->second.get_methods().size(); i++)
-            {
-                std::cout << it->second.get_methods()[i] << "|";
-            }
-            std::cout << "\n";
-            for (std::map<int, std::string>::iterator it2 = it->second.get_return().begin(); it2 != it->second.get_return().end(); it2++)
-            {
-                std::cout << it2->first << "|" << it2->second;
-            }
-            std::cout << "\n";
-            std::cout << it->second.get_upload_enble() << std::endl;
-            std::cout << it->second.get_upload() << std::endl;
-            std::cout << it->second.get_cgi() << std::endl;
-            j++;
-        }
-        
-    }
-
-}
-
-void fill_location(std::string &key, std::string &value, Location &locat, Server &serv, int &nb_line)
+void fill_location(std::string &key, std::string &value, t_WebServ &ws, int &nb_line)
 {
     if (!key.compare("autoindex"))
-        locat.set_autoindex(value, nb_line);
+        ws.locat.set_autoindex(value, nb_line);
     else if (!key.compare("index"))
-        locat.set_index(value, nb_line);
+        ws.locat.set_index(value, nb_line);
     else if (key == "allow_methods")
-        locat.set_methods(value, nb_line);
+        ws.locat.set_methods(value, nb_line);
     else if (!key.compare("return"))
-        locat.set_return(value, nb_line);
+        ws.locat.set_return(value, nb_line);
     else if (!key.compare("fastcgi_pass"))
-        locat.set_cgi(value, nb_line);
+        ws.locat.set_cgi(value, nb_line);
     else if (!key.compare("upload_enable"))
-        locat.set_upload_enble(value, nb_line);
+        ws.locat.set_upload_enble(value, nb_line);
     else if (!key.compare("upload_store"))
-        locat.set_upload(value, nb_line);
+        ws.locat.set_upload(value, nb_line);
     else
-    {
-        std::cout << "dkhal location\n";
         errors(3, nb_line, key);
-    }
 
 }
 
-int check_directive(std::string key)
+void    fill_server(std::string key, std::string value, std::string &line, t_WebServ &ws, int &nb_line)
 {
-    if (!key.compare("autoindex") || !key.compare("index") ||
-        !key.compare("allow_methods") || !key.compare("return") ||
-        !key.compare("fastcgi_pass") || !key.compare("upload_enable") ||
-        !key.compare("upload_store"))
-        return 0;
-    return 1;
-}
-
-void    fill_server(std::string key, std::string value, std::string &line, std::vector<Server> &vec_serv, Server &serv, Location &locat, int &nb_line)
-{
-    if (serv.get_brace_server() == 2)
+    if (ws.serv->get_brace_server() == 2)
     {
         if (!key.compare("listen"))
-            serv.set_listen(value, nb_line);
+            ws.serv->set_listen(value, ws, nb_line);
         else if (!key.compare("host"))
-            serv.set_host(value, nb_line);
+            ws.serv->set_host(value, nb_line);
         else if (!key.compare("server_name"))
-            serv.set_server_names(value, nb_line);
+            ws.serv->set_server_names(value, nb_line);
         else if (!key.compare("client_max_body_size"))
-            serv.set_client_max_body(value, nb_line);
+            ws.serv->set_client_max_body(value, nb_line);
         else if (!key.compare("error_page"))
-            serv.set_err_pages(value, nb_line);
+            ws.serv->set_err_pages(value, nb_line);
         else if (!key.compare("root"))
-            serv.set_root(value, nb_line);
-        else if (line.find("}") != std::string::npos && serv.get_brace_location() == 2)
+            ws.serv->set_root(value, nb_line);
+        else if (line.find("}") != std::string::npos && ws.serv->get_brace_location() == 2)
         {
-            serv.set_brace_location(0);
-            serv.set_location(locat);
-            serv.set_map_loc(locat, nb_line);
-            locat.clear();
+            ws.serv->set_brace_location(0);
+            ws.serv->set_location(ws.locat);
+            ws.serv->set_map_loc(ws.locat, nb_line);
+            ws.locat.clear();
         }
-        else if (line.find("}") != std::string::npos && serv.get_brace_server() == 2)
+        else if (line.find("}") != std::string::npos && ws.serv->get_brace_server() == 2)
         {
-            serv.set_brace_server(0);
-            vec_serv.push_back(serv);
-            serv.clear();
+            ws.serv->set_brace_server(0);
+            ws.servers.push_back(*ws.serv);
+            delete ws.serv;
+            ws.serv = new Server();
         }
-        else if (serv.get_brace_location() == 2)
-            fill_location(key, value, locat, serv, nb_line);
-        else if (!check_directive(key) && serv.get_brace_location() == 1)
+        else if (ws.serv->get_brace_location() == 2)
+            fill_location(key, value, ws, nb_line);
+        else if (!check_directive(key) && ws.serv->get_brace_location() == 1)
             errors(11, nb_line, key);
         else
-        {
-            std::cout << "dkhal hnahhh"<< std::endl;
             errors(3, nb_line, key);
-        }
     }
     else
-    {
-        std::cout << "dkhal yes\n";
         errors(2, nb_line, "");
-    }
 }
 
-void    check_braces(std::string &line, Server &serv, Location &locat, int &nb_line)
-{
-    std::string str_key;
-    std::string str_value;
-    int i = 0, j = 0, k = 0;
-
-    if ((k = line.find("#")) != std::string::npos)
-        line.erase(k, line.length());
-    while (line[i] && line[i] != '{')
-        i++;
-    if (line[i] == '{')
-    {
-        str_key = get_key(line, j);
-        str_value = get_value(line, j);
-        if (str_key.empty() && serv.get_brace_server() == 1)
-			serv.set_brace_server(2);
-        else if (str_key.empty() && serv.get_brace_location() == 1)
-			serv.set_brace_location(2);
-        else if (!str_key.compare("server"))
-        {
-            if (!str_value.empty())
-                errors(0, nb_line, str_value);
-            serv.set_brace_server(2);
-        }
-        else if (!str_key.compare("location"))
-        {
-            if (str_value.empty())
-                errors(1, nb_line, str_value);
-            serv.set_brace_location(2);
-            locat.set_path(str_value, nb_line);
-        }
-		line.erase(0, i + 1);
-    }
-    else if (!line[i] && (line.find("server") != std::string::npos || line.find("location") != std::string::npos))
-    {
-        str_key = get_key(line, j);
-        str_value = get_value(line, j);
-        if (!str_key.compare("server") && str_value.empty())
-        {
-            if (serv.get_brace_server())
-            {
-                std::cout << "emmm1\n";
-                errors(2, nb_line, "");
-            }
-            serv.set_brace_server(1);
-            line.clear();
-        }
-        else if (!str_key.compare("location") && !str_value.empty())
-        {
-            if (serv.get_brace_location())
-            {
-                std::cout << "dkhal\n";
-                errors(3, nb_line, "");
-            }
-            // std::cout << str_value << std::endl;
-            locat.set_path(str_value, nb_line);
-            serv.set_brace_location(1);
-            line.clear();
-        }
-        else if (!str_key.compare("server"))
-        {
-            std::cout << "emmm2\n";
-            errors(0, nb_line, str_key);
-        }
-        else if (!str_key.compare("location"))
-        {
-            std::cout << "emmm\n";
-            errors(1, nb_line, str_key);
-        }
-    }
-}
-
-void    check_semi(std::string line, int &nb_line)
-{
-    int i = 0;
-    std::string key = get_key(line, i);
-    std::string value = get_value(line, i);
-
-    int len = value.length() - 1;
-    if (value[len] != ';' && key.compare("}"))
-        errors(19, nb_line, key);
-}
-
-std::vector<Server>     begin_parser()
+void     begin_parser(t_WebServ &ws)
 {
     std::ifstream               myReadFile;
-    std::vector<Server>         vec_server;
-    Server                      serv;
-    Location                    locat;
     std::vector<std::string>    split;
     std::string                 line, str_key, str_value;
     int i = 0, j = 0, k;
 
+    ws.serv = new Server();
     myReadFile.open("./parsing/webserv.conf");
     while (std::getline(myReadFile, line))
     {
         i++;
         leftTrim(rightTrim(line));
-        check_braces(line, serv, locat, i);
+        check_braces(line, ws, i);
         if (line.empty())
             continue;
         check_semi(line, i);
@@ -532,57 +288,13 @@ std::vector<Server>     begin_parser()
             str_value = get_value(split.at(k), j);
             k++;
             if (!str_key.empty() || !str_value.empty())
-                fill_server(str_key, str_value, line, vec_server, serv, locat, i);
+                fill_server(str_key, str_value, line, ws, i);
         }
     }
-    if (serv.get_brace_server())
+    if (ws.serv->get_brace_server())
         errors(5, i, "");
     myReadFile.close();
-    return vec_server;
-}
-
-
-std::vector<std::string>    ft_splitSpace(std::string str, char c)
-{
-    std::vector<std::string> words;
-    size_t pos = 0;
-    
-    while ((pos = str.find(c)) != std::string::npos)
-    {
-        words.push_back(str.substr(0, pos));
-        str.erase(0, pos + 1);
-    }
-    words.push_back(str);
-    return words;
-}
-
-std::string     get_key(std::string &str, int &i)
-{
-    std::string ret;
-    int j = 0;
-
-    while (str[i] == ' ' || str[i] == '\t')
-        i++;
-    while (str[j + i] && str[j + i] != ' ' && str[j + i] != '\t' && str[j + i] != '\n' && str[j + i] != '{')
-        j++;
-    
-    ret = str.substr(i, j);
-    i += j;
-    return ret;
-}
-
-std::string get_value(std::string &str, int &i)
-{
-    std::string ret;
-    int j = 0;
-
-    while (str[i] == ' ' || str[i] == '\t')
-        i++;
-    while (str[j + i] && str[j + i] != '{')
-        j++;
-    
-    ret = str.substr(i, j);
-    return ret;
+    delete ws.serv;
 }
 
 Server::~Server(){}

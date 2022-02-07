@@ -18,6 +18,8 @@
 #define MOVEDPERMANENTLY 	301
 #define FORBIDDEN			403
 
+class Server;
+
 class Response
 {
 	private:
@@ -28,14 +30,14 @@ class Response
 		std::string					stringJoinedResponse;
 		Request						clientRequest;
 		std::vector<Server>			serverConfigData;
-		Server						virtualServer;				
+		Server						*virtualServer;				
 	public:
 		Response();
 		Response(Request requestClient,std::vector<Server> configParsed);
 		~Response();
 		bool		compareStrings(std::string first, std::string seconde);
 		int			findFileRequested();
-		Server		findVirtualServer();
+		Server		*findVirtualServer();
 		Location	findLocation();
 		bool		allowedMethods();
 		bool		findFile(std::string filename);

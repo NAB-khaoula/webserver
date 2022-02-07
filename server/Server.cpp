@@ -6,7 +6,7 @@
 /*   By: ybouddou <ybouddou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/13 08:57:33 by ybouddou          #+#    #+#             */
-/*   Updated: 2022/02/04 15:34:55 by ybouddou         ###   ########.fr       */
+/*   Updated: 2022/02/06 18:32:24 by ybouddou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,7 @@ int		accept_connection(int sockfd)
 	return (acceptfd);
 }
 
-void	handle_connection(WebServ *webserv, struct kevent event)
+void	handle_connection(t_WebServ *webserv, struct kevent event)
 {
 	Request	request;
 	char	*buffer = new char[event.data + 1];
@@ -36,32 +36,34 @@ void	handle_connection(WebServ *webserv, struct kevent event)
 	recv(event.ident, buffer, event.data, 0);
 	buffer[event.data] = '\0';
 	request.parseRequest(buffer);
-	std::cout << buffer << std::endl;
+	// std::cout << buffer << std::endl;
 	Response resp(request, webserv->servers);
 	delete[] buffer;
 	std::strcpy(response, (resp.buildResponse()).c_str());
+	// std::cout << response << std::endl;
 	send(event.ident, response, strlen(response), 0);
 	delete[] response;
 	close(event.ident);
 }
 
-void	multipleServers(WebServ *webserv)
+void	multipleServers(t_WebServ *webserv)
 {
 	Sockets		sock;
 	struct kevent	change;
+	std::map<std::string, int>::iterator it;
 
 	webserv->kq = kqueue();
-	webserv->it = webserv->servers.begin();
-	while (webserv->it < webserv->servers.end())
+	it = webserv->ports.begin();
+	// std::cout  << webserv->it->get_ports().size() << "\n";
+	while (it != webserv->ports.end())
 	{
 		memset(&webserv->event, 0, sizeof(webserv->event));
-		webserv->port = stoi((*webserv->it).get_listen());
-		sock.SetupSocket(webserv->port, (*webserv->it).get_host());
-		std::cout << webserv->port << " | " << (*webserv->it).get_host() << std::endl;
+		sock.SetupSocket(it->second);
+		std::cout << it->second << " | 127.0.0.1" << std::endl;
 		EV_SET(&webserv->event, sock.getSockfd(), EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, NULL);
 		kevent(webserv->kq, &webserv->event, 1, NULL, 0, NULL);
 		webserv->sockets.push_back(sock);
-		webserv->it++;
+		it++;
 	}
 	multipleClient(webserv);
 }
@@ -80,7 +82,7 @@ bool	isServer(std::vector<Sockets> sockets, int sockfd)
 	return (false);
 }
 
-void	multipleClient(WebServ *webserv)
+void	multipleClient(t_WebServ *webserv)
 {
 	while (1)
 	{

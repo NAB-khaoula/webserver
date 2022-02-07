@@ -42,15 +42,35 @@ Request    &Request::parseRequest(char *buffer)
 void			Request::parseParam(std::string	&variableURL, size_t &pos)
 {
 	//FIXME - need to fix no '=' case eg(?page=1&something+else&user=john)!!!!!
+	std::vector<std::string>	vars;
 	std::string	tempURL;
+	std::string	sec;
+	int			i;
+
 	tempURL = variableURL.substr(pos + 1);
 	variableURL.erase(pos);
-	while(pos != std::string::npos)
+	while ((pos = tempURL.find('&')) !=  std::string::npos)
 	{
-		pos = tempURL.find('&');
-		URLVariable[tempURL.substr(0, tempURL.find('='))] = tempURL.substr(tempURL.find('=') + 1, pos - tempURL.find('=') - 1);
+		vars.push_back(tempURL.substr(0, pos));
 		tempURL.erase(0, pos + 1);
 	}
+	vars.push_back(tempURL);
+	i = -1;
+	while (++i < vars.size())
+	{
+		sec = std::string();
+		pos = vars[i].find('=');
+		if (pos != std::string::npos)
+			sec = vars[i].substr(pos + 1);
+		URLVariable[vars[i].substr(0, pos)] = sec;
+	}
+	// while(pos != std::string::npos)
+	// {
+	// 	pos = tempURL.find('&');
+	// 	n = tempURL.find('=');
+	// 	URLVariable[tempURL.substr(0, n)] = tempURL.substr(n + 1, pos - n - 1);
+	// 	tempURL.erase(0, pos + 1);
+	// }
 }
 
 void			Request::SplitFirstLine(std::string &requestString)

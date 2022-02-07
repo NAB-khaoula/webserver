@@ -14,7 +14,7 @@ bool	Response::compareStrings(std::string first, std::string second)
 	return (first.compare(second));
 }
 
-Server	Response::findVirtualServer()
+Server	*Response::findVirtualServer()
 {
 	int	defaultServerIndex = 0;
 	std::vector<std::string> hostPort = ft_splitSpace(((clientRequest.getHttpHeaders()).find("Host"))->second, ':');
@@ -27,20 +27,20 @@ Server	Response::findVirtualServer()
 			if(i && ((serverConfigData[i - 1]).get_listen()) != ((serverConfigData[i]).get_listen()))
 				defaultServerIndex = i;
 			if (!(compareStrings((serverConfigData[i]).get_host(), hostPort[0])))
-					return serverConfigData[i];
+					return (new Server(serverConfigData[i]));
 			for (std::map<std::string, std::string>::iterator it = (serverConfigData[i].get_server_names()).begin(); it != (serverConfigData[i].get_server_names()).end(); it++)
 				if(!(compareStrings(it->first, hostPort[0])))
-					return serverConfigData[i];
+					return (new Server(serverConfigData[i]));
 		}
 	}
-	return serverConfigData[defaultServerIndex];
+	return (new Server(serverConfigData[defaultServerIndex]));
 }
 
 Location	Response::findLocation()
 {
 	size_t		pos = 0;
 	Location	location;
-	for(std::map<std::string, Location>::iterator it = virtualServer.get_map_loc().begin(); it != virtualServer.get_map_loc().end(); it++)
+	for(std::map<std::string, Location>::iterator it = virtualServer->get_map_loc().begin(); it != virtualServer->get_map_loc().end(); it++)
 	{
 		if (!(it->first.compare("/")))
 			location = it->second;
@@ -72,9 +72,9 @@ int     Response::findFileRequested()
 {
 	struct stat buf;
 	this->virtualServer = this->findVirtualServer();
-	this->filePath = virtualServer.get_root() + clientRequest.getPath();
+	this->filePath = virtualServer->get_root() + clientRequest.getPath();
 	this->location = this->findLocation();
-	std::cout << location.get_path() << std::endl;
+	// std::cout << location.get_path() << std::endl;
 	std::cout << filePath << std::endl;
 	if(allowedMethods())
 	{
