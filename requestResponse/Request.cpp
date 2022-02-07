@@ -24,6 +24,7 @@ Request    &Request::parseRequest(char *buffer)
 
 	SplitFirstLine(requestString);
 	this->httpHeaders = this->SplitHeader(ft_splitCrlf(ft_splitCrlf(requestString, "\r\n\r\n").at(0), "\r\n"), ':');
+	std::cout << requestString << std::endl;
 	//NOTE printing Data;
 	// for(int i = 0; i < requestLine.size(); i++)
 	// 	std::cout << "|" << requestLine[i] << "|" << std::endl;
