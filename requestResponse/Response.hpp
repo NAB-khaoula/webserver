@@ -42,6 +42,7 @@ class Response
 		bool		allowedMethods();
 		bool		findFile(std::string filename);
 		std::string	&buildResponse();
+		int			returnStatus(int, std::string);
 		std::string	&indexFound();
 		// std::string	indexNotFound();
 		// std::string	indexForbidden();

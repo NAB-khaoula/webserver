@@ -62,6 +62,12 @@ bool	Response::findFile(std::string filename){
 	return (!access(filename.c_str(), F_OK) && !access(filename.c_str(), R_OK) && !access(filename.c_str(), W_OK));
 }
 
+int		Response::returnStatus(int status_code, std::string status_message){
+	statusMessage = status_message;
+	statusCode = status_code;
+	return (statusCode);
+}
+
 int     Response::findFileRequested()
 {
 	struct stat buf;
@@ -75,56 +81,53 @@ int     Response::findFileRequested()
 		if(findFile(filePath))
 		{
 			stat(filePath.c_str(), &buf);
-			// if(!S_ISDIR(buf.st_mode))
-			// {
+			if(!S_ISDIR(buf.st_mode))
+			{
 				if (location.get_return().empty())
+					return (returnStatus(OK, std::string("OK")));
+			}
+			else{
+				if (findFile((filePath + "/index.html")))
 				{
-					statusMessage = std::string("OK");
-					return (OK);
+					filePath += "/index.html";
+					return (returnStatus(OK, std::string("OK")));
 				}
-			// }
-			// else{
-			// 	if (findFile((filePath + "/index.html")))
-			// 	{
-			// 		filePath += "/index.html";
-					// statusMessage = std::string("OK");
-					// return (OK);
-			// 	}
-			// 	else
-			// 	{
-			// 		filePath += "/";
-					// statusMessage = std::string("MOVEDPERMANENTLY");
-					// return (MOVEDPERMANENTLY);
-			// 	}
-			// }
-			statusMessage = std::string("MOVEDPERMANENTLY");
-			return (MOVEDPERMANENTLY);
+				else
+				{
+					filePath += "/";
+					return (returnStatus(MOVEDPERMANENTLY, std::string("MOVEDPERMANENTLY")));
+				}
+			}
+			return (returnStatus(MOVEDPERMANENTLY, std::string("MOVEDPERMANENTLY")));
 		}
 		else
 		{
-			statusMessage = std::string("NOTFOUND");
-			return (NOTFOUND);
+			return (returnStatus(NOTFOUND, std::string("NOTFOUND")));
 		}
 	}
-	statusMessage = std::string("FORBIDDEN");
-	return (FORBIDDEN);
+				std::cout << "arrived here" << std::endl;
+	return (returnStatus(FORBIDDEN, std::string("FORBIDDEN")));
 }
 
 std::string	&Response::buildResponse(){
-	this->statusCode = findFileRequested();
+	findFileRequested();
 	return indexFound();
 }
+
 
 std::string &Response::indexFound(){
 	std::ifstream	indexFile;
 	std::string		str;
 	std::string		htmlString;
 	indexFile.open(filePath);
-	stringJoinedResponse += (clientRequest.getRequestLine())[2] + " "; 
+	stringJoinedResponse += clientRequest.getHttpVersion() + " "; 
 	stringJoinedResponse += std::to_string(statusCode) + " ";
 	stringJoinedResponse += statusMessage + " \r\n";
 	while(std::getline(indexFile, str))
+	{
 		htmlString += str;
+		std::cout << "it is joigning" << std::endl;
+	}
 	stringJoinedResponse += "Content-Length: ";
 	stringJoinedResponse += std::to_string(htmlString.length());
 	stringJoinedResponse += "\r\n";
