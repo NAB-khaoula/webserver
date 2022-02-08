@@ -25,7 +25,7 @@ class Request{
 		std::map<std::string, std::string>	&getHttpHeaders();
 		std::vector<std::string>    		ft_splitCrlf(std::string &str,const std::string &c);
 		Request								&parseRequest(char *);
-		std::map<std::string, std::string>	SplitHeader(std::vector<std::string> vect, char c);
+		void								SplitHeader(std::vector<std::string> vect, char c);
 		void								SplitFirstLine(std::string& requestString);
 		void								parseParam(std::string	&variableURL, size_t &pos);
 };

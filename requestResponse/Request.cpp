@@ -23,7 +23,7 @@ Request    &Request::parseRequest(char *buffer)
 	std::string		requestString(buffer);
 
 	SplitFirstLine(requestString);
-	this->httpHeaders = this->SplitHeader(ft_splitCrlf(ft_splitCrlf(requestString, "\r\n\r\n").at(0), "\r\n"), ':');
+	this->SplitHeader(ft_splitCrlf(ft_splitCrlf(requestString, "\r\n\r\n").at(0), "\r\n"), ':');
 	std::cout << requestString << std::endl;
 	//NOTE printing Data;
 	// for(int i = 0; i < requestLine.size(); i++)
@@ -41,7 +41,7 @@ Request    &Request::parseRequest(char *buffer)
 
 void			Request::parseParam(std::string	&variableURL, size_t &pos)
 {
-	//FIXME - need to fix no '=' case eg(?page=1&something+else&user=john)!!!!!
+	//FIXME - need to fix no '=' case eg(?page=1&something+else&user=john)!!!!! FIXED
 	std::vector<std::string>	vars;
 	std::string	tempURL;
 	std::string	sec;
@@ -59,8 +59,7 @@ void			Request::parseParam(std::string	&variableURL, size_t &pos)
 	while (++i < vars.size())
 	{
 		sec = std::string();
-		pos = vars[i].find('=');
-		if (pos != std::string::npos)
+		if ((pos = vars[i].find('=')) != std::string::npos)
 			sec = vars[i].substr(pos + 1);
 		URLVariable[vars[i].substr(0, pos)] = sec;
 	}
@@ -91,16 +90,14 @@ void			Request::SplitFirstLine(std::string &requestString)
 		this->parseParam(requestLine[1], pos);
 }
 
-std::map<std::string, std::string>    Request::SplitHeader(std::vector<std::string> vect, char c)
+void    Request::SplitHeader(std::vector<std::string> vect, char c)
 {
     size_t pos = 0;
-    std::map<std::string, std::string>  map;
     for(int i = 0; i < vect.size(); i++)
 	{
 		if((pos = vect[i].find(c)) != std::string::npos)
-			map.insert(std::make_pair<std::string, std::string>(vect[i].substr(0, pos), vect[i].substr(pos + 2)));
+			this->httpHeaders.insert(std::make_pair<std::string, std::string>(vect[i].substr(0, pos), vect[i].substr(pos + 2)));
 	}
-	return map;
 }
 
 
