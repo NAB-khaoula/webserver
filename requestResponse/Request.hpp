@@ -23,8 +23,9 @@ class Request{
 		std::string							&getPath();
 		std::string							&getHttpVersion();
 		std::map<std::string, std::string>	&getHttpHeaders();
+		int									getContentLenght();
 		std::vector<std::string>    		ft_splitCrlf(std::string &str,const std::string &c);
-		Request								&parseRequest(char *);
+		Request&							parseRequest(char *);
 		std::map<std::string, std::string>	SplitHeader(std::vector<std::string> vect, char c);
 		void								SplitFirstLine(std::string& requestString);
 		void								parseParam(std::string	&variableURL, size_t &pos);

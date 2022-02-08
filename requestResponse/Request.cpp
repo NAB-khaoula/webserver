@@ -18,13 +18,25 @@ std::vector<std::string>    Request::ft_splitCrlf(std::string &str, const std::s
     return words;
 }
 
-Request    &Request::parseRequest(char *buffer)
+int			Request::getContentLenght()
+{
+	std::map<std::string, std::string>::iterator i;
+	i = httpHeaders.find("Content-Length");
+	if (i != httpHeaders.end())
+	{
+		// std::cout << "content lenght found : " << i->second << std::endl;
+		return (stoi(i->second));
+	}
+	return (0);
+}
+
+Request&    Request::parseRequest(char *buffer)
 {
 	std::string		requestString(buffer);
 
 	SplitFirstLine(requestString);
 	this->httpHeaders = this->SplitHeader(ft_splitCrlf(ft_splitCrlf(requestString, "\r\n\r\n").at(0), "\r\n"), ':');
-	std::cout << requestString << std::endl;
+	// std::cout << requestString << std::endl;
 	//NOTE printing Data;
 	// for(int i = 0; i < requestLine.size(); i++)
 	// 	std::cout << "|" << requestLine[i] << "|" << std::endl;

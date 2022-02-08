@@ -75,7 +75,7 @@ int     Response::findFileRequested()
 	this->filePath = virtualServer->get_root() + clientRequest.getPath();
 	this->location = this->findLocation();
 	// std::cout << location.get_path() << std::endl;
-	std::cout << filePath << std::endl;
+	// std::cout << filePath << std::endl;
 	if(allowedMethods())
 	{
 		if(findFile(filePath))
@@ -126,7 +126,7 @@ std::string &Response::indexFound(){
 	while(std::getline(indexFile, str))
 	{
 		htmlString += str;
-		std::cout << "it is joigning" << std::endl;
+		// std::cout << "it is joigning" << std::endl;
 	}
 	stringJoinedResponse += "Content-Length: ";
 	stringJoinedResponse += std::to_string(htmlString.length());
