@@ -2,17 +2,12 @@
 
 Response::Response(){}
 
-Response::Response(Request requestClient, std::vector<Server> configParsed): statusCode(-1), stringJoinedResponse(std::string()), \
+Response::Response(Request requestClient, std::vector<Server> configParsed): statusCode(-1), location(), stringJoinedResponse(std::string()), \
 clientRequest(requestClient), serverConfigData(configParsed)
 {}
 
 Response::~Response()
 {}
-
-bool	Response::compareStrings(std::string first, std::string second)
-{
-	return (first.compare(second));
-}
 
 Server	*Response::findVirtualServer()
 {
@@ -22,32 +17,32 @@ Server	*Response::findVirtualServer()
 		hostPort.push_back("80");
 	for(int i = 0; i < serverConfigData.size(); i++)
 	{
-		if(!(compareStrings((serverConfigData[i]).get_listen(), hostPort[1])))
+		if(!((serverConfigData[i]).get_listen()).compare(hostPort[1]))
 		{
 			if(i && ((serverConfigData[i - 1]).get_listen()) != ((serverConfigData[i]).get_listen()))
 				defaultServerIndex = i;
-			if (!(compareStrings((serverConfigData[i]).get_host(), hostPort[0])))
+			if(!((serverConfigData[i]).get_host()).compare(hostPort[0]))
 					return (new Server(serverConfigData[i]));
 			for (std::map<std::string, std::string>::iterator it = (serverConfigData[i].get_server_names()).begin(); it != (serverConfigData[i].get_server_names()).end(); it++)
-				if(!(compareStrings(it->first, hostPort[0])))
+				if(!(it->first.compare(hostPort[0])))
 					return (new Server(serverConfigData[i]));
 		}
 	}
 	return (new Server(serverConfigData[defaultServerIndex]));
 }
 
-Location	Response::findLocation()
+void	Response::findLocation()
 {
 	size_t		pos = 0;
-	Location	location;
 	for(std::map<std::string, Location>::iterator it = virtualServer->get_map_loc().begin(); it != virtualServer->get_map_loc().end(); it++)
 	{
 		if (!(it->first.compare("/")))
-			location = it->second;
-		if(!(clientRequest.getPath().compare(it->first)))
-			return it->second;
+			this->location = it->second;
+		if(!(clientRequest.getPath().compare(it->first))){
+			this->location = it->second;
+			return;
+		}
 	}
-	return location;
 }
 
 bool	Response::allowedMethods(){
@@ -68,14 +63,14 @@ int		Response::returnStatus(int status_code, std::string status_message){
 	return (statusCode);
 }
 
-int     Response::findFileRequested()
+int     Response::buildResponse()
 {
 	struct stat buf;
 	this->virtualServer = this->findVirtualServer();
 	this->filePath = virtualServer->get_root() + clientRequest.getPath();
-	this->location = this->findLocation();
-	// std::cout << location.get_path() << std::endl;
-	std::cout << filePath << std::endl;
+	this->findLocation();
+	//NOTE std::cout << location.get_path() << std::endl;
+	//NOTE std::cout << filePath << std::endl;
 	if(allowedMethods())
 	{
 		if(findFile(filePath))
@@ -105,12 +100,11 @@ int     Response::findFileRequested()
 			return (returnStatus(NOTFOUND, std::string("NOTFOUND")));
 		}
 	}
-				std::cout << "arrived here" << std::endl;
 	return (returnStatus(FORBIDDEN, std::string("FORBIDDEN")));
 }
 
-std::string	&Response::buildResponse(){
-	findFileRequested();
+std::string	&Response::returnResponse(){
+	buildResponse();
 	return indexFound();
 }
 
@@ -124,10 +118,7 @@ std::string &Response::indexFound(){
 	stringJoinedResponse += std::to_string(statusCode) + " ";
 	stringJoinedResponse += statusMessage + " \r\n";
 	while(std::getline(indexFile, str))
-	{
 		htmlString += str;
-		std::cout << "it is joigning" << std::endl;
-	}
 	stringJoinedResponse += "Content-Length: ";
 	stringJoinedResponse += std::to_string(htmlString.length());
 	stringJoinedResponse += "\r\n";

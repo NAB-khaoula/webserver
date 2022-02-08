@@ -39,7 +39,7 @@ void	handle_connection(t_WebServ *webserv, struct kevent event)
 	// std::cout << buffer << std::endl;
 	Response resp(request, webserv->servers);
 	delete[] buffer;
-	std::strcpy(response, (resp.buildResponse()).c_str());
+	std::strcpy(response, resp.returnResponse().c_str());
 	// std::cout << response << std::endl;
 	send(event.ident, response, strlen(response), 0);
 	delete[] response;
