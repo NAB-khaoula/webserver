@@ -131,8 +131,8 @@ std::string	DateGMT(){
 	static const char wday_name[][4] = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
 	static const char mon_name[][4] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
 
-    time ( &rawtime );
-    timeinfo = localtime ( &rawtime );
+    time( &rawtime );
+    timeinfo = localtime( &rawtime );
 	date +=  wday_name[timeinfo->tm_wday]; 
 	date += std::string(", ");
 	date += std::to_string(timeinfo->tm_mday);
@@ -164,14 +164,20 @@ std::string &Response::indexFound(){
 	stringJoinedResponse += "Content-Length: ";
 	stringJoinedResponse += std::to_string(htmlString.length());
 	stringJoinedResponse += "\r\n";
-	// if (statusCode == MOVEDPERMANENTLY)
-	// {
+	if (statusCode == MOVEDPERMANENTLY)
+	{
 		stringJoinedResponse += "Location: ";
 		stringJoinedResponse +=	redirection; 
 		stringJoinedResponse +=	" \r\n"; 
-	// }	
+	}	
 	stringJoinedResponse += "Connection: close\r\n";
-	stringJoinedResponse += "Content-Type: text/html\r\n";
+	stringJoinedResponse += "Content-Type: text/";
+	if(this->clientRequest.getHttpHeaders().find("Sec-Fetch-Dest")->second == std::string("style"))
+		stringJoinedResponse +=  "css\r\n";
+	else if (this->clientRequest.getHttpHeaders().find("Sec-Fetch-Dest")->second == std::string("script"))
+		stringJoinedResponse +=  "javascript\r\n";
+	else
+		stringJoinedResponse += "html\r\n";
 	stringJoinedResponse += "Date: ";
 	stringJoinedResponse += DateGMT();
 	stringJoinedResponse += "\r\n\r\n";
