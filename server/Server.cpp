@@ -6,7 +6,7 @@
 /*   By: ybouddou <ybouddou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/13 08:57:33 by ybouddou          #+#    #+#             */
-/*   Updated: 2022/02/08 20:04:55 by ybouddou         ###   ########.fr       */
+/*   Updated: 2022/02/09 18:10:05 by ybouddou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,6 +28,19 @@ int		accept_connection(int sockfd)
 	// client_port = ntohs(clientadd.sin_port);
 	// std::cout << "Accepted fd : " << acceptfd << " Connection from " << client_address << ", port " << client_port << "\n\n";
 	return (acceptfd);
+}
+
+void	Request::parseBody(std::string req)
+{
+	std::ofstream	in_file;
+	size_t			pos;
+	
+	in_file.open("body.txt");
+	pos = req.find("\r\n\r\n");
+	if (pos != std::string::npos)
+		req.erase(0, pos + 4);
+	in_file << req << "\n";
+	in_file.close();
 }
 
 void	recvRequest(Request& request, char *buffer, struct kevent event)
@@ -56,6 +69,7 @@ void	recvRequest(Request& request, char *buffer, struct kevent event)
 		ret += rd;
 	}
 	// std::cout << "request size : " << req.size() << "\ntotal read : " << ret << "\nContent lenght : " << length << "\nevent.data : " << event.data << "\n\n";
+	request.parseBody(req);
 	in_file << req << "\n";
 	in_file.close();
 	delete[] buffer;

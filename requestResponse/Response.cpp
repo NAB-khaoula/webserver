@@ -75,7 +75,7 @@ int     Response::findFileRequested()
 	this->filePath = virtualServer->get_root() + clientRequest.getPath();
 	this->location = this->findLocation();
 	// std::cout << location.get_path() << std::endl;
-	// std::cout << filePath << std::endl;
+	std::cout << filePath << std::endl;
 	if(allowedMethods())
 	{
 		if(findFile(filePath))
