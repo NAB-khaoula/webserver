@@ -18,10 +18,8 @@ std::vector<std::string>    Request::ft_splitCrlf(std::string &str, const std::s
     return words;
 }
 
-Request    &Request::parseRequest(char *buffer)
+Request::Request(std::string requestString)
 {
-	std::string		requestString(buffer);
-
 	SplitFirstLine(requestString);
 	this->SplitHeader(ft_splitCrlf(ft_splitCrlf(requestString, "\r\n\r\n").at(0), "\r\n"), ':');
 	std::cout << requestString << std::endl;
@@ -36,12 +34,10 @@ Request    &Request::parseRequest(char *buffer)
 	// {
 	// 	std::cout << "|" << i->first << "|" << " & " << "|" << i->second << "|" << std::endl;
 	// }
-	return(*this);
 }
 
 void			Request::parseParam(std::string	&variableURL, size_t &pos)
 {
-	//FIXME - need to fix no '=' case eg(?page=1&something+else&user=john)!!!!! FIXED
 	std::vector<std::string>	vars;
 	std::string	tempURL;
 	std::string	sec;
@@ -63,13 +59,6 @@ void			Request::parseParam(std::string	&variableURL, size_t &pos)
 			sec = vars[i].substr(pos + 1);
 		URLVariable[vars[i].substr(0, pos)] = sec;
 	}
-	// while(pos != std::string::npos)
-	// {
-	// 	pos = tempURL.find('&');
-	// 	n = tempURL.find('=');
-	// 	URLVariable[tempURL.substr(0, n)] = tempURL.substr(n + 1, pos - n - 1);
-	// 	tempURL.erase(0, pos + 1);
-	// }
 }
 
 void			Request::SplitFirstLine(std::string &requestString)
@@ -94,10 +83,8 @@ void    Request::SplitHeader(std::vector<std::string> vect, char c)
 {
     size_t pos = 0;
     for(int i = 0; i < vect.size(); i++)
-	{
 		if((pos = vect[i].find(c)) != std::string::npos)
 			this->httpHeaders.insert(std::make_pair<std::string, std::string>(vect[i].substr(0, pos), vect[i].substr(pos + 2)));
-	}
 }
 
 

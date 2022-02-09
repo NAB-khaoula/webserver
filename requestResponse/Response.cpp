@@ -1,13 +1,14 @@
 #include "Response.hpp"
 
-Response::Response(){}
+Response::Response(){
+}
 
 Response::Response(Request requestClient, std::vector<Server> configParsed): statusCode(-1), location(), stringJoinedResponse(std::string()), \
-clientRequest(requestClient), serverConfigData(configParsed)
-{}
+clientRequest(requestClient), serverConfigData(configParsed){
+}
 
-Response::~Response()
-{}
+Response::~Response(){
+}
 
 Server	*Response::findVirtualServer()
 {
@@ -31,8 +32,7 @@ Server	*Response::findVirtualServer()
 	return (new Server(serverConfigData[defaultServerIndex]));
 }
 
-void	Response::findLocation()
-{
+void	Response::findLocation(){
 	size_t		pos = 0;
 	for(std::map<std::string, Location>::iterator it = virtualServer->get_map_loc().begin(); it != virtualServer->get_map_loc().end(); it++)
 	{
@@ -53,7 +53,7 @@ bool	Response::allowedMethods(){
 	return false;
 }
 
-bool	Response::findFile(std::string filename){
+bool	Response::accessFile(std::string filename){
 	return (!access(filename.c_str(), F_OK) && !access(filename.c_str(), R_OK) && !access(filename.c_str(), W_OK));
 }
 
@@ -69,38 +69,54 @@ int     Response::buildResponse()
 	this->virtualServer = this->findVirtualServer();
 	this->filePath = virtualServer->get_root() + clientRequest.getPath();
 	this->findLocation();
-	//NOTE std::cout << location.get_path() << std::endl;
-	//NOTE std::cout << filePath << std::endl;
-	if(allowedMethods())
+	stat(filePath.c_str(), &buf);
+	if (this->allowedMethods())
 	{
-		if(findFile(filePath))
+		//FIXME http://localhost:8080/return/
+		if (accessFile(filePath))
 		{
-			stat(filePath.c_str(), &buf);
-			if(!S_ISDIR(buf.st_mode))
+			if(!S_ISDIR(buf.st_mode))     // It is a file;
+				return (returnStatus(OK, std::string("OK")));
+			else
 			{
-				if (location.get_return().empty())
-					return (returnStatus(OK, std::string("OK")));
-			}
-			else{
-				if (findFile((filePath + "/index.html")))
+				if (filePath.back() != '/')
 				{
-					filePath += "/index.html";
-					return (returnStatus(OK, std::string("OK")));
+					redirection = clientRequest.getPath() + std::string("/");
+					filePath = virtualServer->get_root() + "/movedPermanently.html";
+					return (returnStatus(MOVEDPERMANENTLY, std::string("Moved Permanently")));
 				}
 				else
 				{
-					filePath += "/";
-					return (returnStatus(MOVEDPERMANENTLY, std::string("MOVEDPERMANENTLY")));
+						for(int i = 0; i < this->location.get_index().size(); i++)
+						{
+							if (accessFile(filePath + '/' + location.get_index().at(i)))
+							{
+								filePath += location.get_index().at(i);
+								return (returnStatus(OK, std::string("OK")));
+							}
+						}
+						if(!location.get_autoindex().compare("on"))
+						{
+							std::cout << "autoindex on need to create the approp webpage!!!" << std::endl;
+							exit(0);
+						}
+					filePath = virtualServer->get_root() + "/notFound.html";
+					return (returnStatus(NOTFOUND, "NOT FOUND"));
 				}
 			}
-			return (returnStatus(MOVEDPERMANENTLY, std::string("MOVEDPERMANENTLY")));
 		}
 		else
 		{
-			return (returnStatus(NOTFOUND, std::string("NOTFOUND")));
+			filePath = virtualServer->get_root() + "/notFound.html";
+			return (returnStatus(NOTFOUND, "NOT FOUND"));
 		}
 	}
-	return (returnStatus(FORBIDDEN, std::string("FORBIDDEN")));
+	else
+	{
+		filePath = virtualServer->get_root() + "/forbidden.html";
+		return (returnStatus(FORBIDDEN, std::string("FORBIDDEN")));
+	}
+	return (0);
 }
 
 std::string	&Response::returnResponse(){
@@ -108,11 +124,37 @@ std::string	&Response::returnResponse(){
 	return indexFound();
 }
 
+std::string	DateGMT(){
+	time_t rawtime;
+    struct tm * timeinfo;
+	std::string date;
+	static const char wday_name[][4] = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
+	static const char mon_name[][4] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
+
+    time( &rawtime );
+    timeinfo = localtime( &rawtime );
+	date +=  wday_name[timeinfo->tm_wday]; 
+	date += std::string(", ");
+	date += std::to_string(timeinfo->tm_mday);
+	date += std::string(" ");
+	date += std::string(mon_name[timeinfo->tm_mon]);
+	date += std::string(" ");
+	date += std::to_string(1900 + timeinfo->tm_year);
+	date += std::string(" ");
+	date += std::to_string(timeinfo->tm_hour - 1);
+	date += std::string(":");
+	date += std::to_string(timeinfo->tm_min);
+	date += std::string(":");
+	date += std::to_string(timeinfo->tm_sec);
+	date += std::string(" GMT");
+	return (date);
+}
 
 std::string &Response::indexFound(){
 	std::ifstream	indexFile;
 	std::string		str;
 	std::string		htmlString;
+	// std::cout << " ****** " << filePath << " ****** " << std::endl;
 	indexFile.open(filePath);
 	stringJoinedResponse += clientRequest.getHttpVersion() + " "; 
 	stringJoinedResponse += std::to_string(statusCode) + " ";
@@ -122,13 +164,24 @@ std::string &Response::indexFound(){
 	stringJoinedResponse += "Content-Length: ";
 	stringJoinedResponse += std::to_string(htmlString.length());
 	stringJoinedResponse += "\r\n";
-	// if (statusCode == MOVEDPERMANENTLY)
-	// {
-	// 	stringJoinedResponse += "Location: ";
-	// 	stringJoinedResponse +=	"/\r\n"; 
-	// }	
+	if (statusCode == MOVEDPERMANENTLY)
+	{
+		stringJoinedResponse += "Location: ";
+		stringJoinedResponse +=	redirection; 
+		stringJoinedResponse +=	" \r\n"; 
+	}	
 	stringJoinedResponse += "Connection: close\r\n";
-	stringJoinedResponse += "Content-Type: text/html\r\n\r\n";
+	stringJoinedResponse += "Content-Type: text/";
+	if(this->clientRequest.getHttpHeaders().find("Sec-Fetch-Dest")->second == std::string("style"))
+		stringJoinedResponse +=  "css\r\n";
+	else if (this->clientRequest.getHttpHeaders().find("Sec-Fetch-Dest")->second == std::string("script"))
+		stringJoinedResponse +=  "javascript\r\n";
+	else
+		stringJoinedResponse += "html\r\n";
+	stringJoinedResponse += "Date: ";
+	stringJoinedResponse += DateGMT();
+	stringJoinedResponse += "\r\n\r\n";
+	std::cout << stringJoinedResponse << std::endl;
 	stringJoinedResponse += htmlString;
 	return stringJoinedResponse;
 }

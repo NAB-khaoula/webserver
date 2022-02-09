@@ -29,13 +29,12 @@ int		accept_connection(int sockfd)
 
 void	handle_connection(t_WebServ *webserv, struct kevent event)
 {
-	Request	request;
 	char	*buffer = new char[event.data + 1];
 	char	*response = new char[1024];
 
 	recv(event.ident, buffer, event.data, 0);
 	buffer[event.data] = '\0';
-	request.parseRequest(buffer);
+	Request	request(buffer);
 	// std::cout << buffer << std::endl;
 	Response resp(request, webserv->servers);
 	delete[] buffer;

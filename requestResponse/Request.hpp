@@ -17,6 +17,7 @@ class Request{
 		std::map<std::string, std::string>	httpHeaders;
 	public:
 		Request();
+		Request(std::string);
 		~Request();
 		std::vector<std::string>			&getRequestLine();
 		std::string							&getMethod();
