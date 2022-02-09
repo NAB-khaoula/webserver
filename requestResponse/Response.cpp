@@ -124,6 +124,31 @@ std::string	&Response::returnResponse(){
 	return indexFound();
 }
 
+std::string	DateGMT(){
+	time_t rawtime;
+    struct tm * timeinfo;
+	std::string date;
+	static const char wday_name[][4] = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
+	static const char mon_name[][4] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
+
+    time ( &rawtime );
+    timeinfo = localtime ( &rawtime );
+	date +=  wday_name[timeinfo->tm_wday]; 
+	date += std::string(", ");
+	date += std::to_string(timeinfo->tm_mday);
+	date += std::string(" ");
+	date += std::string(mon_name[timeinfo->tm_mon]);
+	date += std::string(" ");
+	date += std::to_string(1900 + timeinfo->tm_year);
+	date += std::string(" ");
+	date += std::to_string(timeinfo->tm_hour - 1);
+	date += std::string(":");
+	date += std::to_string(timeinfo->tm_min);
+	date += std::string(":");
+	date += std::to_string(timeinfo->tm_sec);
+	date += std::string(" GMT");
+	return (date);
+}
 
 std::string &Response::indexFound(){
 	std::ifstream	indexFile;
@@ -146,7 +171,11 @@ std::string &Response::indexFound(){
 		stringJoinedResponse +=	" \r\n"; 
 	// }	
 	stringJoinedResponse += "Connection: close\r\n";
-	stringJoinedResponse += "Content-Type: text/html\r\n\r\n";
+	stringJoinedResponse += "Content-Type: text/html\r\n";
+	stringJoinedResponse += "Date: ";
+	stringJoinedResponse += DateGMT();
+	stringJoinedResponse += "\r\n\r\n";
+	std::cout << stringJoinedResponse << std::endl;
 	stringJoinedResponse += htmlString;
 	return stringJoinedResponse;
 }
