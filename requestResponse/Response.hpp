@@ -26,6 +26,7 @@ class Response
 		int							statusCode;
 		std::string					statusMessage;
 		std::string					filePath;
+		std::string					redirection;
 		Location					location;
 		std::string					stringJoinedResponse;
 		Request						clientRequest;
@@ -39,7 +40,7 @@ class Response
 		Server		*findVirtualServer();
 		void		findLocation();
 		bool		allowedMethods();
-		bool		findFile(std::string filename);
+		bool		accessFile(std::string filename);
 		std::string	&returnResponse();
 		int			returnStatus(int, std::string);
 		std::string	&indexFound();
