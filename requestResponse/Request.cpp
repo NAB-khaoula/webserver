@@ -18,10 +18,8 @@ std::vector<std::string>    Request::ft_splitCrlf(std::string &str, const std::s
     return words;
 }
 
-Request    &Request::parseRequest(char *buffer)
+Request::Request(std::string requestString)
 {
-	std::string		requestString(buffer);
-
 	SplitFirstLine(requestString);
 	this->SplitHeader(ft_splitCrlf(ft_splitCrlf(requestString, "\r\n\r\n").at(0), "\r\n"), ':');
 	std::cout << requestString << std::endl;
@@ -36,7 +34,6 @@ Request    &Request::parseRequest(char *buffer)
 	// {
 	// 	std::cout << "|" << i->first << "|" << " & " << "|" << i->second << "|" << std::endl;
 	// }
-	return(*this);
 }
 
 void			Request::parseParam(std::string	&variableURL, size_t &pos)
