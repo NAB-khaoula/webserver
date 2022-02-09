@@ -15,6 +15,8 @@ class Request{
 		std::vector<std::string>			requestLine;
 		std::map<std::string, std::string>	URLVariable;
 		std::map<std::string, std::string>	httpHeaders;
+		// Body variables
+		std::string							body;
 	public:
 		Request();
 		Request(std::string);
@@ -24,9 +26,11 @@ class Request{
 		std::string							&getPath();
 		std::string							&getHttpVersion();
 		std::map<std::string, std::string>	&getHttpHeaders();
+		int									getContentLenght();
 		std::vector<std::string>    		ft_splitCrlf(std::string &str,const std::string &c);
 		Request								&parseRequest(char *);
 		void								SplitHeader(std::vector<std::string> vect, char c);
+		void								parseBody(std::string str);
 		void								SplitFirstLine(std::string& requestString);
 		void								parseParam(std::string	&variableURL, size_t &pos);
 };

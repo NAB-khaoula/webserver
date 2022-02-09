@@ -181,7 +181,7 @@ std::string &Response::indexFound(){
 	stringJoinedResponse += "Date: ";
 	stringJoinedResponse += DateGMT();
 	stringJoinedResponse += "\r\n\r\n";
-	std::cout << stringJoinedResponse << std::endl;
+	// std::cout << stringJoinedResponse << std::endl;
 	stringJoinedResponse += htmlString;
 	return stringJoinedResponse;
 }

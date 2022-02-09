@@ -6,7 +6,7 @@
 /*   By: ybouddou <ybouddou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/08 16:33:37 by ybouddou          #+#    #+#             */
-/*   Updated: 2022/02/06 18:32:12 by ybouddou         ###   ########.fr       */
+/*   Updated: 2022/02/08 19:54:53 by ybouddou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,9 +44,6 @@ typedef struct	ws
 	int				port;
 	int				acceptfd;
 	int				sockfd;
-	// fd_set			current_set;
-	// fd_set			ready_set;
-	// int				max_fd;
 }				t_WebServ;
 
 
