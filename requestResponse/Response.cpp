@@ -3,7 +3,7 @@
 Response::Response(){
 }
 
-Response::Response(Request requestClient, std::vector<Server> configParsed): statusCode(-1), location(), stringJoinedResponse(std::string()), \
+Response::Response(Request requestClient, std::vector<Server> configParsed): statusCode(-1), errorLog(false), location(), stringJoinedResponse(std::string()), \
 clientRequest(requestClient), serverConfigData(configParsed){
 }
 
@@ -60,7 +60,26 @@ bool	Response::accessFile(std::string filename){
 int		Response::returnStatus(int status_code, std::string status_message){
 	statusMessage = status_message;
 	statusCode = status_code;
+	if (errorLog)
+	{
+		for(std::map<int, std::string>::iterator it = virtualServer->get_err_pages().begin(); it != virtualServer->get_err_pages().end(); it++)
+		{
+			if (it->first == statusCode)
+			{
+				filePath = virtualServer->get_root() + it->second;
+				return (statusCode);
+			}
+		}
+		filePath = virtualServer->get_root() + "/errors/" + std::to_string(statusCode) + ".html";
+	}
 	return (statusCode);
+}
+
+bool	Response::badRequest()
+{
+	// testing request
+	// std::vector<std::string> methods = {"CONNECT", "DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT", "TRACE"};
+	return false;
 }
 
 int     Response::buildResponse()
@@ -70,27 +89,34 @@ int     Response::buildResponse()
 	this->filePath = virtualServer->get_root() + clientRequest.getPath();
 	this->findLocation();
 	stat(filePath.c_str(), &buf);
+	if (badRequest())
+	{
+		errorLog = true;
+		return (returnStatus(BADREQUEST, std::string("Bad Request")));
+	}
+	if(this->clientRequest.getHttpHeaders().find("If-None-Match") != this->clientRequest.getHttpHeaders().end())
+	{
+		errorLog = true;
+		return (returnStatus(NOTMODIFIED, "Not Modified"));
+	}
 	if (this->allowedMethods())
 	{
-		//FIXME http://localhost:8080/return/
-		// std::cout << "file Path" << filePath << std::endl;
 		if (accessFile(filePath))
 		{
-			// std::cout << "this location *" << location.get_path() << "* is " << location.get_return().empty() << std::endl;
 			if (!location.get_return().empty())
 			{
 				redirection = location.get_return()[301];
-				filePath = virtualServer->get_root() + "/movedPermanently.html";
+				errorLog = true;
 				return (returnStatus(MOVEDPERMANENTLY, std::string("Moved Permanently")));
 			}
-			if(!S_ISDIR(buf.st_mode))     // It is a file;
+			if(!S_ISDIR(buf.st_mode))
 				return (returnStatus(OK, std::string("OK")));
 			else
 			{
 				if (filePath.back() != '/')
 				{
 					redirection = clientRequest.getPath() + std::string("/");
-					filePath = virtualServer->get_root() + "/movedPermanently.html";
+					errorLog = true;
 					return (returnStatus(MOVEDPERMANENTLY, std::string("Moved Permanently")));
 				}
 				else
@@ -105,26 +131,27 @@ int     Response::buildResponse()
 						}
 						if(!location.get_autoindex().compare("on"))
 						{
-							std::cout << "autoindex on need to create the approp webpage!!!" << std::endl;
+							std::cout << "autoindex on need to create the appropriate webpage!!!" << std::endl;
 							exit(0);
 						}
-					filePath = virtualServer->get_root() + "/notFound.html";
+					errorLog = true;
 					return (returnStatus(NOTFOUND, "NOT FOUND"));
 				}
 			}
 		}
 		else
 		{
-			filePath = virtualServer->get_root() + "/notFound.html";
-			return (returnStatus(NOTFOUND, "NOT FOUND"));
+			errorLog = true;
+			return (returnStatus(FORBIDDEN, "FORBIDDEN"));
 		}
 	}
 	else
 	{
-		filePath = virtualServer->get_root() + "/forbidden.html";
-		return (returnStatus(FORBIDDEN, std::string("FORBIDDEN")));
+		errorLog = true;
+		return (returnStatus(METHODNOTALLOWED, std::string("METHOD NOT ALLOWED")));
 	}
-	return (-1);
+	errorLog = true;
+	return (returnStatus(NOTFOUND, "NOT FOUND"));
 }
 
 std::string	&Response::returnResponse(){
@@ -177,6 +204,12 @@ std::string &Response::indexFound(){
 		stringJoinedResponse +=	redirection; 
 		stringJoinedResponse +=	" \r\n"; 
 	}	
+	if (statusCode == METHODNOTALLOWED)
+	{
+		stringJoinedResponse += "Allow: ";
+		stringJoinedResponse +=	redirection; 
+		stringJoinedResponse +=	" \r\n"; 
+	}	
 	stringJoinedResponse += "Connection: close\r\n";
 	stringJoinedResponse += "Content-Type: text/";
 	if(this->clientRequest.getHttpHeaders().find("Sec-Fetch-Dest")->second == std::string("style"))
@@ -188,7 +221,6 @@ std::string &Response::indexFound(){
 	stringJoinedResponse += "Date: ";
 	stringJoinedResponse += DateGMT();
 	stringJoinedResponse += "\r\n\r\n";
-	// std::cout << stringJoinedResponse << std::endl;
 	stringJoinedResponse += htmlString;
 	return stringJoinedResponse;
 }

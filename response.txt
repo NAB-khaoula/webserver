@@ -1,7 +1,8 @@
-HTTP/1.1 404 NOT FOUND 
-Content-Length: 347
+HTTP/1.1 405 METHOD NOT ALLOWED 
+Content-Length: 376
+Allow:  
 Connection: close
 Content-Type: text/html
-Date: Thu, 10 Feb 2022 11:41:7 GMT
+Date: Thu, 10 Feb 2022 15:21:24 GMT
 
-<!DOCTYPE html><html lang="en"><head>    <meta charset="UTF-8">    <meta http-equiv="X-UA-Compatible" content="IE=edge">    <meta name="viewport" content="width=device-width, initial-scale=1.0">    <title style="color: red;">NOT FOUND</title>    <h1 style="color: red;">ERROR 404</h1>    <p>this page can't be found</p></head><body> </body></html>
+<!DOCTYPE html><html lang="en"><head>    <meta charset="UTF-8">    <meta http-equiv="X-UA-Compatible" content="IE=edge">    <meta name="viewport" content="width=device-width, initial-scale=1.0">    <title>METHOD NOT ALLOWED</title></head><body>    <center><h1>Error 405 - Method Not Allowed</h1></center>    <hr><center>The request cannot be proccessed!</center></body></html>
