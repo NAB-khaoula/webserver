@@ -193,6 +193,7 @@ void    print_attr(t_WebServ &ws)
     for (size_t i = 0; i < ws.servers.size(); i++)
     {
         std::cout << "============= Server" << i + 1  << "===========" << std::endl;
+        std::cout << "default server : " << ws.servers[i].get_df() << std::endl;
         std::cout << ws.servers[i].get_listen() << std::endl;
         std::cout << ws.servers[i].get_host() << std::endl;
         for (std::map<std::string, std::string>::iterator it = ws.servers[i].get_server_names().begin(); it != ws.servers[i].get_server_names().end(); it++)

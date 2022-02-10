@@ -6,7 +6,7 @@
 /*   By: mbelaman <mbelaman@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/08 16:33:37 by ybouddou          #+#    #+#             */
-/*   Updated: 2022/02/06 17:22:07 by mbelaman         ###   ########.fr       */
+/*   Updated: 2022/02/08 15:24:41 by mbelaman         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,6 +38,7 @@ typedef struct	ws
     Server								*serv;
     Location							locat;
 	std::map<std::string, int>			ports;
+	size_t								index;
 	struct kevent	event;
 	int				kq;
 	int				nev;

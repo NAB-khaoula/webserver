@@ -8,6 +8,7 @@ Server::Server()
     _client_max_body = "";
     _brace_server = 0;
     _brace_location = 0;
+    _df = false;
 }
 
 std::string                             Server::get_root(){return _root;}
@@ -20,6 +21,9 @@ std::vector<Location>                   &Server::get_location() {return _locatio
 std::map<std::string, Location>         &Server::get_map_loc() {return _map_loc;}
 int                                     Server::get_brace_server() {return _brace_server;}
 int                                     Server::get_brace_location() {return _brace_location;}
+bool                                    Server::get_df() {return _df;}
+
+void    Server::set_df(bool b) {_df = b;}
 
 void    Server::set_root(std::string root, int &nb_line)
 {
@@ -43,7 +47,7 @@ void    Server::set_listen(std::string listen, t_WebServ &ws, int &nb_line)
         int i = 0, len = 0;
         if (listen == "")
             errors(5, nb_line, listen);
-        while (listen[i] /*&& i < 5*/)
+        while (listen[i])
         {
             if (isdigit(listen[i]) == false)
                 errors(4, nb_line, listen);
@@ -51,14 +55,15 @@ void    Server::set_listen(std::string listen, t_WebServ &ws, int &nb_line)
             len++;
         }
         _listen = listen;
-        
         if (ws.ports.find(_listen) == ws.ports.end())
+        {
+            _df = true;
             ws.ports.insert(std::make_pair(_listen, stoi(_listen)));
-        // if (len == 2 || len == 4)
-        //     _listen = listen;
-        // else
-        //     errors(5, nb_line, listen);
-
+        }
+        else
+        {
+            _df = false;
+        }
     }
     else
         errors(21, nb_line, listen);
@@ -248,6 +253,7 @@ void    fill_server(std::string key, std::string value, std::string &line, t_Web
         {
             ws.serv->set_brace_server(0);
             ws.servers.push_back(*ws.serv);
+            std::cout << ws.serv->get_df() << std::endl;
             delete ws.serv;
             ws.serv = new Server();
         }
