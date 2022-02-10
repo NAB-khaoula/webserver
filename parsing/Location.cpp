@@ -2,9 +2,9 @@
 
 Location::Location()
 {
-    _path = "";
+    _path = "/";
     _match = false;
-    _autoindex = "";
+    _autoindex = "off";
     _upload = "";
     _upload_enble = "";
     _cgi = "";
@@ -53,7 +53,7 @@ void    Location::set_match(bool    match)
 
 void    Location::set_autoindex(std::string autoindex, int &nb_line)
 {
-    if (this->get_autoindex().empty())
+    if (this->get_autoindex() == "off" ||this->get_autoindex().empty())
     {
         autoindex = rightTrim(autoindex);
         if (!autoindex.compare("off") || !autoindex.compare("on"))
