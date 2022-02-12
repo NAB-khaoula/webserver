@@ -28,7 +28,6 @@ class Response
 	private:
 		int							statusCode;
 		std::string					statusMessage;
-		bool						errorLog;
 		std::string					filePath;
 		std::string					redirection;
 		Location					location;

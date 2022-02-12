@@ -3,7 +3,7 @@
 Response::Response(){
 }
 
-Response::Response(Request requestClient, std::vector<Server> configParsed): statusCode(-1), errorLog(false), location(), stringJoinedResponse(std::string()), \
+Response::Response(Request requestClient, std::vector<Server> configParsed): statusCode(-1), location(), stringJoinedResponse(std::string()), \
 clientRequest(requestClient), serverConfigData(configParsed){
 }
 
@@ -20,6 +20,7 @@ Server	*Response::findVirtualServer()
 	{
 		if(!((serverConfigData[i]).get_listen()).compare(hostPort[1]))
 		{
+			//FIXME set the default server index;
 			if(i && ((serverConfigData[i - 1]).get_listen()) != ((serverConfigData[i]).get_listen()))
 				defaultServerIndex = i;
 			if(!((serverConfigData[i]).get_host()).compare(hostPort[0]))
@@ -60,7 +61,7 @@ bool	Response::accessFile(std::string filename){
 int		Response::returnStatus(int status_code, std::string status_message){
 	statusMessage = status_message;
 	statusCode = status_code;
-	if (errorLog)
+	if (statusCode != OK)
 	{
 		for(std::map<int, std::string>::iterator it = virtualServer->get_err_pages().begin(); it != virtualServer->get_err_pages().end(); it++)
 		{
@@ -77,8 +78,7 @@ int		Response::returnStatus(int status_code, std::string status_message){
 
 bool	Response::badRequest()
 {
-	// testing request
-	// std::vector<std::string> methods = {"CONNECT", "DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT", "TRACE"};
+	// Check if the request is 
 	return false;
 }
 
@@ -90,23 +90,17 @@ int     Response::buildResponse()
 	this->findLocation();
 	stat(filePath.c_str(), &buf);
 	if (badRequest())
-	{
-		errorLog = true;
 		return (returnStatus(BADREQUEST, std::string("Bad Request")));
-	}
 	if(this->clientRequest.getHttpHeaders().find("If-None-Match") != this->clientRequest.getHttpHeaders().end())
-	{
-		errorLog = true;
 		return (returnStatus(NOTMODIFIED, "Not Modified"));
-	}
 	if (this->allowedMethods())
 	{
+		std::cout << "hnaa " << std::endl;
 		if (accessFile(filePath))
 		{
 			if (!location.get_return().empty())
 			{
 				redirection = location.get_return()[301];
-				errorLog = true;
 				return (returnStatus(MOVEDPERMANENTLY, std::string("Moved Permanently")));
 			}
 			if(!S_ISDIR(buf.st_mode))
@@ -116,7 +110,6 @@ int     Response::buildResponse()
 				if (filePath.back() != '/')
 				{
 					redirection = clientRequest.getPath() + std::string("/");
-					errorLog = true;
 					return (returnStatus(MOVEDPERMANENTLY, std::string("Moved Permanently")));
 				}
 				else
@@ -134,23 +127,15 @@ int     Response::buildResponse()
 							std::cout << "autoindex on need to create the appropriate webpage!!!" << std::endl;
 							exit(0);
 						}
-					errorLog = true;
 					return (returnStatus(NOTFOUND, "NOT FOUND"));
 				}
 			}
 		}
 		else
-		{
-			errorLog = true;
 			return (returnStatus(FORBIDDEN, "FORBIDDEN"));
-		}
 	}
 	else
-	{
-		errorLog = true;
 		return (returnStatus(METHODNOTALLOWED, std::string("METHOD NOT ALLOWED")));
-	}
-	errorLog = true;
 	return (returnStatus(NOTFOUND, "NOT FOUND"));
 }
 
@@ -206,18 +191,20 @@ std::string &Response::indexFound(){
 	}	
 	if (statusCode == METHODNOTALLOWED)
 	{
+		//TODO -  need to fix the allow header;
 		stringJoinedResponse += "Allow: ";
 		stringJoinedResponse +=	redirection; 
 		stringJoinedResponse +=	" \r\n"; 
 	}	
 	stringJoinedResponse += "Connection: close\r\n";
-	stringJoinedResponse += "Content-Type: text/";
 	if(this->clientRequest.getHttpHeaders().find("Sec-Fetch-Dest")->second == std::string("style"))
-		stringJoinedResponse +=  "css\r\n";
+		stringJoinedResponse +=  "Content-Type: text/css\r\n";
 	else if (this->clientRequest.getHttpHeaders().find("Sec-Fetch-Dest")->second == std::string("script"))
-		stringJoinedResponse +=  "javascript\r\n";
+		stringJoinedResponse +=  "Content-Type: text/javascript\r\n";
+	else if (this->clientRequest.getHttpHeaders().find("Sec-Fetch-Dest")->second == std::string("image"))
+		stringJoinedResponse +=  "Content-Type: image/png\r\n"; //REVIEW - review the image types
 	else
-		stringJoinedResponse += "html\r\n";
+		stringJoinedResponse += "Content-Type: text/html\r\n";
 	stringJoinedResponse += "Date: ";
 	stringJoinedResponse += DateGMT();
 	stringJoinedResponse += "\r\n\r\n";

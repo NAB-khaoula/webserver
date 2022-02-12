@@ -10,7 +10,7 @@ SRC =	main.cpp\
 		server/Server.cpp\
 		server/Sockets.cpp\
 		requestResponse/Request.cpp\
-		requestResponse/Response.cpp\
+		requestResponse/Response.cpp
 
 OBJ = $(SRC:.cpp=.o)
 
