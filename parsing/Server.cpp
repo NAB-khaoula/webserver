@@ -51,6 +51,8 @@ void    Server::set_listen(std::string listen, t_WebServ &ws, int &nb_line)
         {
             if (isdigit(listen[i]) == false)
                 errors(4, nb_line, listen);
+            if (listen.length() > 9)
+                errors(5, nb_line, listen);
             i++;
             len++;
         }
@@ -61,9 +63,7 @@ void    Server::set_listen(std::string listen, t_WebServ &ws, int &nb_line)
             ws.ports.insert(std::make_pair(_listen, stoi(_listen)));
         }
         else
-        {
             _df = false;
-        }
     }
     else
         errors(21, nb_line, listen);
@@ -73,31 +73,35 @@ void    Server::set_host(std::string host, int &nb_line)
     if (this->get_host().empty())
     {
         host = rightTrim(host);
-        std::vector<std::string> vec = ft_splitSpace(host, '.');
-    
-        if (vec.size() == 4)
+        if (!host.compare("localhost"))
+            _host = "localhost";
+        else
         {
-            for (size_t i = 0; i < vec.size(); i++)
+            std::vector<std::string> vec = ft_splitSpace(host, '.');
+            if (vec.size() == 4)
             {
-                if (vec[i].empty() || isNumber(vec[i]) == false)
-                    errors(6, nb_line, host);
-                int nb = atoi(vec[i].c_str());
-                if (nb >= 0 && nb <= 255)
+                for (size_t i = 0; i < vec.size(); i++)
                 {
-                    if (i != vec.size() - 1)
-                        _host += std::to_string(nb) + ".";
+                    if (vec[i].empty() || isNumber(vec[i]) == false)
+                        errors(6, nb_line, host);
+                    int nb = atoi(vec[i].c_str());
+                    if (nb >= 0 && nb <= 255)
+                    {
+                        if (i != vec.size() - 1)
+                            _host += std::to_string(nb) + ".";
+                        else
+                            _host += std::to_string(nb);
+                    }
                     else
-                        _host += std::to_string(nb);
-                }
-                else
-                {
-                    std::string str = std::to_string(nb);
-                    errors(6, nb_line, str);
+                    {
+                        std::string str = std::to_string(nb);
+                        errors(6, nb_line, str);
+                    }
                 }
             }
+            else
+                errors(6, nb_line, host);
         }
-        else
-            errors(6, nb_line, host);
     }
     else
         errors(22, nb_line, host);
@@ -252,18 +256,21 @@ void    fill_server(std::string key, std::string value, std::string &line, t_Web
         else if (line.find("}") != std::string::npos && ws.serv->get_brace_server() == 2)
         {
             ws.serv->set_brace_server(0);
+            if (ws.serv->get_listen().empty() || ws.serv->get_host().empty() || ws.serv->get_root().empty())
+                errors(30, nb_line, "");
             ws.servers.push_back(*ws.serv);
-            std::cout << ws.serv->get_df() << std::endl;
             delete ws.serv;
             ws.serv = new Server();
         }
         else if (ws.serv->get_brace_location() == 2)
             fill_location(key, value, ws, nb_line);
-        else if (!check_directive(key) && ws.serv->get_brace_location() == 1)
+        else if (!check_directive_loc(key) && ws.serv->get_brace_location() == 1)
             errors(11, nb_line, key);
         else
             errors(3, nb_line, key);
     }
+    else if ((!check_directives(key) || !check_directive_loc(key)) && ws.serv->get_brace_location() != 2)
+        errors(33, nb_line, "");
     else
         errors(2, nb_line, "");
 }
@@ -277,29 +284,34 @@ void     begin_parser(t_WebServ &ws)
 
     ws.serv = new Server();
     myReadFile.open("./parsing/webserv.conf");
-    while (std::getline(myReadFile, line))
+    if (myReadFile.is_open())
     {
-        i++;
-        leftTrim(rightTrim(line));
-        check_braces(line, ws, i);
-        if (line.empty())
-            continue;
-        check_semi(line, i);
-        split = ft_splitSpace(line, ';');
-        k = 0;
-        while (k < split.size())
+        while (std::getline(myReadFile, line))
         {
-            j = 0;
-            str_key  = get_key(split.at(k), j);
-            str_value = get_value(split.at(k), j);
-            k++;
-            if (!str_key.empty() || !str_value.empty())
-                fill_server(str_key, str_value, line, ws, i);
+            i++;
+            leftTrim(rightTrim(line));
+            check_braces(line, ws, i);
+            if (line.empty())
+                continue;
+            check_semi(line, i);
+            split = ft_splitSpace(line, ';');
+            k = 0;
+            while (k < split.size())
+            {
+                j = 0;
+                str_key  = get_key(split.at(k), j);
+                str_value = get_value(split.at(k), j);
+                k++;
+                if (!str_key.empty() || !str_value.empty())
+                    fill_server(str_key, str_value, line, ws, i);
+            }
         }
+        myReadFile.close();
     }
+    else
+        throw std::runtime_error("Error Opening File Config.");
     if (ws.serv->get_brace_server())
-        errors(5, i, "");
-    myReadFile.close();
+        errors(32, i, "");
     delete ws.serv;
 }
 
