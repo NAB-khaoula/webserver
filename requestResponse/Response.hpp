@@ -14,9 +14,12 @@
 #include "Request.hpp"
 
 #define	OK					200
-#define	NOTFOUND 			404
 #define MOVEDPERMANENTLY 	301
+#define	NOTMODIFIED			304
+#define	BADREQUEST			400
 #define FORBIDDEN			403
+#define	NOTFOUND 			404
+#define METHODNOTALLOWED	405
 
 class Server;
 
@@ -36,6 +39,7 @@ class Response
 		Response();
 		Response(Request requestClient,std::vector<Server> configParsed);
 		~Response();
+		bool		badRequest();
 		int			buildResponse();
 		Server		*findVirtualServer();
 		void		findLocation();
