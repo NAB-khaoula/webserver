@@ -59,6 +59,7 @@ Request	recvRequest(char *buffer, struct kevent event)
 	buffer[ret] = '\0';
 	// std::cout << "rd : " << ret << " | ret : " << ret << " | " << event.data << "\n";
 	req = buffer;
+	std::cout << "****** request *********\n"<< buffer << "\n******** request *********" << std::endl;
 	Request		request(req);
 	// request.parseRequest(buffer);
 	length = request.getContentLenght();
