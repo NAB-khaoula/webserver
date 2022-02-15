@@ -13,13 +13,13 @@ std::string    runCgi()
     std::string str;
     std::string path_cgi;
 
-    setenv("SCRIPT_FILENAME", "hello.py", true);
+    setenv("SCRIPT_FILENAME", "index.php", true);
     setenv("REQUEST_METHOD", "GET", true);
     setenv("REDIRECT_STATUS", "0", true);
     setenv("GATEWAY_INTERFACE", "CGI/1.1", true);
     setenv("PATH_INFO", "/Users/mbelaman/Desktop/webserver/parsing/", true);
-    // path_cgi = "/Users/mbelaman/goinfre/.brew/bin/php-cgi";
-    path_cgi = "/usr/bin/python";
+    path_cgi = "/Users/mbelaman/goinfre/.brew/bin/php-cgi";
+    // path_cgi = "/usr/bin/python";
 
     extern char **environ;
     char **args = (char **)malloc(sizeof(char *) * 3);
