@@ -24,6 +24,7 @@ private:
     std::map<std::string, Location>       _map_loc;
     int                                   _brace_server;
     int                                   _brace_location;
+    bool                                  _df;
 public:
     //NOTE - Constructor
     Server();
@@ -40,6 +41,7 @@ public:
     std::vector<Location>                       &get_location();
     int                                         get_brace_server();
     int                                         get_brace_location();
+    bool                                        get_df();
 
     
     //NOTE - Setters
@@ -53,6 +55,7 @@ public:
     void                            set_map_loc(Location &, int &);
     void                            set_brace_server(int);
     void                            set_brace_location(int);
+    void                            set_df(bool);
     void                            clear();
     //NOTE - Destructor
     ~Server();
