@@ -1,7 +1,7 @@
-HTTP/1.1 200 OK 
-Content-Length: 323
+HTTP/1.1 400 Bad Request 
+Content-Length: 362
 Connection: close
 Content-Type: text/html
-Date: Sat, 12 Feb 2022 9:42:15 GMT
+Date: Tue, 15 Feb 2022 9:29:19 GMT
 
-<!DOCTYPE html><html lang="en"><head>    <meta charset="UTF-8">    <meta http-equiv="X-UA-Compatible" content="IE=edge">    <meta name="viewport" content="width=device-width, initial-scale=1.0">    <title>redirect</title></head><body>    <center><h1>REDIRECTION</h1></center>    <hr><center>webServer</center></body></html>
+<!DOCTYPE html><html lang="en"><head>    <meta charset="UTF-8">    <meta http-equiv="X-UA-Compatible" content="IE=edge">    <meta name="viewport" content="width=device-width, initial-scale=1.0">    <title>BAD REQUEST</title></head><body>    <center><h1>Error 400 - BAD REQUEST</h1></center>    <hr><center>The request cannot be proccessed!</center></body></html>

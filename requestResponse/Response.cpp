@@ -78,7 +78,20 @@ int		Response::returnStatus(int status_code, std::string status_message){
 
 bool	Response::badRequest()
 {
-	// Check if the request is 
+	char acceptedRequest[][10] = {"GET", "HEAD", "POST", "PUT", "DELETE", "CONNECT", "OPTIONS", "TRACE", "PATCH"};
+	for(int i = 0; i < 9; i++)
+	{
+		if (acceptedRequest[i] == clientRequest.getMethod())
+			break;
+		else if (i == 8)
+			return true;
+	}
+	if (clientRequest.getHttpVersion() != "HTTP/1.0" && clientRequest.getHttpVersion() != "HTTP/1.1")
+		return true;
+	if (clientRequest.getRequestLine().size() != 3)
+		return true;
+	if (clientRequest.getHttpHeaders().find("Host") == clientRequest.getHttpHeaders().end())
+		return true;
 	return false;
 }
 
@@ -95,11 +108,13 @@ int     Response::buildResponse()
 		return (returnStatus(NOTMODIFIED, "Not Modified"));
 	if (this->allowedMethods())
 	{
-		std::cout << "hnaa " << std::endl;
 		if (accessFile(filePath))
 		{
 			if (!location.get_return().empty())
 			{
+				//FIXME  if 301 is in the map, return the location otherwise return forbidden
+				if (location.get_return().find(301) == location.get_return().end())
+					return (returnStatus(FORBIDDEN, std::string("FORBIDDEN")));
 				redirection = location.get_return()[301];
 				return (returnStatus(MOVEDPERMANENTLY, std::string("Moved Permanently")));
 			}
