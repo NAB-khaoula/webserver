@@ -182,7 +182,7 @@ void    Server::set_err_pages(std::string value, int &nb_line)
         std::string s_str = value.erase(0, pos + 1);
         while (s_str[i])
         {
-            if (s_str[i] == ' ' || s_str[i] == '\t')
+            if ((s_str[i] == ' ' || s_str[i] == '\t'))
                 errors(9, nb_line, s_str);
             i++;
         }

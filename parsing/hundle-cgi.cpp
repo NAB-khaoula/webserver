@@ -22,9 +22,10 @@ std::string    runCgi()
     path_cgi = "/usr/bin/python";
 
     extern char **environ;
-    char **args = (char **)malloc(sizeof(char *) * 2);
-    args[0] = strdup((path_cgi + " hello.py").c_str());
-    args[1] = NULL;
+    char **args = (char **)malloc(sizeof(char *) * 3);
+    args[0] = strdup(path_cgi.c_str());
+    args[1] = getenv("SCRIPT_FILENAME");
+    args[2] = NULL;
     
     if (pipe(fd) == -1)
         std::cout << "Error" << std::endl;
