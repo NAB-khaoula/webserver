@@ -253,7 +253,7 @@ void    fill_server(std::string key, std::string value, std::string &line, t_Web
         {
             ws.serv->set_brace_server(0);
             ws.servers.push_back(*ws.serv);
-            std::cout << ws.serv->get_df() << std::endl;
+            // std::cout << ws.serv->get_df() << std::endl;
             delete ws.serv;
             ws.serv = new Server();
         }
