@@ -26,6 +26,7 @@ class Server;
 class Response
 {
 	private:
+		std::string					cgiString;
 		int							statusCode;
 		std::string					statusMessage;
 		std::string					filePath;
@@ -39,6 +40,7 @@ class Response
 		Response();
 		Response(Request requestClient,std::vector<Server> configParsed);
 		~Response();
+		std::string	get_filePath();
 		bool		badRequest();
 		int			buildResponse();
 		Server		*findVirtualServer();

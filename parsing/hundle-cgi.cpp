@@ -1,10 +1,10 @@
 #include "Server.hpp"
-#include "../requestResponse/Request.hpp"
+// #include "../requestResponse/Request.hpp"
 #include <sys/types.h>
 #include <unistd.h>
 #include <fcntl.h>
 
-std::string    runCgi()
+std::string    runCgi(Response response)
 {
     pid_t       pid;
     int         fd[2];
@@ -13,11 +13,11 @@ std::string    runCgi()
     std::string str;
     std::string path_cgi;
 
-    setenv("SCRIPT_FILENAME", "../parsing/tmp/index.py", true);
+    setenv("SCRIPT_FILENAME", response.get_filePath().c_str(), true);
     setenv("REQUEST_METHOD", "GET", true);
     setenv("REDIRECT_STATUS", "0", true);
     setenv("GATEWAY_INTERFACE", "CGI/1.1", true);
-    setenv("PATH_INFO", "/Users/mbelaman/Desktop/webserver/parsing/", true);
+    setenv("PATH_INFO", "/Users/knabouss/Desktop/webserver/requestResponse/", true);
     // path_cgi = "/Users/mbelaman/goinfre/.brew/bin/php-cgi";
     path_cgi = "/usr/bin/python";
 
@@ -49,14 +49,6 @@ std::string    runCgi()
     }
     close(fd[0]);
     return str.substr(str.find("\r\n\r\n"), str.length());
-}
-
-
-int main()
-{
-    std::string str = runCgi();
-    std::cout << str << std::endl;
-    return 0;
 }
 
 
