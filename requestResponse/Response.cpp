@@ -20,8 +20,7 @@ Server	*Response::findVirtualServer()
 	{
 		if(!((serverConfigData[i]).get_listen()).compare(hostPort[1]))
 		{
-			//FIXME set the default server index;
-			if(i && ((serverConfigData[i - 1]).get_listen()) != ((serverConfigData[i]).get_listen()))
+			if(serverConfigData.at(i).get_df())
 				defaultServerIndex = i;
 			if(!((serverConfigData[i]).get_host()).compare(hostPort[0]))
 					return (new Server(serverConfigData[i]));
@@ -108,46 +107,51 @@ int     Response::buildResponse()
 		return (returnStatus(NOTMODIFIED, "Not Modified"));
 	if (this->allowedMethods())
 	{
-		if (accessFile(filePath))
-		{
-			if (!location.get_return().empty())
-			{
-				//FIXME  if 301 is in the map, return the location otherwise return forbidden
-				if (location.get_return().find(301) == location.get_return().end())
-					return (returnStatus(FORBIDDEN, std::string("FORBIDDEN")));
-				redirection = location.get_return()[301];
-				return (returnStatus(MOVEDPERMANENTLY, std::string("Moved Permanently")));
-			}
-			if(!S_ISDIR(buf.st_mode))
-				return (returnStatus(OK, std::string("OK")));
-			else
-			{
-				if (filePath.back() != '/')
+		// if (clientRequest.getMethod() == "GET")
+		// {
+
+			if (accessFile(filePath))
+			{	
+				if (!location.get_return().empty())
 				{
-					redirection = clientRequest.getPath() + std::string("/");
+					//FIXME  if 301 is in the map, return the location otherwise return forbidden
+					if (location.get_return().find(301) == location.get_return().end())
+						return (returnStatus(FORBIDDEN, std::string("FORBIDDEN")));
+					redirection = location.get_return()[301];
 					return (returnStatus(MOVEDPERMANENTLY, std::string("Moved Permanently")));
 				}
+				if(!S_ISDIR(buf.st_mode))
+					return (returnStatus(OK, std::string("OK")));
 				else
 				{
-						for(int i = 0; i < this->location.get_index().size(); i++)
-						{
-							if (accessFile(filePath + '/' + location.get_index().at(i)))
+					if (filePath.back() != '/')
+					{
+						redirection = clientRequest.getPath() + std::string("/");
+						return (returnStatus(MOVEDPERMANENTLY, std::string("Moved Permanently")));
+					}
+					else
+					{
+							for(int i = 0; i < this->location.get_index().size(); i++)
 							{
-								filePath += location.get_index().at(i);
-								return (returnStatus(OK, std::string("OK")));
+								if (accessFile(filePath + '/' + location.get_index().at(i)))
+								{
+									filePath += location.get_index().at(i);
+									return (returnStatus(OK, std::string("OK")));
+								}
 							}
-						}
-						if(!location.get_autoindex().compare("on"))
-						{
-							std::cout << "autoindex on need to create the appropriate webpage!!!" << std::endl;
-							exit(0);
-						}
-					return (returnStatus(NOTFOUND, "NOT FOUND"));
+							if(!location.get_autoindex().compare("on"))
+							{
+								std::cout << "autoindex on need to create the appropriate webpage!!!" << std::endl;
+								exit(0);
+							}
+						return (returnStatus(NOTFOUND, "NOT FOUND"));
+					}
 				}
 			}
-		}
-		else
-			return (returnStatus(FORBIDDEN, "FORBIDDEN"));
+			else
+				return (returnStatus(FORBIDDEN, "FORBIDDEN"));
+		// }
+		// else if (clientRequest)
 	}
 	else
 		return (returnStatus(METHODNOTALLOWED, std::string("METHOD NOT ALLOWED")));
