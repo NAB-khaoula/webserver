@@ -1,7 +1,17 @@
-HTTP/1.1 403 FORBIDDEN 
-Content-Length: 379
+HTTP/1.1 200 OK 
+Content-Length: 146
 Connection: close
-Content-Type: image/png
-Date: Wed, 16 Feb 2022 15:31:45 GMT
+Content-Type: text/html
+Date: Wed, 16 Feb 2022 19:1:57 GMT
 
-<!DOCTYPE html><html lang="en"><head>    <meta charset="UTF-8">    <meta http-equiv="X-UA-Compatible" content="IE=edge">    <meta name="viewport" content="width=device-width, initial-scale=1.0">    <title>FORBIDDEN</title></head><body>    <center><h1>Error 403 - FORBIDDEN</h1></center>    <hr><center>you don't have the permission to access on this Server</center></body></html>
+
+
+
+<html>
+<head>
+<title>Hello Word - First CGI Program</title>
+</head>
+<body>
+<h2>Hello Word! This is my first CGI program</h2>
+</body>
+</html>

@@ -118,7 +118,6 @@ int     Response::buildResponse()
 			{	
 				if (!location.get_return().empty())
 				{
-					//FIXME  if 301 is in the map, return the location otherwise return forbidden
 					if (location.get_return().find(301) == location.get_return().end())
 						return (returnStatus(FORBIDDEN, std::string("FORBIDDEN")));
 					redirection = location.get_return()[301];
@@ -128,7 +127,6 @@ int     Response::buildResponse()
 				{
 					if(filePath.find(".py") != std::string::npos || filePath.find(".php") != std::string::npos)
 						cgiString = runCgi(*this);
-						// std::cout << "run CGI" << std::endl;
 					return (returnStatus(OK, std::string("OK")));
 				}
 				else
@@ -147,7 +145,6 @@ int     Response::buildResponse()
 									filePath += location.get_index().at(i);
 									if(filePath.find(".py") != std::string::npos || filePath.find(".php") != std::string::npos)
 										cgiString = runCgi(*this);
-										// std::cout << "run CGI" << std::endl;
 									return (returnStatus(OK, std::string("OK")));
 								}
 							}
@@ -160,13 +157,10 @@ int     Response::buildResponse()
 					}
 				}
 			}
+			else if (access(filePath.c_str(), F_OK))
+				return (returnStatus(NOTFOUND, "NOTFOUND"));
 			else
-			{
-				// FIXME NOT FOUND THE FILE INSTEAD OF FORBIDEN
 				return (returnStatus(FORBIDDEN, "FORBIDDEN"));
-			}
-		// }
-		// else if (clientRequest)
 	}
 	else
 		return (returnStatus(METHODNOTALLOWED, std::string("METHOD NOT ALLOWED")));
