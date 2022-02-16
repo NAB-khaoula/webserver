@@ -74,7 +74,9 @@ void    check_braces(std::string &line, t_WebServ &ws, int &nb_line)
             ws.serv->set_brace_location(2);
             ws.locat.set_path(str_value, nb_line);
         }
-		line.erase(0, i + 1);
+        else
+            errors(31, nb_line, str_value);
+        line.erase(0, i + 1);
     }
     else if (!line[i] && (line.find("server") != std::string::npos || line.find("location") != std::string::npos))
     {
@@ -91,6 +93,8 @@ void    check_braces(std::string &line, t_WebServ &ws, int &nb_line)
         {
             if (ws.serv->get_brace_location())
                 errors(3, nb_line, "");
+            else if (ws.serv->get_brace_location() || ws.serv->get_brace_server() != 2)
+                errors(33, nb_line, "");
             ws.locat.set_path(str_value, nb_line);
             ws.serv->set_brace_location(1);
             line.clear();
@@ -113,7 +117,7 @@ void    check_semi(std::string line, int &nb_line)
         errors(19, nb_line, key);
 }
 
-int check_directive(std::string key)
+int check_directive_loc(std::string key)
 {
     if (!key.compare("autoindex") || !key.compare("index") ||
         !key.compare("allow_methods") || !key.compare("return") ||
@@ -123,43 +127,56 @@ int check_directive(std::string key)
     return 1;
 }
 
+int check_directives(std::string key)
+{
+    if (!key.compare("listen") || !key.compare("host") ||
+        !key.compare("server_name") || !key.compare("client_max_body_size") ||
+        !key.compare("error_page") || !key.compare("root"))
+        return 0;
+    return 1;
+}
+
 void    errors(int index, int &nb_line, std::string line)
 {
     static std::string arr[] = 
     {
-        "Syntax Error: invalid number of arguments in 'server' directive.",//0
-        "Syntax Error: invalid number of arguments in 'location' directive.",//1
-        "Syntax Error: directive 'server' has no opening '{' OR unexpected '{'.",//2
-        "Syntax Error: unknown directive " + line + ".",//3
-        "Syntax Error: host not found in " + line +  " of the 'listen' directive",//4
-        "Syntax Error: invalid port in " + line + " of the 'listen' directive",//5
-        "Syntax Error: unknown " + line + " of the 'host' directive",//6
-        "Syntax Error: invalid number of arguments in 'server_name' directive",//7
-        "Syntax Error: 'client_max_body_size' directive invalid value",//8
-        "Syntax Error: invalid value " + line +  " in 'error_page' directive",//9
-        "Syntax Error: invalid number of arguments in " + line + " directive",//10
-        "Syntax Error: directive 'location' has no opening '{'.",//11
-        "Syntax Error: invalid number of arguments in 'autoindex' directive",//12
-        "Syntax Error: invalid number of arguments in 'index' directive",//13
-        "Syntax Error: invalid number of arguments in 'allow_methods' directive",//14
-        "Syntax Error: invalid number of arguments in 'fastcgi_pass' directive",//15
-        "Syntax Error: invalid number of arguments in 'upload_store' directive",//16
-        "Syntax Error: invalid number of arguments in 'upload_enable' directive",//17
-        "Syntax Error: invalid value " + line +  " in 'return' directive",//18
-        "Syntax Error: invalid number of arguments in " + line + " directive.",//19
-        "Syntax Error: duplicate location " + line,//20
-        "Syntax Error: duplicate listen " + line,//21
-        "Syntax Error: duplicate host " + line,//22
-        "Syntax Error: duplicate client_max_body_size " + line,//23
-        "Syntax Error: duplicate root " + line,//24
-        "Syntax Error: duplicate autoindex " + line,//25
-        "Syntax Error: duplicate allow_methods " + line,//26
-        "Syntax Error: duplicate return " + line,//27
-        "Syntax Error: duplicate upload_store " + line,//28
-        "Syntax Error: duplicate upload_enable " + line//29
+        "\033[1;31mSyntax Error: \033[0m\033[1;37minvalid number of arguments in 'server' directive.\033[0m",//0
+        "\033[1;31mSyntax Error: \033[0m\033[1;37minvalid number of arguments in 'location' directive\033[0m",//1
+        "\033[1;31mSyntax Error: \033[0m\033[1;37mdirective 'server' has no opening '{' OR unexpected '{'\033[0m",//2
+        "\033[1;31mSyntax Error: \033[0m\033[1;37munknown directive " + line + "\033[0m",//3
+        "\033[1;31mSyntax Error: \033[0m\033[1;37mhost not found in " + line +  " of the 'listen' directive\033[0m",//4
+        "\033[1;31mSyntax Error: \033[0m\033[1;37minvalid port in " + line + " of the 'listen' directive\033[0m",//5
+        "\033[1;31mSyntax Error: \033[0m\033[1;37munknown " + line + " of the 'host' directive\033[0m",//6
+        "\033[1;31mSyntax Error: \033[0m\033[1;37minvalid number of arguments in 'server_name' directive\033[0m",//7
+        "\033[1;31mSyntax Error: \033[0m\033[1;37m'client_max_body_size' directive invalid value\033[0m",//8
+        "\033[1;31mSyntax Error: \033[0m\033[1;37minvalid value " + line +  " in 'error_page' directive\033[0m",//9
+        "\033[1;31mSyntax Error: \033[0m\033[1;37minvalid number of arguments in " + line + " directive\033[0m",//10
+        "\033[1;31mSyntax Error: \033[0m\033[1;37mdirective 'location' has no opening '{'.\033[0m",//11
+        "\033[1;31mSyntax Error: \033[0m\033[1;37minvalid number of arguments in 'autoindex' directive\033[0m",//12
+        "\033[1;31mSyntax Error: \033[0m\033[1;37minvalid number of arguments in 'index' directive\033[0m",//13
+        "\033[1;31mSyntax Error: \033[0m\033[1;37minvalid number of arguments in 'allow_methods' directive\033[0m",//14
+        "\033[1;31mSyntax Error: \033[0m\033[1;37minvalid number of arguments in 'fastcgi_pass' directive\033[0m",//15
+        "\033[1;31mSyntax Error: \033[0m\033[1;37minvalid number of arguments in 'upload_store' directive\033[0m",//16
+        "\033[1;31mSyntax Error: \033[0m\033[1;37minvalid number of arguments in 'upload_enable' directive\033[0m",//17
+        "\033[1;31mSyntax Error: \033[0m\033[1;37minvalid value " + line +  " in 'return' directive\033[0m",//18
+        "\033[1;31mSyntax Error: \033[0m\033[1;37minvalid number of arguments in " + line + " directive.\033[0m",//19
+        "\033[1;31mSyntax Error: \033[0m\033[1;37mduplicate location " + line + "\033[0m",//20
+        "\033[1;31mSyntax Error: \033[0m\033[1;37mduplicate listen " + line + "\033[0m",//21
+        "\033[1;31mSyntax Error: \033[0m\033[1;37mduplicate host " + line + "\033[0m",//22
+        "\033[1;31mSyntax Error: \033[0m\033[1;37mduplicate client_max_body_size " + line + "\033[0m",//23
+        "\033[1;31mSyntax Error: \033[0m\033[1;37mduplicate root " + line + "\033[0m",//24
+        "\033[1;31mSyntax Error: \033[0m\033[1;37mduplicate autoindex " + line + "\033[0m",//25
+        "\033[1;31mSyntax Error: \033[0m\033[1;37mduplicate allow_methods " + line + "\033[0m",//26
+        "\033[1;31mSyntax Error: \033[0m\033[1;37mduplicate return " + line + "\033[0m",//27
+        "\033[1;31mSyntax Error: \033[0m\033[1;37mduplicate upload_store " + line + "\033[0m",//28
+        "\033[1;31mSyntax Error: \033[0m\033[1;37mduplicate upload_enable " + line + "\033[0m",//29
+        "\033[1;31mSyntax Error: \033[0m\033[1;37mimportant in block server contain |'listen'|'host'|'root'| " + line + "\033[0m",//30
+        "\033[1;31mSyntax Error: \033[0m\033[0m\033[1;37munexpected '{'\033[0m",//31
+        "\033[1;31mSyntax Error: \033[0m\033[0m\033[1;37munexpected end of file, expecting '}'\033[0m",//32
+        "\033[1;31mSyntax Error: \033[0m\033[0m\033[1;37mdirective is not allowed here\033[0m",//33
     };
     std::string str = std::to_string(nb_line);
-    throw std::runtime_error("|line " + str + "| " + arr[index]);
+    throw std::runtime_error("\033[1;31m|line " + str + "| \033[0m" + arr[index]);
 }
 
 bool isNumber(std::string s)
