@@ -3,8 +3,12 @@
 Response::Response(){
 }
 
-Response::Response(Request requestClient, std::vector<Server> configParsed): statusCode(-1), location(), stringJoinedResponse(std::string()), \
+Response::Response(Request requestClient, std::vector<Server> configParsed): cgiString() ,statusCode(-1), location(), stringJoinedResponse(std::string()), \
 clientRequest(requestClient), serverConfigData(configParsed){
+}
+
+std::string	Response::get_filePath(){
+	return filePath;
 }
 
 Response::~Response(){
@@ -121,7 +125,12 @@ int     Response::buildResponse()
 					return (returnStatus(MOVEDPERMANENTLY, std::string("Moved Permanently")));
 				}
 				if(!S_ISDIR(buf.st_mode))
+				{
+					if(filePath.find(".py") != std::string::npos || filePath.find(".php") != std::string::npos)
+						cgiString = runCgi(*this);
+						// std::cout << "run CGI" << std::endl;
 					return (returnStatus(OK, std::string("OK")));
+				}
 				else
 				{
 					if (filePath.back() != '/')
@@ -136,6 +145,9 @@ int     Response::buildResponse()
 								if (accessFile(filePath + '/' + location.get_index().at(i)))
 								{
 									filePath += location.get_index().at(i);
+									if(filePath.find(".py") != std::string::npos || filePath.find(".php") != std::string::npos)
+										cgiString = runCgi(*this);
+										// std::cout << "run CGI" << std::endl;
 									return (returnStatus(OK, std::string("OK")));
 								}
 							}
@@ -149,7 +161,10 @@ int     Response::buildResponse()
 				}
 			}
 			else
+			{
+				// FIXME NOT FOUND THE FILE INSTEAD OF FORBIDEN
 				return (returnStatus(FORBIDDEN, "FORBIDDEN"));
+			}
 		// }
 		// else if (clientRequest)
 	}
@@ -197,8 +212,11 @@ std::string &Response::indexFound(){
 	stringJoinedResponse += clientRequest.getHttpVersion() + " "; 
 	stringJoinedResponse += std::to_string(statusCode) + " ";
 	stringJoinedResponse += statusMessage + " \r\n";
-	while(std::getline(indexFile, str))
-		htmlString += str;
+	if (cgiString.empty())
+		while(std::getline(indexFile, str))
+			htmlString += str;
+	else
+		htmlString = cgiString;
 	stringJoinedResponse += "Content-Length: ";
 	stringJoinedResponse += std::to_string(htmlString.length());
 	stringJoinedResponse += "\r\n";
