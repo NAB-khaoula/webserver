@@ -13,28 +13,98 @@ std::vector<std::string>    Request::ft_splitCrlf(std::string &str, const std::s
     {
         words.push_back(str.substr(0, pos));
         str.erase(0, pos + c.size());
+		if (c == "\r\n\r\n")
+			break ;
     }
     words.push_back(str);
     return words;
 }
 
-int			Request::getContentLenght()
+void		Request::getContentType(std::string& type)
 {
 	std::map<std::string, std::string>::iterator i;
-	i = httpHeaders.find("Content-Length");
+	size_t	pos;
+
+	i = httpHeaders.find("Content-Type");
 	if (i != httpHeaders.end())
+		type = i->second.substr(i->second.find(":") + 1);
+	if ((pos = type.find("; boundary=")) != std::string::npos)
 	{
-		// std::cout << "content lenght found : " << i->second << std::endl;
-		return (stoi(i->second));
+		boundary = "--" + type.substr(pos + 11);
+		type.erase(pos);
 	}
-	return (0);
 }
+
+void		Request::setFormData(std::string& req, std::string type)
+{
+	std::vector<std::string>	bodyHeaders;
+	Body			body;
+	size_t			pos;
+
+	req.erase(0, boundary.size() + 2);
+	while ((pos = req.find(boundary)) != std::string::npos)
+	{
+		body.body = req.substr(0, pos - 2);
+		bodyHeaders = ft_splitCrlf(ft_splitCrlf(body.body, "\r\n\r\n").at(0), "\r\n");
+		body.ContentDispo = bodyHeaders.at(0).substr(bodyHeaders.at(0).find(":") + 2);
+		body.ContentDispo.erase(9, body.ContentDispo.find("=") + 2 - 9);
+		if (bodyHeaders.size() > 1)
+		{
+			body.name = body.ContentDispo.substr(9, body.ContentDispo.find(";") - 1 - 9);
+			body.ContentDispo.erase(9, body.ContentDispo.find("=") + 2 - 9);
+			body.fileName = body.ContentDispo.substr(9, body.ContentDispo.size() - 1 - 9);
+			body.ContentDispo.erase(9);
+			body.ContentType = bodyHeaders.at(1).substr(bodyHeaders.at(1).find(":") + 2);
+		}
+		else
+		{
+			body.name = body.ContentDispo.substr(9, body.ContentDispo.size() - 1 - 9);
+			body.ContentDispo.erase(9);
+		}
+		bodies.push_back(body);
+		bzero(&body, sizeof(Body));
+		req.erase(0, pos + boundary.size() + 2);
+	}
+}
+
+void		Request::parseBody(std::string req)
+{
+	Body			body;
+	std::string		type;
+	
+	getContentType(type);
+	if (!boundary.empty())
+		setFormData(req, type);
+	else
+	{
+		body.body = req;
+		bodies.push_back(body);
+	}
+	// ****Printing body****
+	// std::ofstream	out_file("bodies.txt");
+	// std::vector<Body>::iterator it = bodies.begin();
+	// while (it != bodies.end())
+	// {
+	// 	if (type == "multipart/form-data")
+	// 	{
+	// 		out_file << "| ContentDispo: " << it->ContentDispo << " |\n";
+	// 		out_file << "| ContentType : " << it->ContentType << " |\n";
+	// 		out_file << "| name : " << it->name << " |\n";
+	// 		out_file << "| fileName : " << it->fileName << " |\n";
+	// 	}
+	// 	out_file << "| Body : " << it->body << " |\n+++++++++++++++++++++++++++++++++++++\n";
+	// 	it++;
+	// }
+	// out_file.close();
+}
+
 
 Request::Request(std::string requestString)
 {
 	SplitFirstLine(requestString);
 	this->SplitHeader(ft_splitCrlf(ft_splitCrlf(requestString, "\r\n\r\n").at(0), "\r\n"), ':');
 	// std::cout << requestString << std::endl;
+	parseBody(requestString);
 	//NOTE printing Data;
 	// for(int i = 0; i < requestLine.size(); i++)
 	// 	std::cout << "|" << requestLine[i] << "|" << std::endl;

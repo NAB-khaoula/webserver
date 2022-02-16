@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   WebServ.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mbelaman <mbelaman@student.42.fr>          +#+  +:+       +#+        */
+/*   By: ybouddou <ybouddou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/08 16:33:37 by ybouddou          #+#    #+#             */
-/*   Updated: 2022/02/10 15:23:55 by mbelaman         ###   ########.fr       */
+/*   Updated: 2022/02/14 16:24:38 by ybouddou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@
 #include <sys/socket.h>
 #include <sys/select.h>
 #include <sys/event.h>
-#include <poll.h>
+#include <fcntl.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <map>
@@ -31,6 +31,16 @@
 
 class Server;
 
+typedef struct	Cl
+{
+	bool	done;
+	size_t	sent;
+	size_t	rem;
+	size_t	size;
+	char	*buffer;
+}				Client;
+
+
 typedef struct	ws
 {
 	std::vector<Sockets>				sockets;
@@ -39,6 +49,7 @@ typedef struct	ws
     Location							locat;
 	std::map<std::string, int>			ports;
 	size_t								index;
+	Client								*client;
 	struct kevent	event;
 	int				kq;
 	int				nev;
