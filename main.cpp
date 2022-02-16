@@ -19,8 +19,8 @@ int		main()
 		ws	webserv;
 		
 		begin_parser(webserv);
-		print_attr(webserv);
-		// multipleServers(&webserv);
+		// print_attr(webserv);
+		multipleServers(&webserv);
 	}
 	catch(const std::exception& err)
 	{
