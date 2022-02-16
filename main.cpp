@@ -6,21 +6,26 @@
 /*   By: mbelaman <mbelaman@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/08 16:32:15 by ybouddou          #+#    #+#             */
-/*   Updated: 2022/02/14 16:41:15 by mbelaman         ###   ########.fr       */
+/*   Updated: 2022/02/16 18:20:33 by mbelaman         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "WebServ.hpp"
 
-int		main()
+int		main(int ac, char **av)
 {
 	try
 	{
-		ws	webserv;
+		if (ac == 2)
+		{
+			ws	webserv;
 		
-		begin_parser(webserv);
-		print_attr(webserv);
-		// multipleServers(&webserv);
+			begin_parser(webserv, av);
+			// print_attr(webserv);
+			multipleServers(&webserv);
+		}
+		else
+			throw std::runtime_error("\033[1;31mSyntax Error: \033[0m\033[1;37mSpecify Output The Program and File Configuration like: './webserv webserv_file.conf'.\033[0m");
 	}
 	catch(const std::exception& err)
 	{
