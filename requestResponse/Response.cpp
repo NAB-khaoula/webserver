@@ -38,11 +38,14 @@ Server	*Response::findVirtualServer()
 
 void	Response::findLocation(){
 	size_t		pos = 0;
+	std::string	tempString = clientRequest.getPath();
+	if(tempString.back() == '/')
+		tempString.erase(tempString.length() - 1);
 	for(std::map<std::string, Location>::iterator it = virtualServer->get_map_loc().begin(); it != virtualServer->get_map_loc().end(); it++)
 	{
 		if (!(it->first.compare("/")))
 			this->location = it->second;
-		if(!(clientRequest.getPath().compare(it->first))){
+		if(!(tempString.compare(it->first))){
 			this->location = it->second;
 			return;
 		}
@@ -102,8 +105,10 @@ int     Response::buildResponse()
 {
 	struct stat buf;
 	this->virtualServer = this->findVirtualServer();
-	this->filePath = virtualServer->get_root() + clientRequest.getPath();
 	this->findLocation();
+	this->filePath = virtualServer->get_root() + clientRequest.getPath();
+	std::cout << "file Path" << filePath << std::endl;
+	std::cout << "location path" << location.get_path() << std::endl;
 	stat(filePath.c_str(), &buf);
 	if (badRequest())
 		return (returnStatus(BADREQUEST, std::string("Bad Request")));
@@ -111,57 +116,58 @@ int     Response::buildResponse()
 		return (returnStatus(NOTMODIFIED, "Not Modified"));
 	if (this->allowedMethods())
 	{
-		// if (clientRequest.getMethod() == "GET")
-		// {
-
-			if (accessFile(filePath))
-			{	
-				if (!location.get_return().empty())
+		if (accessFile(filePath))
+		{	
+			if (!location.get_return().empty())
+			{
+				if (location.get_return().find(301) == location.get_return().end())
+					return (returnStatus(FORBIDDEN, std::string("FORBIDDEN")));
+				redirection = location.get_return()[301];
+				return (returnStatus(MOVEDPERMANENTLY, std::string("Moved Permanently")));
+			}
+			if(!S_ISDIR(buf.st_mode))
+			{
+				if(filePath.find(".py") != std::string::npos || filePath.find(".php") != std::string::npos)
+					cgiString = runCgi(*this);
+				return (returnStatus(OK, std::string("OK")));
+			}
+			else
+			{
+				if (filePath.back() != '/')
 				{
-					if (location.get_return().find(301) == location.get_return().end())
-						return (returnStatus(FORBIDDEN, std::string("FORBIDDEN")));
-					redirection = location.get_return()[301];
+					redirection = clientRequest.getPath() + std::string("/");
 					return (returnStatus(MOVEDPERMANENTLY, std::string("Moved Permanently")));
-				}
-				if(!S_ISDIR(buf.st_mode))
-				{
-					if(filePath.find(".py") != std::string::npos || filePath.find(".php") != std::string::npos)
-						cgiString = runCgi(*this);
-					return (returnStatus(OK, std::string("OK")));
 				}
 				else
 				{
-					if (filePath.back() != '/')
-					{
-						redirection = clientRequest.getPath() + std::string("/");
-						return (returnStatus(MOVEDPERMANENTLY, std::string("Moved Permanently")));
-					}
-					else
-					{
-							for(int i = 0; i < this->location.get_index().size(); i++)
+						for(int i = 0; i < this->location.get_index().size(); i++)
+						{
+							if (accessFile(filePath + '/' + location.get_index().at(i)))
 							{
-								if (accessFile(filePath + '/' + location.get_index().at(i)))
-								{
-									filePath += location.get_index().at(i);
-									if(filePath.find(".py") != std::string::npos || filePath.find(".php") != std::string::npos)
-										cgiString = runCgi(*this);
-									return (returnStatus(OK, std::string("OK")));
-								}
+								filePath += location.get_index().at(i);
+								if(filePath.find(".py") != std::string::npos || filePath.find(".php") != std::string::npos)
+									cgiString = runCgi(*this);
+								return (returnStatus(OK, std::string("OK")));
 							}
-							if(!location.get_autoindex().compare("on"))
-							{
-								std::cout << "autoindex on need to create the appropriate webpage!!!" << std::endl;
-								exit(0);
-							}
-						return (returnStatus(NOTFOUND, "NOT FOUND"));
-					}
+						}
+						if(!location.get_autoindex().compare("on"))
+						{
+							std::cout << "autoindex on need to create the appropriate webpage!!!" << std::endl;
+							exit(0);
+						}
+					return (returnStatus(NOTFOUND, "NOT FOUND"));
 				}
 			}
-			else if (access(filePath.c_str(), F_OK))
-				return (returnStatus(NOTFOUND, "NOTFOUND"));
-			else
-				return (returnStatus(FORBIDDEN, "FORBIDDEN"));
+		}
+		else if (access(filePath.c_str(), F_OK))
+			return (returnStatus(NOTFOUND, "NOTFOUND"));
+		else
+		{
+			return (returnStatus(FORBIDDEN, "FORBIDDEN"));
+		}
 	}
+	else if (!this->location.get_match())
+		return (returnStatus(FORBIDDEN, "FORBIDDEN"));
 	else
 		return (returnStatus(METHODNOTALLOWED, std::string("METHOD NOT ALLOWED")));
 	return (returnStatus(NOTFOUND, "NOT FOUND"));
@@ -202,6 +208,14 @@ std::string &Response::indexFound(){
 	std::ifstream	indexFile;
 	std::string		str;
 	std::string		htmlString;
+	if(clientRequest.getMethod() == "POST")
+	{
+		//TODO look for the filename and look for location /upload 
+	}
+	else if(clientRequest.getMethod() == "DELETE")
+	{
+		//TODO look for the filename and look for location /upload
+	}
 	indexFile.open(filePath);
 	stringJoinedResponse += clientRequest.getHttpVersion() + " "; 
 	stringJoinedResponse += std::to_string(statusCode) + " ";

@@ -201,7 +201,10 @@ void    Server::set_location(Location &locat)
 void    Server::set_map_loc(Location &locat, int &nb_line)
 {
     if (_map_loc.find(locat.get_path()) == _map_loc.end())
+    {
+        locat.set_match(true);
         _map_loc[locat.get_path()] = locat;
+    }
     else
         errors(20, nb_line, locat.get_path());
 }
