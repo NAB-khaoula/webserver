@@ -11,6 +11,10 @@ std::string	Response::get_filePath(){
 	return filePath;
 }
 
+Location	Response::get_location(){
+	return location;
+}
+
 Response::~Response(){
 }
 
