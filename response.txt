@@ -1,6 +1,17 @@
-HTTP/1.1 403 FORBIDDEN 
-Content-Length: 0
+HTTP/1.1 200 OK 
+Content-Length: 146
 Connection: close
-Content-Type: image/png
-Date: Thu, 17 Feb 2022 12:54:48 GMT
+Content-Type: text/html
+Date: Thu, 17 Feb 2022 15:45:51 GMT
 
+
+
+
+<html>
+<head>
+<title>Hello Word - First CGI Program</title>
+</head>
+<body>
+<h2>Hello Word! This is my first CGI program</h2>
+</body>
+</html>

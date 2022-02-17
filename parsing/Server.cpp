@@ -286,7 +286,7 @@ void     begin_parser(t_WebServ &ws)
     int i = 0, j = 0, k;
 
     ws.serv = new Server();
-    myReadFile.open("./parsing/webserv.conf");
+    myReadFile.open("./src/webserv.conf");
     if (myReadFile.is_open())
     {
         while (std::getline(myReadFile, line))

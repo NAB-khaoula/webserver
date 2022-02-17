@@ -107,8 +107,6 @@ int     Response::buildResponse()
 	this->virtualServer = this->findVirtualServer();
 	this->findLocation();
 	this->filePath = virtualServer->get_root() + clientRequest.getPath();
-	std::cout << "file Path" << filePath << std::endl;
-	std::cout << "location path" << location.get_path() << std::endl;
 	stat(filePath.c_str(), &buf);
 	if (badRequest())
 		return (returnStatus(BADREQUEST, std::string("Bad Request")));
@@ -117,7 +115,7 @@ int     Response::buildResponse()
 	if (this->allowedMethods())
 	{
 		if (accessFile(filePath))
-		{	
+		{
 			if (!location.get_return().empty())
 			{
 				if (location.get_return().find(301) == location.get_return().end())
@@ -140,21 +138,21 @@ int     Response::buildResponse()
 				}
 				else
 				{
-						for(int i = 0; i < this->location.get_index().size(); i++)
+					for(int i = 0; i < this->location.get_index().size(); i++)
+					{
+						if (accessFile(filePath + '/' + location.get_index().at(i)))
 						{
-							if (accessFile(filePath + '/' + location.get_index().at(i)))
-							{
-								filePath += location.get_index().at(i);
-								if(filePath.find(".py") != std::string::npos || filePath.find(".php") != std::string::npos)
-									cgiString = runCgi(*this);
-								return (returnStatus(OK, std::string("OK")));
-							}
+							filePath += location.get_index().at(i);
+							if(filePath.find(".py") != std::string::npos || filePath.find(".php") != std::string::npos)
+								cgiString = runCgi(*this);
+							return (returnStatus(OK, std::string("OK")));
 						}
-						if(!location.get_autoindex().compare("on"))
-						{
-							std::cout << "autoindex on need to create the appropriate webpage!!!" << std::endl;
-							exit(0);
-						}
+					}
+					if(!location.get_autoindex().compare("on"))
+					{
+						std::cout << "autoindex on need to create the appropriate webpage!!!" << std::endl;
+						exit(0);
+					}
 					return (returnStatus(NOTFOUND, "NOT FOUND"));
 				}
 			}
