@@ -41,6 +41,7 @@ class Response
 		Response(Request requestClient,std::vector<Server> configParsed);
 		~Response();
 		std::string	get_filePath();
+		Location	get_location();
 		bool		badRequest();
 		int			buildResponse();
 		Server		*findVirtualServer();
