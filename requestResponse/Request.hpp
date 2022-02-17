@@ -1,5 +1,5 @@
 #ifndef REQUEST_HPP
-#define REQUEST_HPP
+# define REQUEST_HPP
 #include <iostream>
 #include <map>
 #include <vector>
@@ -40,6 +40,7 @@ class Request{
 		std::string							&getHttpVersion();
 		std::map<std::string, std::string>	&getHttpHeaders();
 		void								getContentType(std::string& type);
+		void								getContentLenght(int& lenght);
 		std::vector<std::string>    		ft_splitCrlf(std::string &str,const std::string &c);
 		Request								&parseRequest(char *);
 		void								parseBody(std::string req);

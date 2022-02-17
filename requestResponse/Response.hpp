@@ -1,5 +1,5 @@
 #ifndef RESPONSE_HPP
-#define RESPONSE_HPP
+# define RESPONSE_HPP
 
 #include <string>
 #include <vector>
@@ -19,6 +19,7 @@
 #define FORBIDDEN			403
 
 class Server;
+class Request;
 
 class Response
 {
