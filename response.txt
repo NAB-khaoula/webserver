@@ -1,6 +1,7 @@
-HTTP/1.1 403 FORBIDDEN 
+HTTP/1.1 405 METHOD NOT ALLOWED 
 Content-Length: 0
+Allow:  
 Connection: close
-Content-Type: image/png
-Date: Thu, 17 Feb 2022 12:54:48 GMT
+Content-Type: text/html
+Date: Thu, 17 Feb 2022 12:24:32 GMT
 

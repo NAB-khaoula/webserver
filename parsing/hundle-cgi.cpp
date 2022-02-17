@@ -13,8 +13,11 @@ std::string    runCgi(Response response)
     std::string str;
     std::string path_cgi;
 
+
+    std::string filename = response.get_filePath();
+    std::cout << "|" + filename + "|" << std::endl;
     //NOTE - The full path to the CGI script.
-    setenv("SCRIPT_FILENAME", "../parsing/tmp/index.py", true);
+    setenv("SCRIPT_FILENAME", filename.c_str(), true);
     //NOTE - This variable is specific to requests made with HTTP.
     setenv("REQUEST_METHOD", "GET", true);
     //NOTE - If cgi.force_redirect is turned on, and you are not running under web servers, you may need to set an environment variable name that PHP will look for to know it is OK to continue execution.
