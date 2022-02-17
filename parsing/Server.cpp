@@ -275,7 +275,7 @@ void    fill_server(std::string key, std::string value, std::string &line, t_Web
         errors(2, nb_line, "");
 }
 
-void     begin_parser(t_WebServ &ws)
+void     begin_parser(t_WebServ &ws, char **av)
 {
     std::ifstream               myReadFile;
     std::vector<std::string>    split;
@@ -283,7 +283,7 @@ void     begin_parser(t_WebServ &ws)
     int i = 0, j = 0, k;
 
     ws.serv = new Server();
-    myReadFile.open("./parsing/webserv.conf");
+    myReadFile.open(av[1]);
     if (myReadFile.is_open())
     {
         while (std::getline(myReadFile, line))
@@ -309,7 +309,7 @@ void     begin_parser(t_WebServ &ws)
         myReadFile.close();
     }
     else
-        throw std::runtime_error("Error Opening File Config.");
+        throw std::runtime_error("\033[1;31mFile Error: \033[0m\033[1;37mError Opening File Config.\033[0m");
     if (ws.serv->get_brace_server())
         errors(32, i, "");
     delete ws.serv;
