@@ -1,4 +1,5 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
 HTTP/1.1 200 OK 
 Content-Length: 146
 Connection: close
@@ -19,6 +20,20 @@ Date: Thu, 17 Feb 2022 12:24:32 GMT
 <html>
 <head>
 <title>Hello Word - First CGI Program</title>
+=======
+HTTP/1.1 200 OK 
+Content-Length: 150
+Connection: close
+Content-Type: text/html
+Date: Thu, 17 Feb 2022 15:51:25 GMT
+
+
+
+
+<html>
+<head>
+<title>Hello Word - First CGI Program bin</title>
+>>>>>>> parsing
 </head>
 <body>
 <h2>Hello Word! This is my first CGI program</h2>
