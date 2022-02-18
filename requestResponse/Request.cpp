@@ -98,15 +98,17 @@ void		Request::parseBody(std::string req)
 	// {
 	// 	if (type == "multipart/form-data")
 	// 	{
-	// 		out_file << "| ContentDispo: " << it->ContentDispo << " |\n";
-	// 		out_file << "| ContentType : " << it->ContentType << " |\n";
-	// 		out_file << "| name : " << it->name << " |\n";
-	// 		out_file << "| fileName : " << it->fileName << " |\n";
+	// 		// out_file << "| ContentDispo: " << it->ContentDispo << " |\n";
+	// 		// out_file << "| ContentType : " << it->ContentType << " |\n";
+	// 		// out_file << "| name : " << it->name << " |\n";
+	// 		// out_file << "| fileName : " << it->fileName << " |\n";
+	// 		std::ofstream	filename(it->fileName);
+	// 		filename << it->body;
 	// 	}
-	// 	out_file << "| Body : " << it->body << " |\n+++++++++++++++++++++++++++++++++++++\n";
+	// 	// out_file << "| Body : " << it->body << " |\n+++++++++++++++++++++++++++++++++++++\n";
 	// 	it++;
 	// }
-	// out_file.close();
+	// // out_file.close();
 }
 
 

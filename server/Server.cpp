@@ -6,7 +6,7 @@
 /*   By: ybouddou <ybouddou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/13 08:57:33 by ybouddou          #+#    #+#             */
-/*   Updated: 2022/02/17 23:02:43 by ybouddou         ###   ########.fr       */
+/*   Updated: 2022/02/18 17:35:49 by ybouddou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,11 +63,13 @@ void	recvRequest(t_WebServ *webserv)
 	webserv->client = (Client *)webserv->event.udata;
 	bzero(webserv->client->receive, 1024);
 	webserv->client->ret = recv(webserv->event.ident, webserv->client->receive, 1023, 0);
-	webserv->client->req += webserv->client->receive;
+	// std::cout << "| received: " << webserv->client->ret << " |\n";
+	webserv->client->req.append(webserv->client->receive, webserv->client->ret);
 	if (webserv->client->header.empty())
 	{
 		if((pos = webserv->client->req.find("\r\n\r\n")) != std::string::npos)
 		{
+			// std::cout << "| **************** |\n";
 			// std::ofstream	headerfile("header.txt");
 			webserv->client->header = webserv->client->req.substr(0, pos + 4);
 			webserv->client->req.erase(0, pos + 4);
@@ -78,13 +80,16 @@ void	recvRequest(t_WebServ *webserv)
 				std::string	tmp = webserv->client->header;
 				tmp.erase(0, pos + 16);
 				webserv->client->lenght = stoi(tmp.substr(0, tmp.find("\r\n")));
-				std::cout << "| lenght: " << webserv->client->lenght << " |\n";
+				// std::cout << "| lenght: " << webserv->client->lenght << " |\n";
 			}
+			// headerfile.close();
 		}
 	}
 	if (!webserv->client->header.empty() && webserv->client->req.size() == webserv->client->lenght)
 	{
+		// std::cout << "| +++++++++++++++ |\n";
 		// std::ofstream	outfile("request.txt");
+		// std::cout << "| size : " <<  webserv->client->req.size() << " |\n";
 		webserv->client->req = webserv->client->header + webserv->client->req;
 		// outfile << webserv->client->req;
 		webserv->client->request = Request(webserv->client->req);
@@ -96,7 +101,7 @@ void	recvRequest(t_WebServ *webserv)
 		kevent(webserv->kq, &webserv->event, 1, NULL, 0, NULL);
 		// outfile.close();
 	}
-	// std::cout << "| " << webserv->client->req.size() << " | " << webserv->client->lenght << " |\n";
+	// std::cout << "| " << webserv->client->header.size() << " | " << webserv->client->req.size() << " | " << webserv->client->lenght << " |\n";
 }
 
 void	sendResponse(t_WebServ *webserv)
