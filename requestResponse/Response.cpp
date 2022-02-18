@@ -167,7 +167,7 @@ int     Response::buildResponse()
 			}
 			else
 			{
-				//TODO NEED TO UPDATE THIS SHIIIIIT
+				//TODO NEED TO UPDATE THIS!
 				if (clientRequest.getUpload() && (clientRequest.getMethod() == "POST" || clientRequest.getMethod() == "DELETE"))
 				{
 					//FIXME check enable_delete!
