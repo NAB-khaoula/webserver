@@ -92,21 +92,21 @@ void		Request::parseBody(std::string req)
 		bodies.push_back(body);
 	}
 	// ****Printing body****
-	std::ofstream	out_file("bodies.txt");
-	std::vector<Body>::iterator it = bodies.begin();
-	while (it != bodies.end())
-	{
-		if (type == "multipart/form-data")
-		{
-			out_file << "| ContentDispo: " << it->ContentDispo << " |\n";
-			out_file << "| ContentType : " << it->ContentType << " |\n";
-			out_file << "| name : " << it->name << " |\n";
-			out_file << "| fileName : " << it->fileName << " |\n";
-		}
-		out_file << "| Body : " << it->body << " |\n+++++++++++++++++++++++++++++++++++++\n";
-		it++;
-	}
-	out_file.close();
+	// std::ofstream	out_file("bodies.txt");
+	// std::vector<Body>::iterator it = bodies.begin();
+	// while (it != bodies.end())
+	// {
+	// 	if (type == "multipart/form-data")
+	// 	{
+	// 		out_file << "| ContentDispo: " << it->ContentDispo << " |\n";
+	// 		out_file << "| ContentType : " << it->ContentType << " |\n";
+	// 		out_file << "| name : " << it->name << " |\n";
+	// 		out_file << "| fileName : " << it->fileName << " |\n";
+	// 	}
+	// 	out_file << "| Body : " << it->body << " |\n+++++++++++++++++++++++++++++++++++++\n";
+	// 	it++;
+	// }
+	// out_file.close();
 }
 
 
