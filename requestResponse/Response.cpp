@@ -15,6 +15,7 @@ Location	Response::get_location(){
 	return location;
 }
 
+
 Response::~Response(){
 }
 
@@ -54,6 +55,18 @@ void	Response::findLocation(){
 			return;
 		}
 	}
+}
+
+bool	Response::findUploadLocation(){
+	for(std::map<std::string, Location>::iterator it = virtualServer->get_map_loc().begin(); it != virtualServer->get_map_loc().end(); it++)
+	{
+		if(it->second.get_upload_enble() == "on") // adding enable delete;
+		{
+			location = it->second;
+			return true;
+		}
+	}
+	return false;
 }
 
 bool	Response::allowedMethods(){
@@ -111,6 +124,8 @@ int     Response::buildResponse()
 	this->virtualServer = this->findVirtualServer();
 	this->findLocation();
 	this->filePath = virtualServer->get_root() + clientRequest.getPath();
+	std::cout << "filePath " << filePath << std::endl;
+	std::cout << "location path " << location.get_path() << std::endl;
 	stat(filePath.c_str(), &buf);
 	if (badRequest())
 		return (returnStatus(BADREQUEST, std::string("Bad Request")));
@@ -123,18 +138,60 @@ int     Response::buildResponse()
 			if (!location.get_return().empty())
 			{
 				if (location.get_return().find(301) == location.get_return().end())
-					return (returnStatus(FORBIDDEN, std::string("FORBIDDEN")));
+					return (returnStatus(FORBIDDEN, std::string("Forbidden")));
 				redirection = location.get_return()[301];
 				return (returnStatus(MOVEDPERMANENTLY, std::string("Moved Permanently")));
 			}
 			if(!S_ISDIR(buf.st_mode))
 			{
+				if (clientRequest.getUpload() && (clientRequest.getMethod() == "POST" || clientRequest.getMethod() == "DELETE"))
+				{
+					for(int i = 0; i < clientRequest.getBodies().size(); i++)
+					{
+						if(!(clientRequest.getBodies().at(i).fileName.empty()))
+						{
+							if (location.get_upload_enble() == "on")
+							{
+								if (location.get_upload() != "")
+									filePath = virtualServer->get_root() + location.get_upload();
+								std::fstream	infile(clientRequest.getBodies().at(i).fileName); 
+								infile << clientRequest.getBodies().at(i).body << std::endl;
+								return (returnStatus(CREATED, std::string("Created")));
+							}
+						}
+					}
+				}
 				if(filePath.find(".py") != std::string::npos || filePath.find(".php") != std::string::npos)
 					cgiString = runCgi(*this);
 				return (returnStatus(OK, std::string("OK")));
 			}
 			else
 			{
+				//TODO NEED TO UPDATE THIS SHIIIIIT
+				if (clientRequest.getUpload() && (clientRequest.getMethod() == "POST" || clientRequest.getMethod() == "DELETE"))
+				{
+					//FIXME check enable_delete!
+					if (location.get_upload_enble() == "on")
+					{
+						for(int i = 0; i < clientRequest.getBodies().size(); i++)
+						{
+							if(!(clientRequest.getBodies().at(i).fileName.empty()))
+							{
+								if (location.get_upload() != "")
+									filePath = virtualServer->get_root() + location.get_upload();
+								std::fstream	infile;
+								infile.open(filePath + "/" + clientRequest.getBodies().at(i).fileName, std::ios_base::out);
+								infile << clientRequest.getBodies().at(i).body;
+								if (!infile.is_open()) {
+        							std::cerr << "Failed to open " << '\n';
+    							}
+								infile.close();
+							}
+						}
+						return (returnStatus(CREATED, std::string("Created")));
+					}
+					cgiString = runCgi(*this);
+				}
 				if (filePath.back() != '/')
 				{
 					redirection = clientRequest.getPath() + std::string("/");
@@ -146,7 +203,7 @@ int     Response::buildResponse()
 					{
 						if (accessFile(filePath + '/' + location.get_index().at(i)))
 						{
-							filePath += location.get_index().at(i);
+							filePath = filePath + '/' + location.get_index().at(i);
 							if(filePath.find(".py") != std::string::npos || filePath.find(".php") != std::string::npos)
 								cgiString = runCgi(*this);
 							return (returnStatus(OK, std::string("OK")));
@@ -169,7 +226,10 @@ int     Response::buildResponse()
 		}
 	}
 	else if (!this->location.get_match())
+	{
+			std::cout << "dkhel hna" << std::endl;
 		return (returnStatus(FORBIDDEN, "FORBIDDEN"));
+	}
 	else
 		return (returnStatus(METHODNOTALLOWED, std::string("METHOD NOT ALLOWED")));
 	return (returnStatus(NOTFOUND, "NOT FOUND"));
@@ -210,14 +270,6 @@ std::string &Response::indexFound(){
 	std::ifstream	indexFile;
 	std::string		str;
 	std::string		htmlString;
-	if(clientRequest.getMethod() == "POST")
-	{
-		//TODO look for the filename and look for location /upload 
-	}
-	else if(clientRequest.getMethod() == "DELETE")
-	{
-		//TODO look for the filename and look for location /upload
-	}
 	indexFile.open(filePath);
 	stringJoinedResponse += clientRequest.getHttpVersion() + " "; 
 	stringJoinedResponse += std::to_string(statusCode) + " ";

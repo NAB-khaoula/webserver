@@ -21,7 +21,7 @@ typedef struct	s_Body
 
 class Request{
 	protected:
-		// adding file descriptor;
+		bool								upload;
 		std::vector<std::string>			requestLine;
 		std::map<std::string, std::string>	URLVariable;
 		std::map<std::string, std::string>	httpHeaders;
@@ -37,10 +37,11 @@ class Request{
 		std::vector<std::string>			&getRequestLine();
 		std::string							&getMethod();
 		std::string							&getPath();
+		std::vector<Body>					&getBodies();
 		std::string							&getHttpVersion();
 		std::map<std::string, std::string>	&getHttpHeaders();
 		void								getContentType(std::string& type);
-		void								getContentLenght(int& lenght);
+		bool								getUpload();
 		std::vector<std::string>    		ft_splitCrlf(std::string &str,const std::string &c);
 		Request								&parseRequest(char *);
 		void								parseBody(std::string req);
@@ -48,6 +49,7 @@ class Request{
 		void								SplitHeader(std::vector<std::string> vect, char c);
 		void								SplitFirstLine(std::string& requestString);
 		void								parseParam(std::string	&variableURL, size_t &pos);
+		bool								uploadFile();
 };
 
 #endif

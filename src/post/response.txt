@@ -1,0 +1,7 @@
+HTTP/1.1 404 NOT FOUND 
+Content-Length: 353
+Connection: close
+Content-Type: text/html
+Date: Fri, 18 Feb 2022 16:55:32 GMT
+
+<!DOCTYPE html><html lang="en"><head>    <meta charset="UTF-8">    <meta http-equiv="X-UA-Compatible" content="IE=edge">    <meta name="viewport" content="width=device-width, initial-scale=1.0">    <title>NOT FOUND</title></head><body>    <center><h1>Error 404 - NOT FOUND</h1></center>    <hr><center>This webpage cannot be found</center></body></html>

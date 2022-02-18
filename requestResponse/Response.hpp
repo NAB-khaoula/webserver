@@ -14,6 +14,7 @@
 #include "Request.hpp"
 
 #define	OK					200
+#define CREATED				201 				
 #define MOVEDPERMANENTLY 	301
 #define	NOTMODIFIED			304
 #define	BADREQUEST			400
@@ -47,6 +48,7 @@ class Response
 		int			buildResponse();
 		Server		*findVirtualServer();
 		void		findLocation();
+		bool		findUploadLocation();
 		bool		allowedMethods();
 		bool		accessFile(std::string filename);
 		std::string	&returnResponse();
