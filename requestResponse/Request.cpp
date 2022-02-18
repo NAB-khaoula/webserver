@@ -20,16 +20,6 @@ std::vector<std::string>    Request::ft_splitCrlf(std::string &str, const std::s
     return words;
 }
 
-void		Request::getContentLenght(int& lenght)
-{
-	std::map<std::string, std::string>::iterator i;
-	size_t	pos;
-
-	i = httpHeaders.find("Content-Lenght");
-	if (i != httpHeaders.end())
-		lenght = stoi(i->second);
-}
-
 void		Request::getContentType(std::string& type)
 {
 	std::map<std::string, std::string>::iterator i;
