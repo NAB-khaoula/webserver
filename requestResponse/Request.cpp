@@ -20,6 +20,16 @@ std::vector<std::string>    Request::ft_splitCrlf(std::string &str, const std::s
     return words;
 }
 
+void		Request::getContentLenght(int& lenght)
+{
+	std::map<std::string, std::string>::iterator i;
+	size_t	pos;
+
+	i = httpHeaders.find("Content-Lenght");
+	if (i != httpHeaders.end())
+		lenght = stoi(i->second);
+}
+
 void		Request::getContentType(std::string& type)
 {
 	std::map<std::string, std::string>::iterator i;
@@ -41,6 +51,7 @@ void		Request::setFormData(std::string& req, std::string type)
 	Body			body;
 	size_t			pos;
 
+	bzero(&body, sizeof(Body));
 	req.erase(0, boundary.size() + 2);
 	while ((pos = req.find(boundary)) != std::string::npos)
 	{
@@ -73,29 +84,31 @@ void		Request::parseBody(std::string req)
 	std::string		type;
 	
 	getContentType(type);
-	if (!boundary.empty())
+	if (!type.empty() && !boundary.empty())
 		setFormData(req, type);
-	else
+	else if (!type.empty())
 	{
 		body.body = req;
 		bodies.push_back(body);
 	}
 	// ****Printing body****
-	std::ofstream	out_file("bodies.txt");
-	std::vector<Body>::iterator it = bodies.begin();
-	while (it != bodies.end())
-	{
-		if (type == "multipart/form-data")
-		{
-			out_file << "| ContentDispo: " << it->ContentDispo << " |\n";
-			out_file << "| ContentType : " << it->ContentType << " |\n";
-			out_file << "| name : " << it->name << " |\n";
-			out_file << "| fileName : " << it->fileName << " |\n";
-		}
-		out_file << "| Body : " << it->body << " |\n+++++++++++++++++++++++++++++++++++++\n";
-		it++;
-	}
-	out_file.close();
+	// std::ofstream	out_file("bodies.txt");
+	// std::vector<Body>::iterator it = bodies.begin();
+	// while (it != bodies.end())
+	// {
+	// 	if (type == "multipart/form-data")
+	// 	{
+	// 		// out_file << "| ContentDispo: " << it->ContentDispo << " |\n";
+	// 		// out_file << "| ContentType : " << it->ContentType << " |\n";
+	// 		// out_file << "| name : " << it->name << " |\n";
+	// 		// out_file << "| fileName : " << it->fileName << " |\n";
+	// 		std::ofstream	filename(it->fileName);
+	// 		filename << it->body;
+	// 	}
+	// 	// out_file << "| Body : " << it->body << " |\n+++++++++++++++++++++++++++++++++++++\n";
+	// 	it++;
+	// }
+	// // out_file.close();
 }
 
 

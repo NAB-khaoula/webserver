@@ -9,7 +9,6 @@ SRC =	main.cpp\
 		parsing/hundle-cgi.cpp\
 		parsing/tools.cpp\
 		server/Server.cpp\
-		server/Sockets.cpp\
 		requestResponse/Request.cpp\
 		requestResponse/Response.cpp
 

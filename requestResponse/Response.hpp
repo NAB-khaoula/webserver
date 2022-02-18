@@ -1,5 +1,5 @@
 #ifndef RESPONSE_HPP
-#define RESPONSE_HPP
+# define RESPONSE_HPP
 
 #include <string>
 #include <vector>
@@ -22,6 +22,7 @@
 #define METHODNOTALLOWED	405
 
 class Server;
+class Request;
 
 class Response
 {
