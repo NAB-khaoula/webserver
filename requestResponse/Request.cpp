@@ -1,6 +1,6 @@
 #include "Request.hpp"
 
-Request::Request(): requestLine(std::vector<std::string>()), httpHeaders(std::map<std::string, std::string>()){}
+Request::Request(): upload(false), requestLine(std::vector<std::string>()), httpHeaders(std::map<std::string, std::string>()){}
 
 Request::~Request(){}
 
@@ -98,6 +98,14 @@ void		Request::parseBody(std::string req)
 	out_file.close();
 }
 
+bool	Request::uploadFile(){
+	for(int i = 0; i < bodies.size(); i++)
+	{
+		if (!bodies.at(i).fileName.empty())
+			return true;
+	}
+	return false;
+}
 
 Request::Request(std::string requestString)
 {
@@ -108,17 +116,11 @@ Request::Request(std::string requestString)
 	this->SplitHeader(ft_splitCrlf(ft_splitCrlf(requestString, "\r\n\r\n").at(0), "\r\n"), ':');
 	// std::cout << requestString << std::endl;
 	parseBody(requestString);
-	//NOTE printing Data;
-	// for(int i = 0; i < requestLine.size(); i++)
-	// 	std::cout << "|" << requestLine[i] << "|" << std::endl;
-	// for(std::map<std::string, std::string>::iterator i = URLVariable.begin(); i != URLVariable.end(); i++)
-	// {
-	// 	std::cout << "|" << i->first << "|" << " ******* " << "|" << i->second << "|" << std::endl;
-	// }
-	// for(std::map<std::string, std::string>::iterator i = httpHeaders.begin(); i != httpHeaders.end(); i++)
-	// {
-	// 	std::cout << "|" << i->first << "|" << " & " << "|" << i->second << "|" << std::endl;
-	// }
+	upload = uploadFile();
+}
+
+bool			Request::getUpload(){
+	return upload;
 }
 
 void			Request::parseParam(std::string	&variableURL, size_t &pos)
@@ -193,3 +195,6 @@ std::map<std::string, std::string>	&Request::getHttpHeaders(){
 	return httpHeaders;
 }
 
+std::vector<Body>	&Request::getBodies(){
+	return bodies;
+}
