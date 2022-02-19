@@ -6,7 +6,7 @@
 /*   By: ybouddou <ybouddou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/13 08:57:33 by ybouddou          #+#    #+#             */
-/*   Updated: 2022/02/19 16:35:28 by ybouddou         ###   ########.fr       */
+/*   Updated: 2022/02/19 19:51:58 by ybouddou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,9 +78,12 @@ void	recvRequest(t_WebServ *webserv)
 	}
 	if (!webserv->client->header.empty() && webserv->client->req.size() == webserv->client->lenght)
 	{
+		std::ofstream reqfile("request.txt");
 		std::cout << "\e[1;32m--> Request has been received successfully !!\e[0m\n\n";
 		webserv->client->req = webserv->client->header + webserv->client->req;
 		webserv->client->request = Request(webserv->client->req);
+		reqfile << webserv->client->req << "\n";
+		reqfile.close();
 		webserv->client->req = "";
 		EV_SET(&webserv->event, webserv->client->socket, EVFILT_READ, EV_DELETE, 0, 0, (void *)(webserv->client));
 		kevent(webserv->kq, &webserv->event, 1, NULL, 0, NULL);
