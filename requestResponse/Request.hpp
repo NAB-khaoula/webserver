@@ -29,25 +29,33 @@ class Request{
 
 		// Body variables
 		std::vector<Body>					bodies;
-		std::string							type;
+		std::string							contentType;
+		int									contentLength;
 		std::string							boundary;
 	public:
 		Request();
 		Request(std::string);
 		~Request();
+
+		// Getters
 		std::vector<std::string>			&getRequestLine();
 		std::string							&getParam();
 		std::string							&getMethod();
 		std::string							&getPath();
 		std::vector<Body>					&getBodies();
 		std::string							&getHttpVersion();
+		std::string							&getContentType();
+		int									&getContentLength();
 		std::map<std::string, std::string>	&getHttpHeaders();
-		void								getContentType(std::string& type);
 		bool								getUpload();
-		std::vector<std::string>    		ft_splitCrlf(std::string &str,const std::string &c);
-		Request								&parseRequest(char *);
-		void								parseBody(std::string req);
+
+		// Setters
+		void								setContentType();
+		void								setContentLength();
 		void								setFormData(std::string& req, std::string type);
+		
+		std::vector<std::string>    		ft_splitCrlf(std::string &str,const std::string &c);
+		void								parseBody(std::string req);
 		void								SplitHeader(std::vector<std::string> vect, char c);
 		void								SplitFirstLine(std::string& requestString);
 		void								parseParam(std::string	&variableURL, size_t &pos);
