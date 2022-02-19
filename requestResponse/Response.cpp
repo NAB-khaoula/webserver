@@ -7,14 +7,37 @@ Response::Response(Request requestClient, std::vector<Server> configParsed): cgi
 clientRequest(requestClient), serverConfigData(configParsed){
 }
 
-std::string	Response::get_filePath(){
+std::string	&Response::getCgiString(){
+	return	cgiString;
+}
+
+int			&Response::getStatusCode(){
+	return statusCode;
+}
+
+std::string	&Response::getStatusMessage(){
+	return statusMessage;
+}
+
+std::string	&Response::get_filePath(){
 	return filePath;
 }
 
-Location	Response::get_location(){
+std::string	&Response::getRedirection(){
+	return redirection;
+}
+
+Location	&Response::get_location(){
 	return location;
 }
 
+Request		&Response::getClientRequest(){
+	return clientRequest;
+}
+
+Server		*Response::getServer(){
+	return virtualServer;
+}
 
 Response::~Response(){
 }
@@ -147,11 +170,10 @@ int     Response::buildResponse()
 				statusMessage = "OK";
 				if(filePath.find(".py") != std::string::npos || filePath.find(".php") != std::string::npos)
 					cgiString = runCgi(*this);
-				return (returnStatus(statusCode, std::string(statusMessage)));
+				return (returnStatus(statusCode, statusMessage));
 			}
 			else
 			{
-				//TODO NEED TO UPDATE THIS!
 				if (clientRequest.getUpload() && (clientRequest.getMethod() == "POST" || clientRequest.getMethod() == "DELETE"))
 				{
 					//FIXME check enable_delete!
@@ -213,14 +235,10 @@ int     Response::buildResponse()
 		else if (access(filePath.c_str(), F_OK))
 			return (returnStatus(NOTFOUND, "NOTFOUND"));
 		else
-		{
 			return (returnStatus(FORBIDDEN, "FORBIDDEN"));
-		}
 	}
 	else if (!this->location.get_match())
-	{
 		return (returnStatus(FORBIDDEN, "FORBIDDEN"));
-	}
 	else
 		return (returnStatus(METHODNOTALLOWED, std::string("METHOD NOT ALLOWED")));
 	return (returnStatus(NOTFOUND, "NOT FOUND"));

@@ -10,14 +10,14 @@
 #define PATH		1
 #define HTTPVERSION	2
 
-typedef struct	s_Body
+typedef struct		s_Body
 {
 	std::string		body;
 	std::string		ContentDispo;
 	std::string		ContentType;
 	std::string		name;
 	std::string		fileName;
-}				Body;
+}					Body;
 
 class Request{
 	protected:
