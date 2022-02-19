@@ -124,8 +124,7 @@ int     Response::buildResponse()
 	this->virtualServer = this->findVirtualServer();
 	this->findLocation();
 	this->filePath = virtualServer->get_root() + clientRequest.getPath();
-	std::cout << "filePath " << filePath << std::endl;
-	std::cout << "location path " << location.get_path() << std::endl;
+	std::cout << clientRequest.getPath() << std::endl;
 	stat(filePath.c_str(), &buf);
 	if (badRequest())
 		return (returnStatus(BADREQUEST, std::string("Bad Request")));
@@ -144,26 +143,11 @@ int     Response::buildResponse()
 			}
 			if(!S_ISDIR(buf.st_mode))
 			{
-				if (clientRequest.getUpload() && (clientRequest.getMethod() == "POST" || clientRequest.getMethod() == "DELETE"))
-				{
-					for(int i = 0; i < clientRequest.getBodies().size(); i++)
-					{
-						if(!(clientRequest.getBodies().at(i).fileName.empty()))
-						{
-							if (location.get_upload_enble() == "on")
-							{
-								if (location.get_upload() != "")
-									filePath = virtualServer->get_root() + location.get_upload();
-								std::fstream	infile(clientRequest.getBodies().at(i).fileName); 
-								infile << clientRequest.getBodies().at(i).body << std::endl;
-								return (returnStatus(CREATED, std::string("Created")));
-							}
-						}
-					}
-				}
+				statusCode = OK;
+				statusMessage = "OK";
 				if(filePath.find(".py") != std::string::npos || filePath.find(".php") != std::string::npos)
 					cgiString = runCgi(*this);
-				return (returnStatus(OK, std::string("OK")));
+				return (returnStatus(statusCode, std::string(statusMessage)));
 			}
 			else
 			{
@@ -181,16 +165,22 @@ int     Response::buildResponse()
 									filePath = virtualServer->get_root() + location.get_upload();
 								std::fstream	infile;
 								infile.open(filePath + "/" + clientRequest.getBodies().at(i).fileName, std::ios_base::out);
-								infile << clientRequest.getBodies().at(i).body;
 								if (!infile.is_open()) {
-        							std::cerr << "Failed to open " << '\n';
+									statusCode = INTERNALSERVERERROR;
+									statusMessage = "Internal Server Error";
     							}
+								else
+								{
+									statusCode = CREATED;
+									statusMessage = "Created";
+								}
+								infile << clientRequest.getBodies().at(i).body;
 								infile.close();
 							}
 						}
-						return (returnStatus(CREATED, std::string("Created")));
 					}
 					cgiString = runCgi(*this);
+					return (returnStatus(statusCode, statusMessage));
 				}
 				if (filePath.back() != '/')
 				{
@@ -204,9 +194,11 @@ int     Response::buildResponse()
 						if (accessFile(filePath + '/' + location.get_index().at(i)))
 						{
 							filePath = filePath + '/' + location.get_index().at(i);
+							statusCode = OK;
+							statusMessage = "OK";
 							if(filePath.find(".py") != std::string::npos || filePath.find(".php") != std::string::npos)
 								cgiString = runCgi(*this);
-							return (returnStatus(OK, std::string("OK")));
+							return (returnStatus(statusCode, std::string(statusMessage)));
 						}
 					}
 					if(!location.get_autoindex().compare("on"))
@@ -227,7 +219,6 @@ int     Response::buildResponse()
 	}
 	else if (!this->location.get_match())
 	{
-			std::cout << "dkhel hna" << std::endl;
 		return (returnStatus(FORBIDDEN, "FORBIDDEN"));
 	}
 	else
@@ -296,14 +287,15 @@ std::string &Response::indexFound(){
 		stringJoinedResponse +=	" \r\n"; 
 	}	
 	stringJoinedResponse += "Connection: close\r\n";
-	if(this->clientRequest.getHttpHeaders().find("Sec-Fetch-Dest")->second == std::string("style"))
-		stringJoinedResponse +=  "Content-Type: text/css\r\n";
-	else if (this->clientRequest.getHttpHeaders().find("Sec-Fetch-Dest")->second == std::string("script"))
-		stringJoinedResponse +=  "Content-Type: text/javascript\r\n";
-	else if (this->clientRequest.getHttpHeaders().find("Sec-Fetch-Dest")->second == std::string("image"))
-		stringJoinedResponse +=  "Content-Type: image/png\r\n"; //REVIEW - review the image types
-	else
-		stringJoinedResponse += "Content-Type: text/html\r\n";
+	// if(this->clientRequest.getHttpHeaders().find("Sec-Fetch-Dest")->second == std::string("style"))
+	// 	stringJoinedResponse +=  "Content-Type: text/css\r\n";
+	// else if (this->clientRequest.getHttpHeaders().find("Sec-Fetch-Dest")->second == std::string("script"))
+	// 	stringJoinedResponse +=  "Content-Type: text/javascript\r\n";
+	// else if (this->clientRequest.getHttpHeaders().find("Sec-Fetch-Dest")->second == std::string("image"))
+	// 	stringJoinedResponse +=  "Content-Type: image/png\r\n"; //REVIEW - review the image types
+	// else
+	// 	stringJoinedResponse += "Content-Type: text/html\r\n";
+	stringJoinedResponse += "Content-Type: */*\r\n";
 	stringJoinedResponse += "Date: ";
 	stringJoinedResponse += DateGMT();
 	stringJoinedResponse += "\r\n\r\n";
