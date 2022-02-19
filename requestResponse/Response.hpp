@@ -43,8 +43,16 @@ class Response
 		Response();
 		Response(Request requestClient,std::vector<Server> configParsed);
 		~Response();
-		std::string	get_filePath();
-		Location	get_location();
+		//NOTE: getters for all attributes;
+		//NOTE: 
+		std::string	&getCgiString();
+		int			&getStatusCode();
+		std::string	&getStatusMessage();
+		std::string	&get_filePath();
+		std::string	&getRedirection();
+		Location	&get_location();
+		Request		&getClientRequest();
+		Server		*getServer();
 		bool		badRequest();
 		int			buildResponse();
 		Server		*findVirtualServer();
