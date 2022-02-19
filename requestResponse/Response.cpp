@@ -147,7 +147,6 @@ int     Response::buildResponse()
 	this->virtualServer = this->findVirtualServer();
 	this->findLocation();
 	this->filePath = virtualServer->get_root() + clientRequest.getPath();
-	std::cout << clientRequest.getPath() << std::endl;
 	stat(filePath.c_str(), &buf);
 	if (badRequest())
 		return (returnStatus(BADREQUEST, std::string("Bad Request")));
@@ -282,18 +281,20 @@ std::string	DateGMT(){
 }
 
 std::string &Response::indexFound(){
-	std::ifstream	indexFile;
-	std::string		str;
+	std::ifstream	indexFile(filePath, std::ios::binary);
+	std::ostringstream buffer;
 	std::string		htmlString;
-	indexFile.open(filePath);
+
+	if (cgiString.empty())
+	{
+		buffer << indexFile.rdbuf();
+		htmlString = buffer.str();
+	}
+	else
+		htmlString = cgiString;
 	stringJoinedResponse += clientRequest.getHttpVersion() + " "; 
 	stringJoinedResponse += std::to_string(statusCode) + " ";
 	stringJoinedResponse += statusMessage + " \r\n";
-	if (cgiString.empty())
-		while(std::getline(indexFile, str))
-			htmlString += str;
-	else
-		htmlString = cgiString;
 	stringJoinedResponse += "Content-Length: ";
 	stringJoinedResponse += std::to_string(htmlString.length());
 	stringJoinedResponse += "\r\n";

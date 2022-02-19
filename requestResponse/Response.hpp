@@ -2,6 +2,7 @@
 # define RESPONSE_HPP
 
 #include <string>
+#include <sstream>
 #include <vector>
 #include <fstream>
 #include <stdio.h>
