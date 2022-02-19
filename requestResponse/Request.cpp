@@ -69,6 +69,7 @@ void		Request::setFormData(std::string& req)
 	std::vector<std::string>	bodyHeaders;
 	Body			body;
 	size_t			pos;
+	size_t			posfile;
 
 	bzero(&body, sizeof(Body));
 	req.erase(0, boundary.size() + 2);
@@ -77,18 +78,20 @@ void		Request::setFormData(std::string& req)
 		body.body = req.substr(0, pos - 2);
 		bodyHeaders = ft_splitCrlf(ft_splitCrlf(body.body, "\r\n\r\n").at(0), "\r\n");
 		body.ContentDispo = bodyHeaders.at(0).substr(bodyHeaders.at(0).find(":") + 2);
-		body.ContentDispo.erase(9, body.ContentDispo.find("=") + 2 - 9);
-		if (bodyHeaders.size() > 1)
+		body.ContentDispo.erase(9, body.ContentDispo.find("; name=\"") + 8 - 9);
+		posfile = body.ContentDispo.find("\"; filename=\"");
+		if (posfile != std::string::npos)
 		{
-			body.name = body.ContentDispo.substr(9, body.ContentDispo.find(";") - 1 - 9);
-			body.ContentDispo.erase(9, body.ContentDispo.find("=") + 2 - 9);
-			body.fileName = body.ContentDispo.substr(9, body.ContentDispo.size() - 1 - 9);
+			body.name = body.ContentDispo.substr(9, posfile - 9);
+			body.ContentDispo.erase(9, posfile + 13 - 9);
+			body.fileName = body.ContentDispo.substr(9, body.ContentDispo.size() - 9 -1);
 			body.ContentDispo.erase(9);
-			body.ContentType = bodyHeaders.at(1).substr(bodyHeaders.at(1).find(":") + 2);
+			if (!body.fileName.empty())
+				body.ContentType = bodyHeaders.at(1).substr(bodyHeaders.at(1).find(":") + 2);
 		}
 		else
 		{
-			body.name = body.ContentDispo.substr(9, body.ContentDispo.size() - 1 - 9);
+			body.name = body.ContentDispo.substr(9, body.ContentDispo.size() - 9 - 1);
 			body.ContentDispo.erase(9);
 			if (!queryString.empty())
 				queryString += "&";
@@ -114,24 +117,26 @@ void		Request::parseBody(std::string req)
 		queryString += body.body;
 		bodies.push_back(body);
 	}
+	// std::cout << getQueryString() << std::endl;
 	// ****Printing body****
 	// std::ofstream	out_file("bodies.txt");
 	// std::vector<Body>::iterator it = bodies.begin();
 	// while (it != bodies.end())
 	// {
-	// 	if (type == "multipart/form-data")
+	// 	if (contentType == "multipart/form-data")
 	// 	{
-	// 		// out_file << "| ContentDispo: " << it->ContentDispo << " |\n";
-	// 		// out_file << "| ContentType : " << it->ContentType << " |\n";
-	// 		// out_file << "| name : " << it->name << " |\n";
-	// 		// out_file << "| fileName : " << it->fileName << " |\n";
-	// 		std::ofstream	filename(it->fileName);
-	// 		filename << it->body;
+	// 		out_file << "| ContentDispo: " << it->ContentDispo << " |\n";
+	// 		out_file << "| ContentType : " << it->ContentType << " |\n";
+	// 		out_file << "| name : " << it->name << " |\n";
+	// 		out_file << "| fileName : " << it->fileName << " |\n";
+	// 		// std::ofstream	filename(it->fileName);
+	// 		// filename << it->body;
 	// 	}
-	// 	// out_file << "| Body : " << it->body << " |\n+++++++++++++++++++++++++++++++++++++\n";
+	// 	out_file << "| Body : " << it->body << " |\n";
+	// 	out_file << "\n+++++++++++++++++++++++++++++++++++++\n";
 	// 	it++;
 	// }
-	// // out_file.close();
+	// out_file.close();
 }
 
 bool	Request::uploadFile(){
