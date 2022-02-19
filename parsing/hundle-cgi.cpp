@@ -8,6 +8,7 @@ std::string    runCgi(Response response)
 {
     pid_t       pid;
     int         fd[2];
+    int         fd_post[2];
     int         r;
     char        buffer[1024];
     std::string str;
@@ -17,6 +18,8 @@ std::string    runCgi(Response response)
     std::string filename = fullPath.substr(fullPath.find_last_of("/") + 1);
     std::string req_method = response.getClientRequest().getMethod();
 
+    std::cout << response.getClientRequest().getContentLength() << " |\n";
+    std::cout << response.getClientRequest().getContentType() << " |\n";
 
     //NOTE - The full path to the CGI script.
     setenv("SCRIPT_FILENAME", fullPath.c_str(), true);
@@ -31,11 +34,11 @@ std::string    runCgi(Response response)
     //NOTE - A path to be interpreted by the CGI script.
     setenv("PATH_INFO", response.getServer()->get_root().c_str(), true);
     //NOTE - The length of the query information. It is available only for POST requests.
-    setenv("CONTENT_LENGTH", "", true);
+    setenv("CONTENT_LENGTH", response.getClientRequest().getContentType().c_str(), true);
     //NOTE - The data type of the content. Used when the client is sending attached content to the server. For example, file upload.
-    setenv("CONTENT_TYPE", "", true);
+    setenv("CONTENT_TYPE", response.getClientRequest().getContentType().c_str(), true);
     //NOTE - The URL-encoded information that is sent with GET method request.
-    setenv("QUERY_STRING", "", true);
+    setenv("QUERY_STRING", response.getClientRequest().getParam().c_str(), true);
     //NOTE - The server's hostname or IP Address
     setenv("SERVER_NAME", response.getServer()->get_host().c_str(), true);
     //NOTE - The port on which this request was received; appropriate as the port part of a URI.
@@ -60,7 +63,11 @@ std::string    runCgi(Response response)
     }
     args[2] = NULL;
     
+    write(fd_post[1], response.getClientRequest().getParam().c_str(), response.getClientRequest().getParam().size());
+    close(fd_post[1]);
     if (pipe(fd) == -1)
+        std::cout << "Error" << std::endl;
+    if (pipe(fd_post) == -1)
         std::cout << "Error" << std::endl;
     if ((pid = fork()) < 0)
         std::cout << "there is an error while calling" << std::endl;
@@ -68,6 +75,7 @@ std::string    runCgi(Response response)
     {
         close(fd[0]);
         dup2(fd[1], STDOUT_FILENO);
+        dup2(fd_post[0], STDIN_FILENO);
         if (execve(args[0], (char *const *)args, environ) < 0)
         {
             std::cout << "CGI NOT FOUND!" << std::endl;
@@ -76,6 +84,7 @@ std::string    runCgi(Response response)
     }
     else
     {
+        close(fd_post[0]);
         close(fd[1]);
         while ((r = read(fd[0], buffer, sizeof(buffer))))
             str.append(buffer, r);
