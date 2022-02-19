@@ -199,10 +199,10 @@ int     Response::buildResponse()
 									infile.open(filePath + "/" + clientRequest.getBodies().at(i).fileName, std::ios_base::out);
 									statusCode = CREATED;
 									statusMessage = "Created";
+									if (!infile.is_open()) {
+										return(returnStatus(INTERNALSERVERERROR, "Internal Server Error"));
+    								}
 								}
-								if (!infile.is_open()) {
-									return(returnStatus(INTERNALSERVERERROR, "Internal Server Error"));
-    							}
 								infile << clientRequest.getBodies().at(i).body;
 								infile.close();
 							}
