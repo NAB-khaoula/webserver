@@ -17,6 +17,7 @@ private:
 	std::string                 _upload;
 	std::string                 _cgi;
 	std::string                 _upload_enble;
+	std::string					_delete_enble;
 
 public:
 	Location();
@@ -29,6 +30,7 @@ public:
 	std::map<int, std::string>   &get_return();
 	std::string                  get_upload();
 	std::string                  get_upload_enble();
+	std::string                  get_delete_enble();
 	std::string                  get_cgi();
 
 	void                        set_path(std::string, int &);
@@ -39,6 +41,7 @@ public:
 	void                        set_return(std::string, int  &);
 	void                        set_upload(std::string, int &);
 	void                        set_upload_enble(std::string, int &);
+	void                        set_delete_enble(std::string, int &);
 	void                        set_cgi(std::string, int &);
 	void                        clear();
 	~Location();

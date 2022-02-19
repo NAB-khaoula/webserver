@@ -47,12 +47,12 @@ std::string    runCgi(Response response)
     args[1] = NULL;
     if (fullPath.find(".php") != std::string::npos)
     {
-        path_cgi = "/Users/mbelaman/goinfre/.brew/bin/php-cgi";
+        path_cgi = response.get_location().get_cgi(); 
         args[0] = (char *)path_cgi.c_str();
     }
     else
     {
-        path_cgi = "/usr/bin/python";
+        path_cgi = response.get_location().get_cgi();
         args[0] = (char *)path_cgi.c_str();
         args[1] = getenv("SCRIPT_FILENAME");
     }

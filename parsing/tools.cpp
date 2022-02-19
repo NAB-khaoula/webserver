@@ -122,7 +122,7 @@ int check_directive_loc(std::string key)
     if (!key.compare("autoindex") || !key.compare("index") ||
         !key.compare("allow_methods") || !key.compare("return") ||
         !key.compare("fastcgi_pass") || !key.compare("upload_enable") ||
-        !key.compare("upload_store"))
+        !key.compare("upload_store") || !key.compare("delete_enable"))
         return 0;
     return 1;
 }
@@ -174,6 +174,8 @@ void    errors(int index, int &nb_line, std::string line)
         "\033[1;31mSyntax Error: \033[0m\033[0m\033[1;37munexpected '{'\033[0m",//31
         "\033[1;31mSyntax Error: \033[0m\033[0m\033[1;37munexpected end of file, expecting '}'\033[0m",//32
         "\033[1;31mSyntax Error: \033[0m\033[0m\033[1;37mdirective is not allowed here\033[0m",//33
+        "\033[1;31mSyntax Error: \033[0m\033[1;37minvalid number of arguments in 'delete_enable' directive\033[0m",//34
+        "\033[1;31mSyntax Error: \033[0m\033[1;37mduplicate delete_enable " + line + "\033[0m",//35
     };
     std::string str = std::to_string(nb_line);
     throw std::runtime_error("\033[1;31m|line " + str + "| \033[0m" + arr[index]);

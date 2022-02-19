@@ -20,6 +20,7 @@ std::vector<std::string>    Location::get_methods() {return  _arr_methods;}
 std::map<int, std::string>  &Location::get_return() {return  _return;}
 std::string                 Location::get_upload() {return  _upload;}
 std::string                 Location::get_upload_enble() {return _upload_enble;}
+std::string                 Location::get_delete_enble() {return _delete_enble;}
 std::string                 Location::get_cgi() {return _cgi;}
 
 void    Location::set_path(std::string path, int &nb_line)
@@ -78,6 +79,21 @@ void    Location::set_upload_enble(std::string enable, int &nb_line)
     else 
         errors(29, nb_line, enable);
 }
+
+void    Location::set_delete_enble(std::string enable, int &nb_line)
+{
+    if (this->get_delete_enble().empty())
+    {
+        enable = rightTrim(enable);
+        if (!enable.compare("off") || !enable.compare("on"))
+            _delete_enble = enable;
+        else
+            errors(34, nb_line, enable);
+    }
+    else
+        errors(35, nb_line, enable);
+}
+
 
 void    Location::set_upload(std::string path_upload, int &nb_line)
 {
