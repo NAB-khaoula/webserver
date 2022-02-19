@@ -1,6 +1,6 @@
 #include "Request.hpp"
 
-Request::Request(): upload(false), requestLine(std::vector<std::string>()), httpHeaders(std::map<std::string, std::string>()){}
+Request::Request(): upload(false), requestLine(std::vector<std::string>()), httpHeaders(std::map<std::string, std::string>()), contentLength(0){}
 
 Request::~Request(){}
 
@@ -34,6 +34,11 @@ std::string		&Request::getContentType()
 	return (contentType);
 }
 
+std::string		&Request::getQueryString()
+{
+	return (queryString);
+}
+
 void		Request::setContentLength()
 {
 	std::map<std::string, std::string>::iterator i;
@@ -59,7 +64,7 @@ void		Request::setContentType()
 	}
 }
 
-void		Request::setFormData(std::string& req, std::string type)
+void		Request::setFormData(std::string& req)
 {
 	std::vector<std::string>	bodyHeaders;
 	Body			body;
@@ -85,6 +90,9 @@ void		Request::setFormData(std::string& req, std::string type)
 		{
 			body.name = body.ContentDispo.substr(9, body.ContentDispo.size() - 1 - 9);
 			body.ContentDispo.erase(9);
+			if (!queryString.empty())
+				queryString += "&";
+			queryString += body.name + "=" + body.body;
 		}
 		bodies.push_back(body);
 		bzero(&body, sizeof(Body));
@@ -95,17 +103,18 @@ void		Request::setFormData(std::string& req, std::string type)
 void		Request::parseBody(std::string req)
 {
 	Body			body;
-	std::string		type;
 	
 	setContentType();
 	setContentLength();
-	if (!type.empty() && !boundary.empty())
-		setFormData(req, type);
-	else if (!type.empty())
+	if (!contentType.empty() && !boundary.empty())
+		setFormData(req);
+	else if (!contentType.empty())
 	{
 		body.body = req;
+		queryString += body.body;
 		bodies.push_back(body);
 	}
+	std::cout << getQueryString() << "\n";
 	// ****Printing body****
 	// std::ofstream	out_file("bodies.txt");
 	// std::vector<Body>::iterator it = bodies.begin();

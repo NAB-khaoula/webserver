@@ -30,6 +30,7 @@ class Request{
 		// Body variables
 		std::vector<Body>					bodies;
 		std::string							contentType;
+		std::string							queryString;
 		int									contentLength;
 		std::string							boundary;
 	public:
@@ -45,6 +46,7 @@ class Request{
 		std::vector<Body>					&getBodies();
 		std::string							&getHttpVersion();
 		std::string							&getContentType();
+		std::string							&getQueryString();
 		int									&getContentLength();
 		std::map<std::string, std::string>	&getHttpHeaders();
 		bool								getUpload();
@@ -52,7 +54,7 @@ class Request{
 		// Setters
 		void								setContentType();
 		void								setContentLength();
-		void								setFormData(std::string& req, std::string type);
+		void								setFormData(std::string& req);
 		
 		std::vector<std::string>    		ft_splitCrlf(std::string &str,const std::string &c);
 		void								parseBody(std::string req);
