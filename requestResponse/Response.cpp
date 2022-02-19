@@ -174,10 +174,9 @@ int     Response::buildResponse()
 			}
 			else
 			{
-				if (clientRequest.getUpload() && (clientRequest.getMethod() == "POST" || clientRequest.getMethod() == "DELETE"))
+				if (clientRequest.getUpload())
 				{
-					//FIXME check enable_delete!
-					if (location.get_upload_enble() == "on")
+					if (location.get_upload_enble() == "on" || location.get_delete_enble() == "on")
 					{
 						for(int i = 0; i < clientRequest.getBodies().size(); i++)
 						{
@@ -186,16 +185,24 @@ int     Response::buildResponse()
 								if (location.get_upload() != "")
 									filePath = virtualServer->get_root() + location.get_upload();
 								std::fstream	infile;
-								infile.open(filePath + "/" + clientRequest.getBodies().at(i).fileName, std::ios_base::out);
-								if (!infile.is_open()) {
-									statusCode = INTERNALSERVERERROR;
-									statusMessage = "Internal Server Error";
-    							}
-								else
+								if (location.get_delete_enble() == "on" && clientRequest.getMethod() == "DELETE")
 								{
+									if (remove((filePath + "/" + clientRequest.getBodies().at(i).fileName).c_str()) != 0)
+									{
+										return(returnStatus(INTERNALSERVERERROR, "Internal Server Error"));
+									}
+									statusCode = OK;
+									statusMessage = "OK";
+								}
+								else if (location.get_upload_enble() == "on" && clientRequest.getMethod() != "DELETE")
+								{
+									infile.open(filePath + "/" + clientRequest.getBodies().at(i).fileName, std::ios_base::out);
 									statusCode = CREATED;
 									statusMessage = "Created";
 								}
+								if (!infile.is_open()) {
+									return(returnStatus(INTERNALSERVERERROR, "Internal Server Error"));
+    							}
 								infile << clientRequest.getBodies().at(i).body;
 								infile.close();
 							}
@@ -241,7 +248,6 @@ int     Response::buildResponse()
 		return (returnStatus(FORBIDDEN, "FORBIDDEN"));
 	else
 		return (returnStatus(METHODNOTALLOWED, std::string("METHOD NOT ALLOWED")));
-	return (returnStatus(NOTFOUND, "NOT FOUND"));
 }
 
 std::string	&Response::returnResponse(){
