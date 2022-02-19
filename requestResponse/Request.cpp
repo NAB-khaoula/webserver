@@ -20,18 +20,38 @@ std::vector<std::string>    Request::ft_splitCrlf(std::string &str, const std::s
     return words;
 }
 
-void		Request::getContentType(std::string& type)
+int		&Request::getContentLength()
+{
+	return (contentLength);
+}
+
+std::string		&Request::getContentType()
+{
+	return (contentType);
+}
+
+void		Request::setContentLength()
+{
+	std::map<std::string, std::string>::iterator i;
+	size_t	pos;
+
+	i = httpHeaders.find("Content-Length");
+	if (i != httpHeaders.end())
+		contentLength = stoi(i->second);
+}
+
+void		Request::setContentType()
 {
 	std::map<std::string, std::string>::iterator i;
 	size_t	pos;
 
 	i = httpHeaders.find("Content-Type");
 	if (i != httpHeaders.end())
-		type = i->second.substr(i->second.find(":") + 1);
-	if ((pos = type.find("; boundary=")) != std::string::npos)
+		contentType = i->second.substr(i->second.find(":") + 1);
+	if ((pos = contentType.find("; boundary=")) != std::string::npos)
 	{
-		boundary = "--" + type.substr(pos + 11);
-		type.erase(pos);
+		boundary = "--" + contentType.substr(pos + 11);
+		contentType.erase(pos);
 	}
 }
 
@@ -73,7 +93,8 @@ void		Request::parseBody(std::string req)
 	Body			body;
 	std::string		type;
 	
-	getContentType(type);
+	setContentType();
+	setContentLength();
 	if (!type.empty() && !boundary.empty())
 		setFormData(req, type);
 	else if (!type.empty())
