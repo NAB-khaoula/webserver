@@ -21,6 +21,7 @@
 #define FORBIDDEN			403
 #define	NOTFOUND 			404
 #define METHODNOTALLOWED	405
+#define INTERNALSERVERERROR	500
 
 class Server;
 class Request;

@@ -112,9 +112,9 @@ bool	Request::uploadFile(){
 
 Request::Request(std::string requestString)
 {
-	std::cout << "*************" << std::endl;
-	std::cout << requestString << std::endl;
-	std::cout << "*************" << std::endl;
+	// std::cout << "*************" << std::endl;
+	// std::cout << requestString << std::endl;
+	// std::cout << "*************" << std::endl;
 	SplitFirstLine(requestString);
 	this->SplitHeader(ft_splitCrlf(ft_splitCrlf(requestString, "\r\n\r\n").at(0), "\r\n"), ':');
 	// std::cout << requestString << std::endl;
