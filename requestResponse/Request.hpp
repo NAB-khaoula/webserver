@@ -23,6 +23,7 @@ class Request{
 	protected:
 		bool								upload;
 		std::vector<std::string>			requestLine;
+		std::string							param;
 		std::map<std::string, std::string>	URLVariable;
 		std::map<std::string, std::string>	httpHeaders;
 
@@ -35,6 +36,7 @@ class Request{
 		Request(std::string);
 		~Request();
 		std::vector<std::string>			&getRequestLine();
+		std::string							&getParam();
 		std::string							&getMethod();
 		std::string							&getPath();
 		std::vector<Body>					&getBodies();
