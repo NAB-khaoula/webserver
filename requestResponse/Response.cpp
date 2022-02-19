@@ -93,6 +93,8 @@ bool	Response::findUploadLocation(){
 }
 
 bool	Response::allowedMethods(){
+	if (location.get_methods().empty())
+		return false;
 	for (int i = 0; i < location.get_methods().size(); i++){
 		if (!(location.get_methods().at(i).compare(clientRequest.getMethod())))
 			return true;
@@ -109,15 +111,28 @@ int		Response::returnStatus(int status_code, std::string status_message){
 	statusCode = status_code;
 	if (statusCode != OK)
 	{
-		for(std::map<int, std::string>::iterator it = virtualServer->get_err_pages().begin(); it != virtualServer->get_err_pages().end(); it++)
+		if (statusCode == CREATED)
 		{
-			if (it->first == statusCode)
+			for(int i = 0; i < this->location.get_index().size(); i++)
 			{
-				filePath = virtualServer->get_root() + it->second;
-				return (statusCode);
+				if (accessFile(filePath + '/' + location.get_index().at(i)))
+				{
+					filePath = filePath + '/' + location.get_index().at(i);
+				}
 			}
 		}
-		filePath = virtualServer->get_root() + "/errors/" + std::to_string(statusCode) + ".html";
+		else
+		{
+			for(std::map<int, std::string>::iterator it = virtualServer->get_err_pages().begin(); it != virtualServer->get_err_pages().end(); it++)
+			{
+				if (it->first == statusCode)
+				{
+					filePath = virtualServer->get_root() + it->second;
+					return (statusCode);
+				}
+			}
+			filePath = virtualServer->get_root() + "/errors/" + std::to_string(statusCode) + ".html";
+		}
 	}
 	return (statusCode);
 }
@@ -146,6 +161,7 @@ int     Response::buildResponse()
 	struct stat buf;
 	this->virtualServer = this->findVirtualServer();
 	this->findLocation();
+	std::cout << "location  " << location.get_path() << std::endl;
 	this->filePath = virtualServer->get_root() + clientRequest.getPath();
 	stat(filePath.c_str(), &buf);
 	if (badRequest())
@@ -207,7 +223,17 @@ int     Response::buildResponse()
 							}
 						}
 					}
-					cgiString = runCgi(*this);
+					for(int i = 0; i < this->location.get_index().size(); i++)
+					{
+						if (accessFile(filePath + '/' + location.get_index().at(i)))
+						{
+							filePath = filePath + '/' + location.get_index().at(i);
+							statusCode = OK;
+							statusMessage = "OK";
+							if(filePath.find(".py") != std::string::npos || filePath.find(".php") != std::string::npos)
+								cgiString = runCgi(*this);
+						}
+					}
 					return (returnStatus(statusCode, statusMessage));
 				}
 				if (filePath.back() != '/')
@@ -306,12 +332,18 @@ std::string &Response::indexFound(){
 	}	
 	if (statusCode == METHODNOTALLOWED)
 	{
-		//TODO -  need to fix the allow header;
 		stringJoinedResponse += "Allow: ";
-		stringJoinedResponse +=	redirection; 
+		for(int i = 0; i < location.get_methods().size(); i++)
+		{
+			stringJoinedResponse += location.get_methods().at(i);
+			if(i != location.get_methods().size() - 1)
+				stringJoinedResponse += " , ";
+		}
 		stringJoinedResponse +=	" \r\n"; 
 	}	
-	stringJoinedResponse += "Connection: close\r\n";
+	stringJoinedResponse += "Connection: ";
+	stringJoinedResponse += clientRequest.getHttpHeaders().find("Connection")->second;
+	stringJoinedResponse +=	" \r\n"; 
 	// if(this->clientRequest.getHttpHeaders().find("Sec-Fetch-Dest")->second == std::string("style"))
 	// 	stringJoinedResponse +=  "Content-Type: text/css\r\n";
 	// else if (this->clientRequest.getHttpHeaders().find("Sec-Fetch-Dest")->second == std::string("script"))
