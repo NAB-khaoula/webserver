@@ -13,11 +13,13 @@ std::string    runCgi(Response response)
     std::string str;
     std::string path_cgi;
 
+    std::string fullPath = response.get_filePath();
+    std::string filename = fullPath.substr(fullPath.find_last_of("/") + 1);
 
-    std::string filename = response.get_filePath();
-    std::cout << "|" + filename + "|" << std::endl;
     //NOTE - The full path to the CGI script.
-    setenv("SCRIPT_FILENAME", filename.c_str(), true);
+    setenv("SCRIPT_FILENAME", fullPath.c_str(), true);
+    //NOTE - The name of the CGI script.
+    setenv("SCRIPT_NAME", filename.c_str(), 1);
     //NOTE - This variable is specific to requests made with HTTP.
     setenv("REQUEST_METHOD", "GET", true);
     //NOTE - If cgi.force_redirect is turned on, and you are not running under web servers, you may need to set an environment variable name that PHP will look for to know it is OK to continue execution.
@@ -25,7 +27,7 @@ std::string    runCgi(Response response)
     //NOTE - The version of the CGI specification to which this server complies
     setenv("GATEWAY_INTERFACE", "CGI/1.1", true);
     //NOTE - A path to be interpreted by the CGI script.
-    setenv("PATH_INFO", "/Users/mbelaman/Desktop/webserver/parsing/", true);
+    setenv("PATH_INFO", "/Users/mbelaman/Desktop/webserver", true);
     //NOTE - The length of the query information. It is available only for POST requests.
     setenv("CONTENT_LENGTH", "", true);
     //NOTE - The data type of the content. Used when the client is sending attached content to the server. For example, file upload.
@@ -38,16 +40,22 @@ std::string    runCgi(Response response)
     setenv("SERVER_PORT", "", true);
     //NOTE - The name and revision of the information protocol this request came in with.
     setenv("SERVER_PROTOCOL", "", true);
-    //NOTE - The name and version of the information server software answering the request (and running the gateway).
-    setenv("SERVER_SOFTWARE", "", true);
 
-    // path_cgi = "/Users/mbelaman/goinfre/.brew/bin/php-cgi";
-    path_cgi = "/usr/bin/python";
 
     extern char **environ;
     char **args = new char*[3];
-    args[0] = (char *)path_cgi.c_str();
-    args[1] = getenv("SCRIPT_FILENAME");
+    args[1] = NULL;
+    if (fullPath.find(".php") != std::string::npos)
+    {
+        path_cgi = "/Users/mbelaman/goinfre/.brew/bin/php-cgi";
+        args[0] = (char *)path_cgi.c_str();
+    }
+    else
+    {
+        path_cgi = "/usr/bin/python";
+        args[0] = (char *)path_cgi.c_str();
+        args[1] = getenv("SCRIPT_FILENAME");
+    }
     args[2] = NULL;
     
     if (pipe(fd) == -1)
@@ -73,7 +81,6 @@ std::string    runCgi(Response response)
     close(fd[0]);
     return str.substr(str.find("\r\n\r\n"), str.length());
 }
-
 
 
 

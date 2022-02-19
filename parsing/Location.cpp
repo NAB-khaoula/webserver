@@ -193,10 +193,7 @@ void    Location::set_cgi(std::string cgi, int &nb_line)
 {
     cgi = rightTrim(cgi);
     if (cgi.empty())
-    {
-        std::cout << "empty\n";
         errors(15, nb_line, cgi);
-    }
     if (cgi.find(" ") != std::string::npos || cgi.find("\t") != std::string::npos)
         errors(15, nb_line, cgi);
     else

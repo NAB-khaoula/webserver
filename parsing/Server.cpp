@@ -230,7 +230,6 @@ void fill_location(std::string &key, std::string &value, t_WebServ &ws, int &nb_
         ws.locat.set_upload(value, nb_line);
     else
         errors(3, nb_line, key);
-
 }
 
 void    fill_server(std::string key, std::string value, std::string &line, t_WebServ &ws, int &nb_line)
