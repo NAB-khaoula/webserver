@@ -4,6 +4,10 @@ Request::Request(): upload(false), requestLine(std::vector<std::string>()), http
 
 Request::~Request(){}
 
+std::string	&Request::getParam(){
+	return param;
+}
+
 std::vector<std::string>    Request::ft_splitCrlf(std::string &str, const std::string &c)
 {
     std::vector<std::string> words;
@@ -166,7 +170,10 @@ void			Request::SplitFirstLine(std::string &requestString)
 	}
 	this->requestLine.push_back(strSplited);
 	if ((pos = requestLine[1].find('?')) != std::string::npos)
+	{
+		param = requestLine[1].substr(pos + 1);
 		this->parseParam(requestLine[1], pos);
+	}
 }
 
 void    Request::SplitHeader(std::vector<std::string> vect, char c)
