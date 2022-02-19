@@ -58,10 +58,7 @@ void		Request::setContentType()
 	if (i != httpHeaders.end())
 		contentType = i->second.substr(i->second.find(":") + 1);
 	if ((pos = contentType.find("; boundary=")) != std::string::npos)
-	{
 		boundary = "--" + contentType.substr(pos + 11);
-		contentType.erase(pos);
-	}
 }
 
 void		Request::setFormData(std::string& req)
@@ -145,9 +142,6 @@ bool	Request::uploadFile(){
 
 Request::Request(std::string requestString)
 {
-	std::cout << "*************" << std::endl;
-	std::cout << requestString << std::endl;
-	std::cout << "*************" << std::endl;
 	SplitFirstLine(requestString);
 	this->SplitHeader(ft_splitCrlf(ft_splitCrlf(requestString, "\r\n\r\n").at(0), "\r\n"), ':');
 	parseBody(requestString);

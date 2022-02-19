@@ -1,10 +1,11 @@
 <?php
 
 // Show all information, defaults to INFO_ALL
-phpinfo();
+// phpinfo();
 
 // Show just the module information.
 // phpinfo(8) yields identical results.
-phpinfo(INFO_MODULES);
+// phpinfo(INFO_MODULES);
+var_dump($_POST);
 
 ?>
