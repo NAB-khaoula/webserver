@@ -114,7 +114,6 @@ void		Request::parseBody(std::string req)
 		queryString += body.body;
 		bodies.push_back(body);
 	}
-	std::cout << getQueryString() << "\n";
 	// ****Printing body****
 	// std::ofstream	out_file("bodies.txt");
 	// std::vector<Body>::iterator it = bodies.begin();
