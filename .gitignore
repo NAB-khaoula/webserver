@@ -1,4 +1,4 @@
 webserv
 .vscode
 *.txt
-/src/webserv.conf
+src/webserv.conf
