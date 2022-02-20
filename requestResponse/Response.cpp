@@ -161,7 +161,6 @@ int     Response::buildResponse()
 	struct stat buf;
 	this->virtualServer = this->findVirtualServer();
 	this->findLocation();
-	std::cout << "location  " << location.get_path() << std::endl;
 	this->filePath = virtualServer->get_root() + clientRequest.getPath();
 	stat(filePath.c_str(), &buf);
 	if (badRequest())
@@ -231,7 +230,10 @@ int     Response::buildResponse()
 							statusCode = OK;
 							statusMessage = "OK";
 							if(filePath.find(".py") != std::string::npos || filePath.find(".php") != std::string::npos)
+							{
 								cgiString = runCgi(*this);
+								break;
+							}
 						}
 					}
 					return (returnStatus(statusCode, statusMessage));
@@ -251,14 +253,21 @@ int     Response::buildResponse()
 							statusCode = OK;
 							statusMessage = "OK";
 							if(filePath.find(".py") != std::string::npos || filePath.find(".php") != std::string::npos)
+							{
 								cgiString = runCgi(*this);
+								break;
+							}
 							return (returnStatus(statusCode, std::string(statusMessage)));
 						}
 					}
 					if(!location.get_autoindex().compare("on"))
 					{
 						std::cout << "autoindex on need to create the appropriate webpage!!!" << std::endl;
-						exit(0);
+						filePath = virtualServer->get_root() + "/index.py"; //FIXME - need to update this path
+						std::cerr << filePath << std::endl;
+						std::cerr << "test" << std::endl;
+						cgiString = runCgi(*this);
+						return(returnStatus(OK, "OK"));
 					}
 					return (returnStatus(NOTFOUND, "NOT FOUND"));
 				}
@@ -343,15 +352,7 @@ std::string &Response::indexFound(){
 	}	
 	stringJoinedResponse += "Connection: ";
 	stringJoinedResponse += clientRequest.getHttpHeaders().find("Connection")->second;
-	stringJoinedResponse +=	" \r\n"; 
-	// if(this->clientRequest.getHttpHeaders().find("Sec-Fetch-Dest")->second == std::string("style"))
-	// 	stringJoinedResponse +=  "Content-Type: text/css\r\n";
-	// else if (this->clientRequest.getHttpHeaders().find("Sec-Fetch-Dest")->second == std::string("script"))
-	// 	stringJoinedResponse +=  "Content-Type: text/javascript\r\n";
-	// else if (this->clientRequest.getHttpHeaders().find("Sec-Fetch-Dest")->second == std::string("image"))
-	// 	stringJoinedResponse +=  "Content-Type: image/png\r\n"; //REVIEW - review the image types
-	// else
-	// 	stringJoinedResponse += "Content-Type: text/html\r\n";
+	stringJoinedResponse +=	" \r\n";
 	stringJoinedResponse += "Content-Type: */*\r\n";
 	stringJoinedResponse += "Date: ";
 	stringJoinedResponse += DateGMT();

@@ -63,7 +63,7 @@ std::string    runCgi(Response response)
     }
     else
     {
-        path_cgi = response.get_location().get_cgi();
+        path_cgi = "/usr/bin/python";
         args[0] = (char *)path_cgi.c_str();
         args[1] = getenv("SCRIPT_FILENAME");
     }
@@ -86,6 +86,7 @@ std::string    runCgi(Response response)
         dup2(fd_post[0], STDIN_FILENO);
         close(fd_post[0]);
         close(fd_post[1]);
+        std::cerr << "\n++++++" << args[0] << "++++++" << response.get_filePath() << "+++++++++\n";
         if (execve(args[0], (char *const *)args, environ) < 0)
         {
             std::cout << "CGI NOT FOUND!" << std::endl;
