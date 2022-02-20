@@ -225,7 +225,9 @@ void    Location::clear()
     _return.clear();
     _upload = "";
     _match = false;
+    _upload_enble = "";
 }
+
 
 Location::~Location()
 {

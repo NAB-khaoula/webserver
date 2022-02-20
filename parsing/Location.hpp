@@ -7,44 +7,44 @@
 
 class Location
 {
-private:
-	std::string                 _path;
-	bool                        _match;
-	std::string                 _autoindex;
-	std::vector<std::string>    _arr_index;
-	std::vector<std::string>    _arr_methods;
-	std::map<int, std::string>  _return;
-	std::string                 _upload;
-	std::string                 _cgi;
-	std::string                 _upload_enble;
-	std::string					_delete_enble;
-
-public:
-	Location();
+	private:
+		std::string                 _path;
+		bool                        _match;
+		std::string                 _autoindex;
+		std::vector<std::string>    _arr_index;
+		std::vector<std::string>    _arr_methods;
+		std::map<int, std::string>  _return;
+		std::string                 _upload;
+		std::string                 _cgi;
+		std::string                 _upload_enble;
+		std::string					_delete_enble;
 	
-	std::string                  get_path();
-	bool                         get_match();
-	std::string                  get_autoindex();
-	std::vector<std::string>     get_index();
-	std::vector<std::string>     get_methods();
-	std::map<int, std::string>   &get_return();
-	std::string                  get_upload();
-	std::string                  get_upload_enble();
-	std::string                  get_delete_enble();
-	std::string                  get_cgi();
-
-	void                        set_path(std::string, int &);
-	void                        set_match(bool);
-	void                        set_autoindex(std::string, int &);
-	void                        set_index(std::string, int &);
-	void                        set_methods(std::string, int &);
-	void                        set_return(std::string, int  &);
-	void                        set_upload(std::string, int &);
-	void                        set_upload_enble(std::string, int &);
-	void                        set_delete_enble(std::string, int &);
-	void                        set_cgi(std::string, int &);
-	void                        clear();
-	~Location();
+	public:
+		Location();
+		
+		std::string                  get_path();
+		bool                         get_match();
+		std::string                  get_autoindex();
+		std::vector<std::string>     get_index();
+		std::vector<std::string>     get_methods();
+		std::map<int, std::string>   &get_return();
+		std::string                  get_upload();
+		std::string                  get_upload_enble();
+		std::string                  get_delete_enble();
+		std::string                  get_cgi();
+	
+		void                        set_path(std::string, int &);
+		void                        set_match(bool);
+		void                        set_autoindex(std::string, int &);
+		void                        set_index(std::string, int &);
+		void                        set_methods(std::string, int &);
+		void                        set_return(std::string, int  &);
+		void                        set_upload(std::string, int &);
+		void                        set_upload_enble(std::string, int &);
+		void                        set_delete_enble(std::string, int &);
+		void                        set_cgi(std::string, int &);
+		void                        clear();
+		~Location();
 };
 
 std::vector<std::string>    ft_splitSpace(std::string str, char c);
