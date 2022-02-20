@@ -161,7 +161,6 @@ int     Response::buildResponse()
 	struct stat buf;
 	this->virtualServer = this->findVirtualServer();
 	this->findLocation();
-	std::cout << "location  " << location.get_path() << std::endl;
 	this->filePath = virtualServer->get_root() + clientRequest.getPath();
 	stat(filePath.c_str(), &buf);
 	if (badRequest())

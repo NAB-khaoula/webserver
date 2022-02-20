@@ -114,13 +114,14 @@ void		Request::parseBody(std::string req)
 		queryString += body.body;
 		bodies.push_back(body);
 	}
+	// std::cout << contentType << std::endl;
 	// std::cout << getQueryString() << std::endl;
 	// ****Printing body****
 	// std::ofstream	out_file("bodies.txt");
 	// std::vector<Body>::iterator it = bodies.begin();
 	// while (it != bodies.end())
 	// {
-	// 	if (contentType == "multipart/form-data")
+	// 	if (contentType.find("multipart/form-data") != std::string::npos)
 	// 	{
 	// 		out_file << "| ContentDispo: " << it->ContentDispo << " |\n";
 	// 		out_file << "| ContentType : " << it->ContentType << " |\n";

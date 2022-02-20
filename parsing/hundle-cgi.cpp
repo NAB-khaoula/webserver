@@ -19,10 +19,6 @@ std::string    runCgi(Response response)
     std::string filename = fullPath.substr(fullPath.find_last_of("/") + 1);
     std::string req_method = response.getClientRequest().getMethod();
 
-    std::cout << response.getClientRequest().getContentLength() << " |\n";
-    std::cout << response.getClientRequest().getContentType() << " |\n";
-    std::cout << response.getClientRequest().getQueryString() << " |\n";
-
     //NOTE - The full path to the CGI script.
     setenv("SCRIPT_FILENAME", fullPath.c_str(), true);
     //NOTE - The name of the CGI script.
@@ -38,7 +34,7 @@ std::string    runCgi(Response response)
     //NOTE - The length of the query information. It is available only for POST requests.
     setenv("CONTENT_LENGTH", (std::to_string(response.getClientRequest().getContentLength())).c_str(), true);
     //NOTE - The data type of the content. Used when the client is sending attached content to the server. For example, file upload.
-    if (response.getClientRequest().getContentType().find("multipart/form-data") != std::string::npos)
+	if (response.getClientRequest().getContentType().find("multipart/form-data") != std::string::npos)
         setenv("CONTENT_TYPE", "application/x-www-form-urlencoded", true);
     else
         setenv("CONTENT_TYPE", response.getClientRequest().getContentType().c_str(), true);
