@@ -176,6 +176,7 @@ void    errors(int index, int &nb_line, std::string line)
         "\033[1;31mSyntax Error: \033[0m\033[0m\033[1;37mdirective is not allowed here\033[0m",//33
         "\033[1;31mSyntax Error: \033[0m\033[1;37minvalid number of arguments in 'delete_enable' directive\033[0m",//34
         "\033[1;31mSyntax Error: \033[0m\033[1;37mduplicate delete_enable " + line + "\033[0m",//35
+        "\033[1;31mSyntax Error: \033[0m\033[1;37mFastCGI binary is not correct fof 'PHP'\033[0m",//36
     };
     std::string str = std::to_string(nb_line);
     throw std::runtime_error("\033[1;31m|line " + str + "| \033[0m" + arr[index]);
