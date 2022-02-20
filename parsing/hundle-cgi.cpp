@@ -18,6 +18,8 @@ std::string    runCgi(Response response)
     std::string fullPath = response.get_filePath();
     std::string filename = fullPath.substr(fullPath.find_last_of("/") + 1);
     std::string req_method = response.getClientRequest().getMethod();
+    std::string path_cgi_php = "/Users/mbelaman/goinfre/.brew/bin/php-cgi";
+    std::string path_cgi_py = "/usr/bin/python";
 
     //NOTE - The full path to the CGI script.
     setenv("SCRIPT_FILENAME", fullPath.c_str(), true);
@@ -53,18 +55,13 @@ std::string    runCgi(Response response)
     args[1] = NULL;
     if (fullPath.find(".php") != std::string::npos)
     {
-        path_cgi = response.get_location().get_cgi(); 
-        args[0] = (char *)path_cgi.c_str();
-        args[1] = getenv("SCRIPT_FILENAME");
-
+        args[0] = (char *)path_cgi_php.c_str();
+        args[1] = (char *)fullPath.c_str();
     }
     else
     {
-        path_cgi = "/usr/bin/python";
-        args[0] = (char *)path_cgi.c_str();
+        args[0] = (char *)path_cgi_py.c_str();
         args[1] = getenv("SCRIPT_FILENAME");
-        std::cout << args[0] << std::endl;
-        std::cout << args[1] << std::endl;
     }
     args[2] = NULL;
     
@@ -75,20 +72,18 @@ std::string    runCgi(Response response)
         std::cout << "Error" << std::endl;
     if (pipe(fd_post) == -1)
         std::cout << "Error" << std::endl;
-    
+
     write(fd_post[1], response.getClientRequest().getQueryString().c_str(), response.getClientRequest().getQueryString().size());
-    
     if ((pid = fork()) < 0)
         std::cout << "there is an error while calling" << std::endl;
     if (pid == 0)
     {
         dup2(fd[1], STDOUT_FILENO);
+        dup2(fd_post[0], STDIN_FILENO);
         close(fd[0]);
         close(fd[1]);
-        dup2(fd_post[0], STDIN_FILENO);
         close(fd_post[0]);
         close(fd_post[1]);
-        std::cerr << "\n++++++" << args[0] << "++++++" << response.get_filePath() << "+++++++++\n";
         if (execve(args[0], (char *const *)args, environ) < 0)
         {
             std::cout << "CGI NOT FOUND!" << std::endl;
@@ -97,15 +92,15 @@ std::string    runCgi(Response response)
     }
     else
     {
-        close(fd_post[1]);
-        close(fd_post[0]);
         close(fd[1]);
-        // wait(&pid);
-        dup2(old_fd[1], STDOUT_FILENO);
-        dup2(old_fd[0], STDIN_FILENO);
+        close(fd_post[0]);
+        close(fd_post[1]);
         while ((r = read(fd[0], buffer, sizeof(buffer))))
             str.append(buffer, r);
         close(fd[0]);
+        wait(&pid);
+        dup2(old_fd[1], STDOUT_FILENO);
+        dup2(old_fd[0], STDIN_FILENO);
         close(old_fd[1]);
         close(old_fd[0]);
     }

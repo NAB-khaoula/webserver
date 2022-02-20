@@ -263,7 +263,7 @@ int     Response::buildResponse()
 					if(!location.get_autoindex().compare("on"))
 					{
 						std::cout << "autoindex on need to create the appropriate webpage!!!" << std::endl;
-						filePath = virtualServer->get_root() + "/index.py"; //FIXME - need to update this path
+						filePath = virtualServer->get_root() + "/index.php"; //FIXME - need to update this path
 						std::cerr << filePath << std::endl;
 						std::cerr << "test" << std::endl;
 						cgiString = runCgi(*this);
