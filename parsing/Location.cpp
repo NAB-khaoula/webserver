@@ -7,7 +7,6 @@ Location::Location()
     _autoindex = "off";
     _upload = "";
     _upload_enble = "";
-    _cgi = "";
     _arr_methods.clear();
     _return.clear();
 }
@@ -21,7 +20,6 @@ std::map<int, std::string>  &Location::get_return() {return  _return;}
 std::string                 Location::get_upload() {return  _upload;}
 std::string                 Location::get_upload_enble() {return _upload_enble;}
 std::string                 Location::get_delete_enble() {return _delete_enble;}
-std::string                 Location::get_cgi() {return _cgi;}
 
 void    Location::set_path(std::string path, int &nb_line)
 {
@@ -205,17 +203,6 @@ void    Location::set_return(std::string _ret, int &nb_line)
 
 }
 
-void    Location::set_cgi(std::string cgi, int &nb_line)
-{
-    cgi = rightTrim(cgi);
-    if (cgi.empty())
-        errors(15, nb_line, cgi);
-    if (cgi.find(" ") != std::string::npos || cgi.find("\t") != std::string::npos)
-        errors(15, nb_line, cgi);
-    else
-        _cgi = cgi;
-}
-
 void    Location::clear()
 {
     _path = "";
@@ -227,7 +214,6 @@ void    Location::clear()
     _match = false;
     _upload_enble = "";
     _delete_enble = "";
-    _cgi = "";
 }
 
 

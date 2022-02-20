@@ -271,7 +271,6 @@ void    print_attr(t_WebServ &ws)
             std::cout << "\n";
             std::cout << it->second.get_upload_enble() << std::endl;
             std::cout << it->second.get_upload() << std::endl;
-            std::cout << it->second.get_cgi() << std::endl;
             j++;
         }
         

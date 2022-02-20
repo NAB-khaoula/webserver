@@ -222,8 +222,6 @@ void fill_location(std::string &key, std::string &value, t_WebServ &ws, int &nb_
         ws.locat.set_methods(value, nb_line);
     else if (!key.compare("return"))
         ws.locat.set_return(value, nb_line);
-    else if (!key.compare("fastcgi_pass"))
-        ws.locat.set_cgi(value, nb_line);
     else if (!key.compare("upload_enable"))
         ws.locat.set_upload_enble(value, nb_line);
     else if (!key.compare("delete_enable"))
