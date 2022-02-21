@@ -3,7 +3,7 @@
 Response::Response(){
 }
 
-Response::Response(Request requestClient, std::vector<Server> configParsed): cgiString() ,statusCode(-1), location(), stringJoinedResponse(std::string()), \
+Response::Response(Request requestClient, std::vector<Server> configParsed): cgiString(), cgiHeaders(),statusCode(-1), location(), stringJoinedResponse(std::string()), \
 clientRequest(requestClient), serverConfigData(configParsed){
 }
 
@@ -17,6 +17,14 @@ int			&Response::getStatusCode(){
 
 std::string	&Response::getStatusMessage(){
 	return statusMessage;
+}
+
+std::string	&Response::getCgiHeaders(){
+	return cgiHeaders;
+}
+
+void	Response::setCgiHeaders(std::string cgi_headers){
+	cgiHeaders = cgi_headers;
 }
 
 std::string	&Response::get_filePath(){
@@ -274,7 +282,7 @@ int     Response::buildResponse()
 
 									cgiString = runCgi(*this);
 								}
-								catch(std::string str)
+								catch(std::exception e)
 								{
 									return (returnStatus(INTERNALSERVERERROR, "Internal Server Error"));
 								}
@@ -346,10 +354,11 @@ std::string &Response::indexFound(){
 	if (cgiString.empty())
 	{
 		buffer << indexFile.rdbuf();
-		htmlString = buffer.str();
+		htmlString = "\r\n\r\n";
+		htmlString += buffer.str();
 	}
 	else
-		htmlString = cgiString;
+		htmlString = getCgiHeaders() + "\r\n\r\n" + cgiString;
 	stringJoinedResponse += clientRequest.getHttpVersion() + " "; 
 	stringJoinedResponse += std::to_string(statusCode) + " ";
 	stringJoinedResponse += statusMessage + " \r\n";
@@ -386,8 +395,6 @@ std::string &Response::indexFound(){
 		stringJoinedResponse += "Content-Type: */*\r\n";
 	stringJoinedResponse += "Date: ";
 	stringJoinedResponse += DateGMT();
-	stringJoinedResponse += "\r\n\r\n";
 	stringJoinedResponse += htmlString;
 	return stringJoinedResponse;
 }
-

@@ -32,6 +32,7 @@ class Response
 {
 	private:
 		std::string					cgiString;
+		std::string					cgiHeaders;
 		int							statusCode;
 		std::string					statusMessage;
 		std::string					filePath;
@@ -47,6 +48,8 @@ class Response
 		~Response();
 		//NOTE: getters for all attributes;
 		//NOTE: 
+		void		setCgiHeaders(std::string cgi_headers);
+		std::string	&getCgiHeaders();
 		std::string	&getCgiString();
 		int			&getStatusCode();
 		std::string	&getStatusMessage();

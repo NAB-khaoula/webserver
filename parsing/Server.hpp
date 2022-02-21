@@ -79,5 +79,5 @@ void                        fill_server(std::string, std::string, std::string &,
 void                        fill_location(std::string &, std::string &, struct ws &, int &);
 void                        print_attr(struct ws &);
 void                        begin_parser(struct ws &, char **);
-std::string                 runCgi(Response);
+std::string                 runCgi(Response&);
 #endif

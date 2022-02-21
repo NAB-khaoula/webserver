@@ -4,7 +4,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 
-std::string    runCgi(Response response)
+std::string    runCgi(Response &response)
 {
     pid_t       pid;
     int         fd[2];
@@ -104,7 +104,7 @@ std::string    runCgi(Response response)
         close(old_fd[1]);
         close(old_fd[0]);
     }
-    std::cout << str + "\n";
+    response.setCgiHeaders(str.substr(0, str.find("\r\n\r\n")));
     return str.substr(str.find("\r\n\r\n"), str.length());
 }
 
