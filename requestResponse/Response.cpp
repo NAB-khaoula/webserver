@@ -183,7 +183,16 @@ int     Response::buildResponse()
 				statusCode = OK;
 				statusMessage = "OK";
 				if(filePath.find(".py") != std::string::npos || filePath.find(".php") != std::string::npos)
-					cgiString = runCgi(*this);
+				{
+					try
+					{
+						cgiString = runCgi(*this);
+					}
+					catch(std::exception e)
+					{
+						return (returnStatus(INTERNALSERVERERROR, "Internal Server Error"));
+					}
+				}
 				return (returnStatus(statusCode, statusMessage));
 			}
 			else
@@ -231,7 +240,14 @@ int     Response::buildResponse()
 							statusMessage = "OK";
 							if(filePath.find(".py") != std::string::npos || filePath.find(".php") != std::string::npos)
 							{
-								cgiString = runCgi(*this);
+								try{
+
+									cgiString = runCgi(*this);
+								}
+								catch(std::exception e)
+								{
+									return (returnStatus(INTERNALSERVERERROR, "Internal Server Error"));
+								}
 								break;
 							}
 						}
@@ -254,7 +270,14 @@ int     Response::buildResponse()
 							statusMessage = "OK";
 							if(filePath.find(".py") != std::string::npos || filePath.find(".php") != std::string::npos)
 							{
-								cgiString = runCgi(*this);
+								try{
+
+									cgiString = runCgi(*this);
+								}
+								catch(std::string str)
+								{
+									return (returnStatus(INTERNALSERVERERROR, "Internal Server Error"));
+								}
 								break;
 							}
 							return (returnStatus(statusCode, std::string(statusMessage)));

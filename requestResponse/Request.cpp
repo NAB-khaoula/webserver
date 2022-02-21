@@ -233,6 +233,10 @@ std::map<std::string, std::string>	&Request::getHttpHeaders(){
 	return httpHeaders;
 }
 
+std::map<std::string, std::string>	&Request::getURLVariable(){
+	return URLVariable;
+}
+
 std::vector<Body>	&Request::getBodies(){
 	return bodies;
 }
