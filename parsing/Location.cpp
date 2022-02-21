@@ -62,7 +62,7 @@ void    Location::set_autoindex(std::string autoindex, int &nb_line)
         else
             errors(12, nb_line, autoindex);
     }
-    else 
+    else
         errors(25, nb_line, autoindex);
 }
 
@@ -76,7 +76,7 @@ void    Location::set_upload_enble(std::string enable, int &nb_line)
         else
             errors(17, nb_line, enable);
     }
-    else 
+    else
         errors(29, nb_line, enable);
 }
 
@@ -226,6 +226,8 @@ void    Location::clear()
     _upload = "";
     _match = false;
     _upload_enble = "";
+    _delete_enble = "";
+    _cgi = "";
 }
 
 

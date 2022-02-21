@@ -38,7 +38,6 @@ std::string    runCgi(Response response)
         setenv("CONTENT_TYPE", "application/x-www-form-urlencoded", true);
     else
         setenv("CONTENT_TYPE", response.getClientRequest().getContentType().c_str(), true);
-    std::cerr << getenv("CONTENT_TYPE") << "\n";
     //NOTE - The URL-encoded information that is sent with GET method request.
     setenv("QUERY_STRING", response.getClientRequest().getParam().c_str(), true);
     //NOTE - The server's hostname or IP Address
@@ -56,22 +55,29 @@ std::string    runCgi(Response response)
     {
         path_cgi = response.get_location().get_cgi(); 
         args[0] = (char *)path_cgi.c_str();
+        args[1] = getenv("SCRIPT_FILENAME");
+
     }
     else
     {
         path_cgi = "/usr/bin/python";
         args[0] = (char *)path_cgi.c_str();
         args[1] = getenv("SCRIPT_FILENAME");
+        std::cout << args[0] << std::endl;
+        std::cout << args[1] << std::endl;
     }
     args[2] = NULL;
     
     old_fd[0] = dup(0);
     old_fd[1] = dup(1);
+
     if (pipe(fd) == -1)
         std::cout << "Error" << std::endl;
     if (pipe(fd_post) == -1)
         std::cout << "Error" << std::endl;
+    
     write(fd_post[1], response.getClientRequest().getQueryString().c_str(), response.getClientRequest().getQueryString().size());
+    
     if ((pid = fork()) < 0)
         std::cout << "there is an error while calling" << std::endl;
     if (pid == 0)
@@ -94,7 +100,7 @@ std::string    runCgi(Response response)
         close(fd_post[1]);
         close(fd_post[0]);
         close(fd[1]);
-        wait(&pid);
+        // wait(&pid);
         dup2(old_fd[1], STDOUT_FILENO);
         dup2(old_fd[0], STDIN_FILENO);
         while ((r = read(fd[0], buffer, sizeof(buffer))))
