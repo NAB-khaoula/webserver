@@ -26,23 +26,19 @@ void    Location::set_path(std::string path, int &nb_line)
     int pos = 0;
 
     path = rightTrim(path);
-    if((pos = path.find("=")) != std::string::npos)
-    {
-        _match = true;
-        path.erase(0, pos + 1);
-    }
+    // if((pos = path.find("=")) != std::string::npos)
+    // {
+    //     _match = true;
+    //     path.erase(0, pos + 1);
+    // }
     path = leftTrim(path);
     if (path.empty())
         errors(1, nb_line, path);
     if (path.find(" ") != std::string::npos || path.find("\t") != std::string::npos ||
-        path.find(";") != std::string::npos)
+        path.find(";") != std::string::npos || path.find("*") != std::string::npos)
         errors(1, nb_line, path);
     else
-    {
-        if ((pos = path.find('*')) != std::string::npos)
-            path.erase(pos, 1);
         _path = path;
-    }
 }
 
 void    Location::set_match(bool    match)

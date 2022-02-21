@@ -48,8 +48,8 @@ std::string    runCgi(Response response)
     setenv("SERVER_PORT", response.getServer()->get_listen().c_str(), true);
     //NOTE - The name and revision of the information protocol this request came in with.
     setenv("SERVER_PROTOCOL", response.getClientRequest().getHttpVersion().c_str(), true);
-
-
+    
+    setenv("HTTP_COOKIE", response.getClientRequest().getParam().c_str(), true);
     extern char **environ;
     char **args = new char*[3];
     args[1] = NULL;
@@ -104,6 +104,7 @@ std::string    runCgi(Response response)
         close(old_fd[1]);
         close(old_fd[0]);
     }
+    std::cout << str + "\n";
     return str.substr(str.find("\r\n\r\n"), str.length());
 }
 

@@ -49,6 +49,7 @@ class Request{
 		std::string							&getQueryString();
 		int									&getContentLength();
 		std::map<std::string, std::string>	&getHttpHeaders();
+		std::map<std::string, std::string>	&get_url_var();
 		bool								getUpload();
 
 		// Setters
