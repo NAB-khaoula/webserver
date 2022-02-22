@@ -47,7 +47,6 @@ std::string		&Request::getConnection()
 void		Request::setConnection()
 {
 	std::map<std::string, std::string>::iterator i;
-	size_t	pos;
 
 	i = httpHeaders.find("Connection");
 	if (i != httpHeaders.end())
@@ -59,7 +58,6 @@ void		Request::setConnection()
 void		Request::setContentLength()
 {
 	std::map<std::string, std::string>::iterator i;
-	size_t	pos;
 
 	i = httpHeaders.find("Content-Length");
 	if (i != httpHeaders.end())
@@ -123,6 +121,7 @@ void		Request::parseBody(std::string req)
 	
 	setContentType();
 	setContentLength();
+	setConnection();
 	if (!contentType.empty() && !boundary.empty())
 		setFormData(req);
 	else if (!contentType.empty())
@@ -134,7 +133,7 @@ void		Request::parseBody(std::string req)
 }
 
 bool	Request::uploadFile(){
-	for(int i = 0; i < bodies.size(); i++)
+	for(size_t i = 0; i < bodies.size(); i++)
 	{
 		if (!bodies.at(i).fileName.empty())
 			return true;
@@ -159,7 +158,7 @@ void			Request::parseParam(std::string	&variableURL, size_t &pos)
 	std::vector<std::string>	vars;
 	std::string	tempURL;
 	std::string	sec;
-	int			i;
+	size_t		i;
 
 	tempURL = variableURL.substr(pos + 1);
 	variableURL.erase(pos);
@@ -203,7 +202,7 @@ void			Request::SplitFirstLine(std::string &requestString)
 void    Request::SplitHeader(std::vector<std::string> vect, char c)
 {
     size_t pos = 0;
-    for(int i = 0; i < vect.size(); i++)
+    for(size_t i = 0; i < vect.size(); i++)
 		if((pos = vect[i].find(c)) != std::string::npos)
 			this->httpHeaders.insert(std::make_pair<std::string, std::string>(vect[i].substr(0, pos), vect[i].substr(pos + 2)));
 }

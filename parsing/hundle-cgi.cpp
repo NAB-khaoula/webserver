@@ -17,8 +17,10 @@ std::string    runCgi(Response &response)
     std::string fullPath = response.get_filePath();
     std::string filename = fullPath.substr(fullPath.find_last_of("/") + 1);
     std::string req_method = response.getClientRequest().getMethod();
-    std::string path_cgi_php = "/Users/mbelaman/goinfre/.brew/bin/php-cgi";
+    size_t pos = response.getServer()->get_root().find("/", 7);
+    std::string path_cgi_php = response.getServer()->get_root().substr(0, pos) +  "/goinfre/.brew/bin/php-cgi";
     std::string path_cgi_py = "/usr/bin/python";
+
 
     //NOTE - The full path to the CGI script.
     setenv("SCRIPT_FILENAME", fullPath.c_str(), true);
@@ -106,7 +108,7 @@ std::string    runCgi(Response &response)
         close(old_fd[0]);
     }
     response.setCgiHeaders(str.substr(0, str.find("\r\n\r\n")));
-    return str.substr(str.find("\r\n\r\n"), str.length());
+    return str.substr(str.find("\r\n\r\n") + 4, str.length());
 }
 
 

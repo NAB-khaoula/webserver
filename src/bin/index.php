@@ -7,10 +7,10 @@
     </body>
     </html>
 <?php
-// var_dump($_POST);
-// var_dump($_GET);
-setcookie("last_name", $_GET["lname"]);
-setcookie("first_name", $_GET["fname"]);
+var_dump($_POST);
+var_dump($_GET);
+// setcookie("last_name", $_GET["lname"]);
+// setcookie("first_name", $_GET["fname"]);
 // Show all information, defaults to INFO_ALL
 // phpinfo();
 

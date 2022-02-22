@@ -56,7 +56,7 @@ Server	*Response::findVirtualServer()
 	std::vector<std::string> hostPort = ft_splitSpace(((clientRequest.getHttpHeaders()).find("Host"))->second, ':');
 	if (hostPort.size() == 1)
 		hostPort.push_back("80");
-	for(int i = 0; i < serverConfigData.size(); i++)
+	for(size_t i = 0; i < serverConfigData.size(); i++)
 	{
 		if(!((serverConfigData[i]).get_listen()).compare(hostPort[1]))
 		{
@@ -73,7 +73,6 @@ Server	*Response::findVirtualServer()
 }
 
 void	Response::findLocation(){
-	size_t		pos = 0;
 	std::string	tempString = clientRequest.getPath();
 	if(tempString.back() == '/')
 		tempString.erase(tempString.length() - 1);
@@ -103,7 +102,7 @@ bool	Response::findUploadLocation(){
 bool	Response::allowedMethods(){
 	if (location.get_methods().empty())
 		return false;
-	for (int i = 0; i < location.get_methods().size(); i++){
+	for (size_t i = 0; i < location.get_methods().size(); i++){
 		if (!(location.get_methods().at(i).compare(clientRequest.getMethod())))
 			return true;
 	}
@@ -121,7 +120,7 @@ int		Response::returnStatus(int status_code, std::string status_message){
 	{
 		if (statusCode == CREATED)
 		{
-			for(int i = 0; i < this->location.get_index().size(); i++)
+			for(size_t i = 0; i < this->location.get_index().size(); i++)
 			{
 				if (accessFile(filePath + '/' + location.get_index().at(i)))
 				{
@@ -209,7 +208,7 @@ int     Response::buildResponse()
 				{
 					if (location.get_upload_enble() == "on" || location.get_delete_enble() == "on")
 					{
-						for(int i = 0; i < clientRequest.getBodies().size(); i++)
+						for(size_t i = 0; i < clientRequest.getBodies().size(); i++)
 						{
 							if(!(clientRequest.getBodies().at(i).fileName.empty()))
 							{
@@ -239,7 +238,7 @@ int     Response::buildResponse()
 							}
 						}
 					}
-					for(int i = 0; i < this->location.get_index().size(); i++)
+					for(size_t i = 0; i < this->location.get_index().size(); i++)
 					{
 						if (accessFile(filePath + '/' + location.get_index().at(i)))
 						{
@@ -269,7 +268,7 @@ int     Response::buildResponse()
 				}
 				else
 				{
-					for(int i = 0; i < this->location.get_index().size(); i++)
+					for(size_t i = 0; i < this->location.get_index().size(); i++)
 					{
 						if (accessFile(filePath + '/' + location.get_index().at(i)))
 						{
@@ -356,14 +355,15 @@ std::string &Response::indexFound(){
 		buffer << indexFile.rdbuf();
 		htmlString = "\r\n\r\n";
 		htmlString += buffer.str();
+		cgiString = buffer.str();
 	}
 	else
-		htmlString = getCgiHeaders() + "\r\n\r\n" + cgiString;
+		htmlString = "\r\n" + getCgiHeaders() + "\r\n\r\n" + cgiString;
 	stringJoinedResponse += clientRequest.getHttpVersion() + " "; 
 	stringJoinedResponse += std::to_string(statusCode) + " ";
 	stringJoinedResponse += statusMessage + " \r\n";
 	stringJoinedResponse += "Content-Length: ";
-	stringJoinedResponse += std::to_string(htmlString.length());
+	stringJoinedResponse += std::to_string(cgiString.size());
 	stringJoinedResponse += "\r\n";
 	if (statusCode == MOVEDPERMANENTLY)
 	{
@@ -374,13 +374,13 @@ std::string &Response::indexFound(){
 	if (statusCode == METHODNOTALLOWED)
 	{
 		stringJoinedResponse += "Allow: ";
-		for(int i = 0; i < location.get_methods().size(); i++)
+		for(size_t i = 0; i < location.get_methods().size(); i++)
 		{
 			stringJoinedResponse += location.get_methods().at(i);
 			if(i != location.get_methods().size() - 1)
 				stringJoinedResponse += " , ";
 		}
-		stringJoinedResponse +=	" \r\n"; 
+		stringJoinedResponse +=	" \r\n";
 	}
 	stringJoinedResponse += "Connection: ";
 	stringJoinedResponse += clientRequest.getConnection();

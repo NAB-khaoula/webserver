@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ybouddou <ybouddou@student.42.fr>          +#+  +:+       +#+        */
+/*   By: mbelaman <mbelaman@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/13 08:57:33 by ybouddou          #+#    #+#             */
-/*   Updated: 2022/02/22 04:39:30 by ybouddou         ###   ########.fr       */
+/*   Updated: 2022/02/22 13:11:56 by mbelaman         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -174,7 +174,7 @@ bool	isServer(t_WebServ& webserv)
 	it = webserv.sockets.begin();
 	while (it < webserv.sockets.end())
 	{
-		if (webserv.event.ident == (*it))
+		if (webserv.event.ident == (uintptr_t)(*it))
 			return (true);
 		it++;
 	}

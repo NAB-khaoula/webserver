@@ -123,7 +123,7 @@ void    Server::set_client_max_body(std::string client_max_body, int &nb_line)
     if (this->get_client_max_body().empty())
     {
             client_max_body = rightTrim(client_max_body);
-        int i = 0;
+        size_t i = 0;
         int check = 0;
         while (client_max_body[i])
         {
@@ -282,7 +282,8 @@ void     begin_parser(t_WebServ &ws, char **av)
     std::ifstream               myReadFile;
     std::vector<std::string>    split;
     std::string                 line, str_key, str_value;
-    int i = 0, j = 0, k;
+    int i = 0, j = 0;
+    size_t k;
 
     ws.serv = new Server();
     myReadFile.open(av[1]);

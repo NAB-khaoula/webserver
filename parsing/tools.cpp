@@ -47,7 +47,8 @@ void    check_braces(std::string &line, t_WebServ &ws, int &nb_line)
 {
     std::string str_key;
     std::string str_value;
-    int i = 0, j = 0, k = 0;
+    int i = 0, j = 0;
+    size_t k = 0;
 
     if ((k = line.find("#")) != std::string::npos)
         line.erase(k, line.length());
@@ -184,7 +185,7 @@ void    errors(int index, int &nb_line, std::string line)
 
 bool isNumber(std::string s)
 {
-    for (int i = 0; i < s.length(); i++)
+    for (size_t i = 0; i < s.length(); i++)
         if (isdigit(s[i]) == false)
             return false;
     return true;
