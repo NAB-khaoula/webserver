@@ -1,4 +1,3 @@
-
 NAME = webserv
 CC = clang++
 CFLAGS = -Wall -Wextra -Werror -std=c++98
@@ -12,6 +11,12 @@ SRC =	main.cpp\
 		requestResponse/Request.cpp\
 		requestResponse/Response.cpp
 
+INC = 	WebServ.hpp\
+		parsing/Location.hpp\
+		parsing/Server.hpp\
+		requestResponse/Request.hpp\
+		requestResponse/Response.hpp
+
 OBJ = $(SRC:.cpp=.o)
 
 all: $(NAME)
@@ -19,8 +24,8 @@ all: $(NAME)
 $(NAME): $(OBJ)
 	@$(CC) $(OBJ) -o $(NAME)
 
-%.o: %.cpp
-	@$(CC) -c $^ -o $@
+%.o: %.cpp $(INC)
+	@$(CC) -c $< -o $@
 
 clean:
 	@rm -rf $(OBJ)

@@ -339,19 +339,18 @@ std::string &Response::indexFound(){
 				stringJoinedResponse += " , ";
 		}
 		stringJoinedResponse +=	" \r\n"; 
-	}	
+	}
 	stringJoinedResponse += "Connection: ";
-	stringJoinedResponse += clientRequest.getHttpHeaders().find("Connection")->second;
-	stringJoinedResponse +=	" \r\n"; 
-	// if(this->clientRequest.getHttpHeaders().find("Sec-Fetch-Dest")->second == std::string("style"))
-	// 	stringJoinedResponse +=  "Content-Type: text/css\r\n";
-	// else if (this->clientRequest.getHttpHeaders().find("Sec-Fetch-Dest")->second == std::string("script"))
-	// 	stringJoinedResponse +=  "Content-Type: text/javascript\r\n";
-	// else if (this->clientRequest.getHttpHeaders().find("Sec-Fetch-Dest")->second == std::string("image"))
-	// 	stringJoinedResponse +=  "Content-Type: image/png\r\n"; //REVIEW - review the image types
-	// else
-	// 	stringJoinedResponse += "Content-Type: text/html\r\n";
-	stringJoinedResponse += "Content-Type: */*\r\n";
+	stringJoinedResponse += clientRequest.getConnection();
+	stringJoinedResponse +=	" \r\n";
+	if(this->clientRequest.getHttpHeaders().find("Sec-Fetch-Dest")->second == std::string("style"))
+		stringJoinedResponse +=  "Content-Type: text/css\r\n";
+	else if (this->clientRequest.getHttpHeaders().find("Sec-Fetch-Dest")->second == std::string("script"))
+		stringJoinedResponse +=  "Content-Type: text/javascript\r\n";
+	else if (this->clientRequest.getHttpHeaders().find("Sec-Fetch-Dest")->second == std::string("document"))
+		stringJoinedResponse +=  "Content-Type: text/html\r\n"; //REVIEW - review the image types
+	else
+		stringJoinedResponse += "Content-Type: */*\r\n";
 	stringJoinedResponse += "Date: ";
 	stringJoinedResponse += DateGMT();
 	stringJoinedResponse += "\r\n\r\n";
