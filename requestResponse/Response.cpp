@@ -78,25 +78,13 @@ void	Response::findLocation(){
 		tempString.erase(tempString.length() - 1);
 	for(std::map<std::string, Location>::iterator it = virtualServer->get_map_loc().begin(); it != virtualServer->get_map_loc().end(); it++)
 	{
-		if (!(it->first.compare("/src/")))
+		if (!(it->first.compare("/")))
 			this->location = it->second;
 		if(!(tempString.compare(it->first))){
 			this->location = it->second;
 			return;
 		}
 	}
-}
-
-bool	Response::findUploadLocation(){
-	for(std::map<std::string, Location>::iterator it = virtualServer->get_map_loc().begin(); it != virtualServer->get_map_loc().end(); it++)
-	{
-		if(it->second.get_upload_enble() == "on") // adding enable delete;
-		{
-			location = it->second;
-			return true;
-		}
-	}
-	return false;
 }
 
 bool	Response::allowedMethods(){
@@ -246,7 +234,18 @@ int     Response::buildResponse()
 						}
 						if(!location.get_autoindex().compare("on"))
 						{
-							std::cout << "auto index here" << std::endl;
+							DIR *dir;
+							struct dirent *ent;
+							if ((dir = opendir (filePath.c_str())) != NULL) {
+								cgiString += "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<title>Index Table</title>\n</head>\n<body><center><h1>Index Table</h1></center>\n<hr>\n</body>\n</html>";
+								while ((ent = readdir (dir)) != NULL) 
+								{
+									cgiString += ent->d_name;
+									cgiString += "<br>";
+							  	}
+								  cgiString += "</body>\n</html>\n";
+							  closedir (dir);
+							}
 							return(returnStatus(OK, "OK"));
 						}
 						return (returnStatus(NOTFOUND, "NOT FOUND"));
@@ -262,7 +261,9 @@ int     Response::buildResponse()
 			return (returnStatus(FORBIDDEN, "FORBIDDEN"));
 	}
 	else if (!this->location.get_match())
+	{
 		return (returnStatus(FORBIDDEN, "FORBIDDEN"));
+	}
 	else
 		return (returnStatus(METHODNOTALLOWED, std::string("METHOD NOT ALLOWED")));
 }
