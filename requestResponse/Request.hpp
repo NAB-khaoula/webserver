@@ -21,7 +21,6 @@ typedef struct		s_Body
 
 class Request{
 	protected:
-		bool								upload;
 		std::vector<std::string>			requestLine;
 		std::string							param;
 		std::string							connection;

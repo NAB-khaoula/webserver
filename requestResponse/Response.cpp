@@ -78,7 +78,7 @@ void	Response::findLocation(){
 		tempString.erase(tempString.length() - 1);
 	for(std::map<std::string, Location>::iterator it = virtualServer->get_map_loc().begin(); it != virtualServer->get_map_loc().end(); it++)
 	{
-		if (!(it->first.compare("/")))
+		if (!(it->first.compare("/src/")))
 			this->location = it->second;
 		if(!(tempString.compare(it->first))){
 			this->location = it->second;
@@ -146,8 +146,8 @@ int		Response::returnStatus(int status_code, std::string status_message){
 
 bool	Response::badRequest()
 {
-	char acceptedRequest[][10] = {"GET", "HEAD", "POST", "PUT", "DELETE", "CONNECT", "OPTIONS", "TRACE", "PATCH"};
-	for(int i = 0; i < 9; i++)
+	char acceptedRequest[][17] = {"GET", "HEAD", "POST", "PUT", "DELETE", "CONNECT", "OPTIONS", "TRACE", "PATCH", "COPY", "LINK", "UNLINK", "PURGE", "LOCK", "UNLOCK", "PROPFIND", "VIEW"};
+	for(int i = 0; i < 17; i++)
 	{
 		if (acceptedRequest[i] == clientRequest.getMethod())
 			break;
@@ -183,7 +183,7 @@ int     Response::buildResponse()
 				if (location.get_return().find(301) == location.get_return().end())
 					return (returnStatus(FORBIDDEN, std::string("Forbidden")));
 				redirection = location.get_return()[301];
-				return (returnStatus(MOVEDPERMANENTLY, std::string("Moved Permanently")));
+				return (returnStatus(MOVEDPERMANENTLY, "Moved Permanently"));
 			}
 			if(!S_ISDIR(buf.st_mode))
 			{
@@ -191,12 +191,10 @@ int     Response::buildResponse()
 				statusMessage = "OK";
 				if(filePath.find(".py") != std::string::npos || filePath.find(".php") != std::string::npos)
 				{
-					try
-					{
+					try{
 						cgiString = runCgi(*this);
 					}
-					catch(std::exception e)
-					{
+					catch(std::exception e){
 						return (returnStatus(INTERNALSERVERERROR, "Internal Server Error"));
 					}
 				}
@@ -204,100 +202,58 @@ int     Response::buildResponse()
 			}
 			else
 			{
-				if (clientRequest.getUpload())
+				if (!clientRequest.getMethod().compare("POST") || !clientRequest.getMethod().compare("DELETE"))
 				{
-					if (location.get_upload_enble() == "on" || location.get_delete_enble() == "on")
-					{
-						for(size_t i = 0; i < clientRequest.getBodies().size(); i++)
-						{
-							if(!(clientRequest.getBodies().at(i).fileName.empty()))
-							{
-								if (location.get_upload() != "")
-									filePath = virtualServer->get_root() + location.get_upload();
-								std::fstream	infile;
-								if (location.get_delete_enble() == "on" && clientRequest.getMethod() == "DELETE")
-								{
-									if (remove((filePath + "/" + clientRequest.getBodies().at(i).fileName).c_str()) != 0)
-									{
-										return(returnStatus(INTERNALSERVERERROR, "Internal Server Error"));
-									}
-									statusCode = OK;
-									statusMessage = "OK";
-								}
-								else if (location.get_upload_enble() == "on" && clientRequest.getMethod() != "DELETE")
-								{
-									infile.open(filePath + "/" + clientRequest.getBodies().at(i).fileName, std::ios_base::out);
-									statusCode = CREATED;
-									statusMessage = "Created";
-									if (!infile.is_open()) {
-										return(returnStatus(INTERNALSERVERERROR, "Internal Server Error"));
-    								}
-								}
-								infile << clientRequest.getBodies().at(i).body;
-								infile.close();
-							}
-						}
+					statusCode = OK;
+					statusMessage = "OK";
+					try{
+						cgiString = runCgi(*this);
 					}
-					for(size_t i = 0; i < this->location.get_index().size(); i++)
-					{
-						if (accessFile(filePath + '/' + location.get_index().at(i)))
-						{
-							filePath = filePath + '/' + location.get_index().at(i);
-							statusCode = OK;
-							statusMessage = "OK";
-							if(filePath.find(".py") != std::string::npos || filePath.find(".php") != std::string::npos)
-							{
-								try{
-
-									cgiString = runCgi(*this);
-								}
-								catch(std::exception e)
-								{
-									return (returnStatus(INTERNALSERVERERROR, "Internal Server Error"));
-								}
-								break;
-							}
-						}
+					catch(std::exception e){
+						return (returnStatus(INTERNALSERVERERROR, "Internal Server Error"));
 					}
-					return (returnStatus(statusCode, statusMessage));
-				}
-				if (filePath.back() != '/')
-				{
-					redirection = clientRequest.getPath() + std::string("/");
-					return (returnStatus(MOVEDPERMANENTLY, std::string("Moved Permanently")));
 				}
 				else
 				{
-					for(size_t i = 0; i < this->location.get_index().size(); i++)
+					if (filePath.back() != '/')
 					{
-						if (accessFile(filePath + '/' + location.get_index().at(i)))
+						redirection = clientRequest.getPath() + std::string("/");
+						return (returnStatus(MOVEDPERMANENTLY, std::string("Moved Permanently")));
+					}
+					else
+					{
+						for(size_t i = 0; i < this->location.get_index().size(); i++)
 						{
-							filePath = filePath + '/' + location.get_index().at(i);
-							statusCode = OK;
-							statusMessage = "OK";
-							if(filePath.find(".py") != std::string::npos || filePath.find(".php") != std::string::npos)
+							if (accessFile(filePath + '/' + location.get_index().at(i)))
 							{
-								try{
-
-									cgiString = runCgi(*this);
-								}
-								catch(std::exception e)
+								filePath = filePath + '/' + location.get_index().at(i);
+								statusCode = OK;
+								statusMessage = "OK";
+								if(filePath.find(".py") != std::string::npos || filePath.find(".php") != std::string::npos)
 								{
-									return (returnStatus(INTERNALSERVERERROR, "Internal Server Error"));
+									try{
+
+										cgiString = runCgi(*this);
+									}
+									catch(std::exception e)
+									{
+										return (returnStatus(INTERNALSERVERERROR, "Internal Server Error"));
+									}
+									break;
 								}
-								break;
+								return (returnStatus(statusCode, std::string(statusMessage)));
 							}
-							return (returnStatus(statusCode, std::string(statusMessage)));
 						}
+						if(!location.get_autoindex().compare("on"))
+						{
+							std::cout << "auto index here" << std::endl;
+							return(returnStatus(OK, "OK"));
+						}
+						return (returnStatus(NOTFOUND, "NOT FOUND"));
 					}
-					if(!location.get_autoindex().compare("on"))
-					{
-						std::cout << "autoindex on need to create the appropriate webpage!!!" << std::endl;
-						cgiString = std::string("<?php\necho \"Here are our files\";$path = \".\";$dh = opendir($path);$i=1;while (($file = readdir($dh)) !== false) {if($file != \".\" && $file != \"..\" && $file != \"index.php\" && $file != \".htaccess\" && $file != \"error_log\" && $file != \"cgi-bin\") {echo \"<a href='$path/$file'>$file</a><br /><br />\";$i++;}}closedir($dh);?> ");
-						return(returnStatus(OK, "OK"));
-					}
-					return (returnStatus(NOTFOUND, "NOT FOUND"));
+					
 				}
+				return (returnStatus(statusCode, statusMessage));
 			}
 		}
 		else if (access(filePath.c_str(), F_OK))

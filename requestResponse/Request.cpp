@@ -1,6 +1,6 @@
 #include "Request.hpp"
 
-Request::Request(): upload(false), requestLine(std::vector<std::string>()), httpHeaders(std::map<std::string, std::string>()), contentLength(0){}
+Request::Request(): requestLine(std::vector<std::string>()), httpHeaders(std::map<std::string, std::string>()), contentLength(0){}
 
 Request::~Request(){}
 
@@ -132,26 +132,14 @@ void		Request::parseBody(std::string req)
 	}
 }
 
-bool	Request::uploadFile(){
-	for(size_t i = 0; i < bodies.size(); i++)
-	{
-		if (!bodies.at(i).fileName.empty())
-			return true;
-	}
-	return false;
-}
 
 Request::Request(std::string requestString)
 {
 	SplitFirstLine(requestString);
 	this->SplitHeader(ft_splitCrlf(ft_splitCrlf(requestString, "\r\n\r\n").at(0), "\r\n"), ':');
 	parseBody(requestString);
-	upload = uploadFile();
 }
 
-bool			Request::getUpload(){
-	return upload;
-}
 
 void			Request::parseParam(std::string	&variableURL, size_t &pos)
 {
