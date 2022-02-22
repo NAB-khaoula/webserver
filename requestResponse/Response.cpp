@@ -171,6 +171,8 @@ int     Response::buildResponse()
 	this->findLocation();
 	this->filePath = virtualServer->get_root() + clientRequest.getPath();
 	stat(filePath.c_str(), &buf);
+	if (clientRequest.getContentLength() > stoi(virtualServer->get_client_max_body()))
+		return(returnStatus(PAYLOADTOOLARGE, "Payload Too Large"));
 	if (badRequest())
 		return (returnStatus(BADREQUEST, std::string("Bad Request")));
 	if(this->clientRequest.getHttpHeaders().find("If-None-Match") != this->clientRequest.getHttpHeaders().end())
@@ -223,36 +225,38 @@ int     Response::buildResponse()
 					}
 					else
 					{
-						std::cout << this->location.get_index().at(0) << std::endl;
-						for(size_t i = 0; i < this->location.get_index().size(); i++)
+						if (!location.get_index().empty())
 						{
-							if (accessFile(filePath + '/' + location.get_index().at(i)))
+							for(size_t i = 0; i < this->location.get_index().size(); i++)
 							{
-								filePath = filePath + '/' + location.get_index().at(i);
-								statusCode = OK;
-								statusMessage = "OK";
-								if(filePath.find(".py") != std::string::npos || filePath.find(".php") != std::string::npos)
+								if (accessFile(filePath + '/' + location.get_index().at(i)))
 								{
-									try{
-
-										cgiString = runCgi(*this);
-									}
-									catch(std::exception e)
+									filePath = filePath + '/' + location.get_index().at(i);
+									statusCode = OK;
+									statusMessage = "OK";
+									if(filePath.find(".py") != std::string::npos || filePath.find(".php") != std::string::npos)
 									{
-										return (returnStatus(INTERNALSERVERERROR, "Internal Server Error"));
+										try{
+
+											cgiString = runCgi(*this);
+										}
+										catch(std::exception e)
+										{
+											return (returnStatus(INTERNALSERVERERROR, "Internal Server Error"));
+										}
+										break;
 									}
-									break;
+									return (returnStatus(statusCode, std::string(statusMessage)));
 								}
-								return (returnStatus(statusCode, std::string(statusMessage)));
 							}
 						}
-						if(!location.get_autoindex().compare("on"))
+						else if(!location.get_autoindex().compare("on"))
 						{
 							DIR *dir;
 							struct dirent *ent;
 							if ((dir = opendir (filePath.c_str())) != NULL) {
 								cgiString += "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<title>Index Table</title>\n</head>\n<body><center><h1>Index Table</h1></center>\n<hr>\n</body>\n</html>";
-								while ((ent = readdir (dir)) != NULL) 
+								while ((ent = readdir (dir)) != NULL)
 								{
 									cgiString += "<a href=\"/";
 									cgiString += ent->d_name;
