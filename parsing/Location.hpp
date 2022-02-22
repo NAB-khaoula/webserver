@@ -15,6 +15,7 @@ class Location
 		std::vector<std::string>    _arr_methods;
 		std::map<int, std::string>  _return;
 		std::string                 _upload;
+		std::string                 _cgi;
 		std::string                 _upload_enble;
 		std::string					_delete_enble;
 	
@@ -30,6 +31,7 @@ class Location
 		std::string                  get_upload();
 		std::string                  get_upload_enble();
 		std::string                  get_delete_enble();
+		std::string                  get_cgi();
 	
 		void                        set_path(std::string, int &);
 		void                        set_match(bool);
@@ -40,6 +42,7 @@ class Location
 		void                        set_upload(std::string, int &);
 		void                        set_upload_enble(std::string, int &);
 		void                        set_delete_enble(std::string, int &);
+		void                        set_cgi(std::string, int &);
 		void                        clear();
 		~Location();
 };

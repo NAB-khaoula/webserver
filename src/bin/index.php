@@ -1,11 +1,4 @@
-<html>
-    <body>
-        
-        <br> First Name Is:   <?php echo $_GET["fname"]; ?><br>
-        Second Name Is:  <?php echo $_GET["lname"]; ?>
-        
-    </body>
-    </html>
+
 <?php
 var_dump($_POST);
 var_dump($_GET);

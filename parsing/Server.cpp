@@ -27,6 +27,7 @@ void    Server::set_df(bool b) {_df = b;}
 
 void    Server::set_root(std::string root, int &nb_line)
 {
+    std::string str;
     if (this->get_root().empty())
     {
         root = rightTrim(root);
@@ -222,6 +223,8 @@ void fill_location(std::string &key, std::string &value, t_WebServ &ws, int &nb_
         ws.locat.set_methods(value, nb_line);
     else if (!key.compare("return"))
         ws.locat.set_return(value, nb_line);
+    else if (!key.compare("fastcgi_pass"))
+        ws.locat.set_cgi(value, nb_line);
     else if (!key.compare("upload_enable"))
         ws.locat.set_upload_enble(value, nb_line);
     else if (!key.compare("delete_enable"))
@@ -251,7 +254,6 @@ void    fill_server(std::string key, std::string value, std::string &line, t_Web
         else if (line.find("}") != std::string::npos && ws.serv->get_brace_location() == 2)
         {
             ws.serv->set_brace_location(0);
-            ws.serv->set_location(ws.locat);
             ws.serv->set_map_loc(ws.locat, nb_line);
             ws.locat.clear();
         }
