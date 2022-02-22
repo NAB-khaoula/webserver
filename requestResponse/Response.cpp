@@ -240,10 +240,14 @@ int     Response::buildResponse()
 								cgiString += "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<title>Index Table</title>\n</head>\n<body><center><h1>Index Table</h1></center>\n<hr>\n</body>\n</html>";
 								while ((ent = readdir (dir)) != NULL) 
 								{
+									cgiString += "<a href=\"/";
 									cgiString += ent->d_name;
+									cgiString += "\">";
+									cgiString += ent->d_name;
+									cgiString += "</a>";
 									cgiString += "<br>";
 							  	}
-								  cgiString += "</body>\n</html>\n";
+								cgiString += "</body>\n</html>\n";
 							  closedir (dir);
 							}
 							return(returnStatus(OK, "OK"));
