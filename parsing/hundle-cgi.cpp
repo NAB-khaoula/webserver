@@ -1,5 +1,4 @@
 #include "Server.hpp"
-// #include "../requestResponse/Request.hpp"
 #include <sys/types.h>
 #include <unistd.h>
 #include <fcntl.h>
@@ -48,8 +47,9 @@ std::string    runCgi(Response &response)
     setenv("SERVER_PORT", response.getServer()->get_listen().c_str(), true);
     //NOTE - The name and revision of the information protocol this request came in with.
     setenv("SERVER_PROTOCOL", response.getClientRequest().getHttpVersion().c_str(), true);
-    
+    //NOTE - Returns the set cookies in the form of key & value pair.
     setenv("HTTP_COOKIE", response.getClientRequest().getParam().c_str(), true);
+    
     extern char **environ;
     char **args = new char*[3];
     args[1] = NULL;
@@ -73,7 +73,6 @@ std::string    runCgi(Response &response)
     if (pipe(fd_post) == -1)
         std::cout << "Error" << std::endl;
 
-    write(fd_post[1], response.getClientRequest().getQueryString().c_str(), response.getClientRequest().getQueryString().size());
     if ((pid = fork()) < 0)
         std::cout << "there is an error while calling" << std::endl;
     if (pid == 0)
@@ -92,6 +91,8 @@ std::string    runCgi(Response &response)
     }
     else
     {
+        if (req_method == "POST")
+            write(fd_post[1], response.getClientRequest().getQueryString().c_str(), response.getClientRequest().getQueryString().size());
         close(fd[1]);
         close(fd_post[0]);
         close(fd_post[1]);

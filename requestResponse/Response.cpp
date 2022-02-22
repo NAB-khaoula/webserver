@@ -390,7 +390,7 @@ std::string &Response::indexFound(){
 	else if (this->clientRequest.getHttpHeaders().find("Sec-Fetch-Dest")->second == std::string("script"))
 		stringJoinedResponse +=  "Content-Type: text/javascript\r\n";
 	else if (this->clientRequest.getHttpHeaders().find("Sec-Fetch-Dest")->second == std::string("document"))
-		stringJoinedResponse +=  "Content-Type: text/html\r\n"; //REVIEW - review the image types
+		stringJoinedResponse +=  "Content-Type: text/html\r\n";
 	else
 		stringJoinedResponse += "Content-Type: */*\r\n";
 	stringJoinedResponse += "Date: ";

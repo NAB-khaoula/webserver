@@ -7,6 +7,8 @@
     </body>
     </html>
 <?php
+// var_dump($_POST);
+// var_dump($_GET);
 setcookie("last_name", $_GET["lname"]);
 setcookie("first_name", $_GET["fname"]);
 // Show all information, defaults to INFO_ALL
@@ -31,7 +33,5 @@ setcookie("first_name", $_GET["fname"]);
 // phpinfo(8) yields identical results.
 // phpinfo(INFO_MODULES);
 // phpinfo(INFO_MODULES);
-// var_dump($_POST);
-// var_dump($_GET);
 
 ?>
