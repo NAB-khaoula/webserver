@@ -372,11 +372,11 @@ std::string &Response::indexFound(){
 				stringJoinedResponse += " , ";
 		}
 		stringJoinedResponse +=	" \r\n"; 
-	}	
+	}
 	stringJoinedResponse += "Connection: ";
-	stringJoinedResponse += clientRequest.getHttpHeaders().find("Connection")->second;
+	stringJoinedResponse += clientRequest.getConnection();
 	stringJoinedResponse +=	" \r\n";
-		if(this->clientRequest.getHttpHeaders().find("Sec-Fetch-Dest")->second == std::string("style"))
+	if(this->clientRequest.getHttpHeaders().find("Sec-Fetch-Dest")->second == std::string("style"))
 		stringJoinedResponse +=  "Content-Type: text/css\r\n";
 	else if (this->clientRequest.getHttpHeaders().find("Sec-Fetch-Dest")->second == std::string("script"))
 		stringJoinedResponse +=  "Content-Type: text/javascript\r\n";

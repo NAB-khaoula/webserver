@@ -39,6 +39,23 @@ std::string		&Request::getQueryString()
 	return (queryString);
 }
 
+std::string		&Request::getConnection()
+{
+	return (connection);
+}
+
+void		Request::setConnection()
+{
+	std::map<std::string, std::string>::iterator i;
+	size_t	pos;
+
+	i = httpHeaders.find("Connection");
+	if (i != httpHeaders.end())
+		connection = i->second;
+	else
+		connection = "keep-alive";
+}
+
 void		Request::setContentLength()
 {
 	std::map<std::string, std::string>::iterator i;
@@ -114,27 +131,6 @@ void		Request::parseBody(std::string req)
 		queryString += body.body;
 		bodies.push_back(body);
 	}
-	// std::cout << contentType << std::endl;
-	// std::cout << getQueryString() << std::endl;
-	// ****Printing body****
-	// std::ofstream	out_file("bodies.txt");
-	// std::vector<Body>::iterator it = bodies.begin();
-	// while (it != bodies.end())
-	// {
-	// 	if (contentType.find("multipart/form-data") != std::string::npos)
-	// 	{
-	// 		out_file << "| ContentDispo: " << it->ContentDispo << " |\n";
-	// 		out_file << "| ContentType : " << it->ContentType << " |\n";
-	// 		out_file << "| name : " << it->name << " |\n";
-	// 		out_file << "| fileName : " << it->fileName << " |\n";
-	// 		// std::ofstream	filename(it->fileName);
-	// 		// filename << it->body;
-	// 	}
-	// 	out_file << "| Body : " << it->body << " |\n";
-	// 	out_file << "\n+++++++++++++++++++++++++++++++++++++\n";
-	// 	it++;
-	// }
-	// out_file.close();
 }
 
 bool	Request::uploadFile(){
