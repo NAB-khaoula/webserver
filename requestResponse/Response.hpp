@@ -18,15 +18,16 @@
 #include "../parsing/Server.hpp"
 #include "Request.hpp"
 
-#define	OK					200
-#define CREATED				201 				
-#define MOVEDPERMANENTLY 	301
-#define	NOTMODIFIED			304
-#define	BADREQUEST			400
-#define FORBIDDEN			403
-#define	NOTFOUND 			404
-#define METHODNOTALLOWED	405
-#define INTERNALSERVERERROR	500
+#define	OK						200
+#define CREATED					201 				
+#define MOVEDPERMANENTLY 		301
+#define	NOTMODIFIED				304
+#define	BADREQUEST				400
+#define FORBIDDEN				403
+#define	NOTFOUND 				404
+#define	PAYLOADTOOLARGE			413
+#define METHODNOTALLOWED		405
+#define INTERNALSERVERERROR		500
 
 class Server;
 class Request;
