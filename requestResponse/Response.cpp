@@ -84,8 +84,6 @@ void	Response::findLocation(){
 	struct stat buf;
 	size_t pos;
 	stat(tempString.c_str(), &buf);
-	if(tempString.back() == '/')
-		tempString.erase(tempString.length() - 1);
 	if(!S_ISDIR(buf.st_mode))
 	{
 		if((pos = tempString.find_last_of('/')) != std::string::npos)
@@ -225,6 +223,7 @@ int     Response::buildResponse()
 					}
 					else
 					{
+						std::cout << this->location.get_index().at(0) << std::endl;
 						for(size_t i = 0; i < this->location.get_index().size(); i++)
 						{
 							if (accessFile(filePath + '/' + location.get_index().at(i)))
@@ -255,10 +254,14 @@ int     Response::buildResponse()
 								cgiString += "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<title>Index Table</title>\n</head>\n<body><center><h1>Index Table</h1></center>\n<hr>\n</body>\n</html>";
 								while ((ent = readdir (dir)) != NULL) 
 								{
+									cgiString += "<a href=\"/";
 									cgiString += ent->d_name;
+									cgiString += "\">";
+									cgiString += ent->d_name;
+									cgiString += "</a>";
 									cgiString += "<br>";
 							  	}
-								  cgiString += "</body>\n</html>\n";
+								cgiString += "</body>\n</html>\n";
 							  closedir (dir);
 							}
 							return(returnStatus(OK, "OK"));
