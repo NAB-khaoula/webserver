@@ -27,6 +27,13 @@ void	Response::setCgiHeaders(std::string cgi_headers){
 	cgiHeaders = cgi_headers;
 }
 
+void	Response::setStatusCode(int status){
+	statusCode = status;
+}
+void	Response::setStatusMesssage(std::string status){
+	statusMessage = status;
+}
+
 std::string	&Response::get_filePath(){
 	return filePath;
 }
@@ -73,9 +80,17 @@ Server	*Response::findVirtualServer()
 }
 
 void	Response::findLocation(){
-	std::string	tempString = clientRequest.getPath();
+	std::string	tempString (clientRequest.getPath());
+	struct stat buf;
+	size_t pos;
+	stat(tempString.c_str(), &buf);
 	if(tempString.back() == '/')
 		tempString.erase(tempString.length() - 1);
+	if(!S_ISDIR(buf.st_mode))
+	{
+		if((pos = tempString.find_last_of('/')) != std::string::npos)
+			tempString.erase(pos);
+	}
 	for(std::map<std::string, Location>::iterator it = virtualServer->get_map_loc().begin(); it != virtualServer->get_map_loc().end(); it++)
 	{
 		if (!(it->first.compare("/")))

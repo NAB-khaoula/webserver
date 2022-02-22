@@ -51,6 +51,8 @@ class Response
 		~Response();
 		//NOTE: getters for all attributes;
 		//NOTE: 
+		void		setStatusCode(int);
+		void		setStatusMesssage(std::string);
 		void		setCgiHeaders(std::string cgi_headers);
 		std::string	&getCgiHeaders();
 		std::string	&getCgiString();

@@ -4,22 +4,6 @@
 #include <fcntl.h>
 
 
-// #include  <unistd.h>
-// #include <stdio.h>
-
-
-// #define PATH_MAX 4096
-// int main() {
-//    char cwd[PATH_MAX];
-//    if (getcwd(cwd, sizeof(cwd)) != NULL) {
-//        printf("Current working dir: %s\n", cwd);
-//    } else {
-//        perror("getcwd() error");
-//        return 1;
-//    }
-//    return 0;
-// }
-
 std::string    runCgi(Response &response)
 {
     pid_t       pid;
@@ -29,23 +13,20 @@ std::string    runCgi(Response &response)
     int         r;
     char        buffer[1024];
     std::string str;
-    std::cout << "|" << response.get_location().get_cgi() << std::endl;
+    
     std::string fullPath = response.get_filePath();
     std::string filename = fullPath.substr(fullPath.find_last_of("/") + 1);
     std::string req_method = response.getClientRequest().getMethod();
     std::string path_cgi_php = response.get_location().get_cgi();
     if (!path_cgi_php.empty())
-    {
         path_cgi_php = response.get_location().get_cgi();
-        std::cout << "3amar " << path_cgi_php << std::endl;
-    }
     else
     {
-        std::cout << "khawi " << path_cgi_php << std::endl;
+        response.setStatusCode(INTERNALSERVERERROR);
+        response.setStatusMesssage("Internal Server Error");
         throw std::runtime_error("Path CGI not found");
     }
     std::string path_cgi_py = "/usr/bin/python";
-
 
     //NOTE - The full path to the CGI script.
     setenv("SCRIPT_FILENAME", fullPath.c_str(), true);
