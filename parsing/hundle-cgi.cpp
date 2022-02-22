@@ -3,6 +3,23 @@
 #include <unistd.h>
 #include <fcntl.h>
 
+
+// #include  <unistd.h>
+// #include <stdio.h>
+
+
+// #define PATH_MAX 4096
+// int main() {
+//    char cwd[PATH_MAX];
+//    if (getcwd(cwd, sizeof(cwd)) != NULL) {
+//        printf("Current working dir: %s\n", cwd);
+//    } else {
+//        perror("getcwd() error");
+//        return 1;
+//    }
+//    return 0;
+// }
+
 std::string    runCgi(Response &response)
 {
     pid_t       pid;
@@ -12,13 +29,21 @@ std::string    runCgi(Response &response)
     int         r;
     char        buffer[1024];
     std::string str;
-    std::string path_cgi;
-
+    std::cout << "|" << response.get_location().get_cgi() << std::endl;
     std::string fullPath = response.get_filePath();
     std::string filename = fullPath.substr(fullPath.find_last_of("/") + 1);
     std::string req_method = response.getClientRequest().getMethod();
-    size_t pos = response.getServer()->get_root().find("/", 7);
-    std::string path_cgi_php = response.getServer()->get_root().substr(0, pos) +  "/goinfre/.brew/bin/php-cgi";
+    std::string path_cgi_php = response.get_location().get_cgi();
+    if (!path_cgi_php.empty())
+    {
+        path_cgi_php = response.get_location().get_cgi();
+        std::cout << "3amar " << path_cgi_php << std::endl;
+    }
+    else
+    {
+        std::cout << "khawi " << path_cgi_php << std::endl;
+        throw std::runtime_error("Path CGI not found");
+    }
     std::string path_cgi_py = "/usr/bin/python";
 
 
@@ -37,10 +62,7 @@ std::string    runCgi(Response &response)
     //NOTE - The length of the query information. It is available only for POST requests.
     setenv("CONTENT_LENGTH", (std::to_string(response.getClientRequest().getContentLength())).c_str(), true);
     //NOTE - The data type of the content. Used when the client is sending attached content to the server. For example, file upload.
-	if (response.getClientRequest().getContentType().find("multipart/form-data") != std::string::npos)
-        setenv("CONTENT_TYPE", "application/x-www-form-urlencoded", true);
-    else
-        setenv("CONTENT_TYPE", response.getClientRequest().getContentType().c_str(), true);
+    setenv("CONTENT_TYPE", response.getClientRequest().getContentType().c_str(), true);
     //NOTE - The URL-encoded information that is sent with GET method request.
     setenv("QUERY_STRING", response.getClientRequest().getParam().c_str(), true);
     //NOTE - The server's hostname or IP Address
@@ -71,12 +93,12 @@ std::string    runCgi(Response &response)
     old_fd[1] = dup(1);
 
     if (pipe(fd) == -1)
-        std::cout << "Error" << std::endl;
+        throw std::runtime_error("Pipe Failed!");
     if (pipe(fd_post) == -1)
-        std::cout << "Error" << std::endl;
+        throw std::runtime_error("Pipe Failed!");
 
     if ((pid = fork()) < 0)
-        std::cout << "there is an error while calling" << std::endl;
+        throw std::runtime_error("There is an error while calling");
     if (pid == 0)
     {
         dup2(fd[1], STDOUT_FILENO);
@@ -87,7 +109,7 @@ std::string    runCgi(Response &response)
         close(fd_post[1]);
         if (execve(args[0], (char *const *)args, environ) < 0)
         {
-            std::cout << "CGI NOT FOUND!" << std::endl;
+            throw std::runtime_error("CGI NOT FOUND!");
             exit(1);
         }
     }
