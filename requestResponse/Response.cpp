@@ -84,8 +84,6 @@ void	Response::findLocation(){
 	struct stat buf;
 	size_t pos;
 	stat(tempString.c_str(), &buf);
-	if(tempString.back() == '/')
-		tempString.erase(tempString.length() - 1);
 	if(!S_ISDIR(buf.st_mode))
 	{
 		if((pos = tempString.find_last_of('/')) != std::string::npos)
@@ -225,6 +223,7 @@ int     Response::buildResponse()
 					}
 					else
 					{
+						std::cout << this->location.get_index().at(0) << std::endl;
 						for(size_t i = 0; i < this->location.get_index().size(); i++)
 						{
 							if (accessFile(filePath + '/' + location.get_index().at(i)))
