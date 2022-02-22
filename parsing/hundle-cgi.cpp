@@ -43,7 +43,7 @@ std::string    runCgi(Response &response)
     //NOTE - The length of the query information. It is available only for POST requests.
     setenv("CONTENT_LENGTH", (std::to_string(response.getClientRequest().getContentLength())).c_str(), true);
     //NOTE - The data type of the content. Used when the client is sending attached content to the server. For example, file upload.
-    setenv("CONTENT_TYPE", response.getClientRequest().getContentType().c_str(), true);
+	setenv("CONTENT_TYPE", response.getClientRequest().getContentType().c_str(), true);
     //NOTE - The URL-encoded information that is sent with GET method request.
     setenv("QUERY_STRING", response.getClientRequest().getParam().c_str(), true);
     //NOTE - The server's hostname or IP Address
@@ -96,8 +96,7 @@ std::string    runCgi(Response &response)
     }
     else
     {
-        if (req_method == "POST")
-            write(fd_post[1], response.getClientRequest().getQueryString().c_str(), response.getClientRequest().getQueryString().size());
+        write(fd_post[1], response.getClientRequest().getBody().c_str(), response.getClientRequest().getBody().size());
         close(fd[1]);
         close(fd_post[0]);
         close(fd_post[1]);

@@ -1,4 +1,5 @@
 webserv
 .vscode
 *.txt
+.DS_Store
 src/webserv.conf

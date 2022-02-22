@@ -34,9 +34,9 @@ std::string		&Request::getContentType()
 	return (contentType);
 }
 
-std::string		&Request::getQueryString()
+std::string		&Request::getBody()
 {
-	return (queryString);
+	return (reqBody);
 }
 
 std::string		&Request::getConnection()
@@ -105,9 +105,6 @@ void		Request::setFormData(std::string& req)
 		{
 			body.name = body.ContentDispo.substr(9, body.ContentDispo.size() - 9 - 1);
 			body.ContentDispo.erase(9);
-			if (!queryString.empty())
-				queryString += "&";
-			queryString += body.name + "=" + body.body;
 		}
 		bodies.push_back(body);
 		bzero(&body, sizeof(Body));
@@ -119,15 +116,11 @@ void		Request::parseBody(std::string req)
 {
 	Body			body;
 	
-	setContentType();
-	setContentLength();
-	setConnection();
 	if (!contentType.empty() && !boundary.empty())
 		setFormData(req);
 	else if (!contentType.empty())
 	{
 		body.body = req;
-		queryString += body.body;
 		bodies.push_back(body);
 	}
 }
@@ -137,7 +130,11 @@ Request::Request(std::string requestString)
 {
 	SplitFirstLine(requestString);
 	this->SplitHeader(ft_splitCrlf(ft_splitCrlf(requestString, "\r\n\r\n").at(0), "\r\n"), ':');
-	parseBody(requestString);
+	setContentType();
+	setContentLength();
+	setConnection();
+	reqBody = requestString;
+	// parseBody(requestString);
 }
 
 

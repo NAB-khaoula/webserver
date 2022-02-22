@@ -30,7 +30,7 @@ class Request{
 		// Body variables
 		std::vector<Body>					bodies;
 		std::string							contentType;
-		std::string							queryString;
+		std::string							reqBody;
 		int									contentLength;
 		std::string							boundary;
 	public:
@@ -46,7 +46,7 @@ class Request{
 		std::vector<Body>					&getBodies();
 		std::string							&getHttpVersion();
 		std::string							&getContentType();
-		std::string							&getQueryString();
+		std::string							&getBody();
 		std::string							&getConnection();
 		int									&getContentLength();
 		std::map<std::string, std::string>	&getHttpHeaders();
