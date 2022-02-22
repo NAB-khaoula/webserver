@@ -6,7 +6,7 @@
 /*   By: ybouddou <ybouddou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/08 16:32:15 by ybouddou          #+#    #+#             */
-/*   Updated: 2022/02/20 15:58:06 by ybouddou         ###   ########.fr       */
+/*   Updated: 2022/02/22 04:21:37 by ybouddou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@ int		main(int ac, char **av)
 		ws	webserv;
 		begin_parser(webserv, av);
 		// print_attr(webserv);
-		multipleServers(&webserv);
+		multipleServers(webserv);
 	}
 	catch(const std::exception& err)
 	{

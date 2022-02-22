@@ -3,7 +3,7 @@
 Response::Response(){
 }
 
-Response::Response(Request requestClient, std::vector<Server> configParsed): cgiString() ,statusCode(-1), location(), stringJoinedResponse(std::string()), \
+Response::Response(Request requestClient, std::vector<Server> configParsed): cgiString(), cgiHeaders(),statusCode(-1), location(), stringJoinedResponse(std::string()), \
 clientRequest(requestClient), serverConfigData(configParsed){
 }
 
@@ -17,6 +17,14 @@ int			&Response::getStatusCode(){
 
 std::string	&Response::getStatusMessage(){
 	return statusMessage;
+}
+
+std::string	&Response::getCgiHeaders(){
+	return cgiHeaders;
+}
+
+void	Response::setCgiHeaders(std::string cgi_headers){
+	cgiHeaders = cgi_headers;
 }
 
 std::string	&Response::get_filePath(){
@@ -48,7 +56,7 @@ Server	*Response::findVirtualServer()
 	std::vector<std::string> hostPort = ft_splitSpace(((clientRequest.getHttpHeaders()).find("Host"))->second, ':');
 	if (hostPort.size() == 1)
 		hostPort.push_back("80");
-	for(int i = 0; i < serverConfigData.size(); i++)
+	for(size_t i = 0; i < serverConfigData.size(); i++)
 	{
 		if(!((serverConfigData[i]).get_listen()).compare(hostPort[1]))
 		{
@@ -65,7 +73,6 @@ Server	*Response::findVirtualServer()
 }
 
 void	Response::findLocation(){
-	size_t		pos = 0;
 	std::string	tempString = clientRequest.getPath();
 	if(tempString.back() == '/')
 		tempString.erase(tempString.length() - 1);
@@ -95,7 +102,7 @@ bool	Response::findUploadLocation(){
 bool	Response::allowedMethods(){
 	if (location.get_methods().empty())
 		return false;
-	for (int i = 0; i < location.get_methods().size(); i++){
+	for (size_t i = 0; i < location.get_methods().size(); i++){
 		if (!(location.get_methods().at(i).compare(clientRequest.getMethod())))
 			return true;
 	}
@@ -113,7 +120,7 @@ int		Response::returnStatus(int status_code, std::string status_message){
 	{
 		if (statusCode == CREATED)
 		{
-			for(int i = 0; i < this->location.get_index().size(); i++)
+			for(size_t i = 0; i < this->location.get_index().size(); i++)
 			{
 				if (accessFile(filePath + '/' + location.get_index().at(i)))
 				{
@@ -201,7 +208,7 @@ int     Response::buildResponse()
 				{
 					if (location.get_upload_enble() == "on" || location.get_delete_enble() == "on")
 					{
-						for(int i = 0; i < clientRequest.getBodies().size(); i++)
+						for(size_t i = 0; i < clientRequest.getBodies().size(); i++)
 						{
 							if(!(clientRequest.getBodies().at(i).fileName.empty()))
 							{
@@ -231,7 +238,7 @@ int     Response::buildResponse()
 							}
 						}
 					}
-					for(int i = 0; i < this->location.get_index().size(); i++)
+					for(size_t i = 0; i < this->location.get_index().size(); i++)
 					{
 						if (accessFile(filePath + '/' + location.get_index().at(i)))
 						{
@@ -261,7 +268,7 @@ int     Response::buildResponse()
 				}
 				else
 				{
-					for(int i = 0; i < this->location.get_index().size(); i++)
+					for(size_t i = 0; i < this->location.get_index().size(); i++)
 					{
 						if (accessFile(filePath + '/' + location.get_index().at(i)))
 						{
@@ -274,7 +281,7 @@ int     Response::buildResponse()
 
 									cgiString = runCgi(*this);
 								}
-								catch(std::string str)
+								catch(std::exception e)
 								{
 									return (returnStatus(INTERNALSERVERERROR, "Internal Server Error"));
 								}
@@ -343,15 +350,17 @@ std::string &Response::indexFound(){
 	if (cgiString.empty())
 	{
 		buffer << indexFile.rdbuf();
-		htmlString = buffer.str();
+		htmlString = "\r\n\r\n";
+		htmlString += buffer.str();
+		cgiString = buffer.str();
 	}
 	else
-		htmlString = cgiString;
+		htmlString = "\r\n" + getCgiHeaders() + "\r\n\r\n" + cgiString;
 	stringJoinedResponse += clientRequest.getHttpVersion() + " "; 
 	stringJoinedResponse += std::to_string(statusCode) + " ";
 	stringJoinedResponse += statusMessage + " \r\n";
 	stringJoinedResponse += "Content-Length: ";
-	stringJoinedResponse += std::to_string(htmlString.length());
+	stringJoinedResponse += std::to_string(cgiString.size());
 	stringJoinedResponse += "\r\n";
 	if (statusCode == MOVEDPERMANENTLY)
 	{
@@ -362,29 +371,27 @@ std::string &Response::indexFound(){
 	if (statusCode == METHODNOTALLOWED)
 	{
 		stringJoinedResponse += "Allow: ";
-		for(int i = 0; i < location.get_methods().size(); i++)
+		for(size_t i = 0; i < location.get_methods().size(); i++)
 		{
 			stringJoinedResponse += location.get_methods().at(i);
 			if(i != location.get_methods().size() - 1)
 				stringJoinedResponse += " , ";
 		}
-		stringJoinedResponse +=	" \r\n"; 
-	}	
+		stringJoinedResponse +=	" \r\n";
+	}
 	stringJoinedResponse += "Connection: ";
-	stringJoinedResponse += clientRequest.getHttpHeaders().find("Connection")->second;
+	stringJoinedResponse += clientRequest.getConnection();
 	stringJoinedResponse +=	" \r\n";
-		if(this->clientRequest.getHttpHeaders().find("Sec-Fetch-Dest")->second == std::string("style"))
+	if(this->clientRequest.getHttpHeaders().find("Sec-Fetch-Dest")->second == std::string("style"))
 		stringJoinedResponse +=  "Content-Type: text/css\r\n";
 	else if (this->clientRequest.getHttpHeaders().find("Sec-Fetch-Dest")->second == std::string("script"))
 		stringJoinedResponse +=  "Content-Type: text/javascript\r\n";
 	else if (this->clientRequest.getHttpHeaders().find("Sec-Fetch-Dest")->second == std::string("document"))
-		stringJoinedResponse +=  "Content-Type: text/html\r\n"; //REVIEW - review the image types
+		stringJoinedResponse +=  "Content-Type: text/html\r\n";
 	else
 		stringJoinedResponse += "Content-Type: */*\r\n";
 	stringJoinedResponse += "Date: ";
 	stringJoinedResponse += DateGMT();
-	stringJoinedResponse += "\r\n\r\n";
 	stringJoinedResponse += htmlString;
 	return stringJoinedResponse;
 }
-

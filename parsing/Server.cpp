@@ -123,7 +123,7 @@ void    Server::set_client_max_body(std::string client_max_body, int &nb_line)
     if (this->get_client_max_body().empty())
     {
             client_max_body = rightTrim(client_max_body);
-        int i = 0;
+        size_t i = 0;
         int check = 0;
         while (client_max_body[i])
         {
@@ -222,8 +222,6 @@ void fill_location(std::string &key, std::string &value, t_WebServ &ws, int &nb_
         ws.locat.set_methods(value, nb_line);
     else if (!key.compare("return"))
         ws.locat.set_return(value, nb_line);
-    else if (!key.compare("fastcgi_pass"))
-        ws.locat.set_cgi(value, nb_line);
     else if (!key.compare("upload_enable"))
         ws.locat.set_upload_enble(value, nb_line);
     else if (!key.compare("delete_enable"))
@@ -284,10 +282,11 @@ void     begin_parser(t_WebServ &ws, char **av)
     std::ifstream               myReadFile;
     std::vector<std::string>    split;
     std::string                 line, str_key, str_value;
-    int i = 0, j = 0, k;
+    int i = 0, j = 0;
+    size_t k;
 
     ws.serv = new Server();
-    myReadFile.open("./src/webserv.conf");
+    myReadFile.open(av[1]);
     if (myReadFile.is_open())
     {
         while (std::getline(myReadFile, line))

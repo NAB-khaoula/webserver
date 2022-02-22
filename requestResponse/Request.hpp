@@ -24,6 +24,7 @@ class Request{
 		bool								upload;
 		std::vector<std::string>			requestLine;
 		std::string							param;
+		std::string							connection;
 		std::map<std::string, std::string>	URLVariable;
 		std::map<std::string, std::string>	httpHeaders;
 
@@ -47,14 +48,16 @@ class Request{
 		std::string							&getHttpVersion();
 		std::string							&getContentType();
 		std::string							&getQueryString();
+		std::string							&getConnection();
 		int									&getContentLength();
 		std::map<std::string, std::string>	&getHttpHeaders();
-		std::map<std::string, std::string>	&getURLVariable();
+		std::map<std::string, std::string>	&get_url_var();
 		bool								getUpload();
 
 		// Setters
 		void								setContentType();
 		void								setContentLength();
+		void								setConnection();
 		void								setFormData(std::string& req);
 		
 		std::vector<std::string>    		ft_splitCrlf(std::string &str,const std::string &c);

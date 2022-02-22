@@ -39,10 +39,25 @@ std::string		&Request::getQueryString()
 	return (queryString);
 }
 
+std::string		&Request::getConnection()
+{
+	return (connection);
+}
+
+void		Request::setConnection()
+{
+	std::map<std::string, std::string>::iterator i;
+
+	i = httpHeaders.find("Connection");
+	if (i != httpHeaders.end())
+		connection = i->second;
+	else
+		connection = "keep-alive";
+}
+
 void		Request::setContentLength()
 {
 	std::map<std::string, std::string>::iterator i;
-	size_t	pos;
 
 	i = httpHeaders.find("Content-Length");
 	if (i != httpHeaders.end())
@@ -106,6 +121,7 @@ void		Request::parseBody(std::string req)
 	
 	setContentType();
 	setContentLength();
+	setConnection();
 	if (!contentType.empty() && !boundary.empty())
 		setFormData(req);
 	else if (!contentType.empty())
@@ -114,31 +130,10 @@ void		Request::parseBody(std::string req)
 		queryString += body.body;
 		bodies.push_back(body);
 	}
-	// std::cout << contentType << std::endl;
-	// std::cout << getQueryString() << std::endl;
-	// ****Printing body****
-	// std::ofstream	out_file("bodies.txt");
-	// std::vector<Body>::iterator it = bodies.begin();
-	// while (it != bodies.end())
-	// {
-	// 	if (contentType.find("multipart/form-data") != std::string::npos)
-	// 	{
-	// 		out_file << "| ContentDispo: " << it->ContentDispo << " |\n";
-	// 		out_file << "| ContentType : " << it->ContentType << " |\n";
-	// 		out_file << "| name : " << it->name << " |\n";
-	// 		out_file << "| fileName : " << it->fileName << " |\n";
-	// 		// std::ofstream	filename(it->fileName);
-	// 		// filename << it->body;
-	// 	}
-	// 	out_file << "| Body : " << it->body << " |\n";
-	// 	out_file << "\n+++++++++++++++++++++++++++++++++++++\n";
-	// 	it++;
-	// }
-	// out_file.close();
 }
 
 bool	Request::uploadFile(){
-	for(int i = 0; i < bodies.size(); i++)
+	for(size_t i = 0; i < bodies.size(); i++)
 	{
 		if (!bodies.at(i).fileName.empty())
 			return true;
@@ -163,7 +158,7 @@ void			Request::parseParam(std::string	&variableURL, size_t &pos)
 	std::vector<std::string>	vars;
 	std::string	tempURL;
 	std::string	sec;
-	int			i;
+	size_t		i;
 
 	tempURL = variableURL.substr(pos + 1);
 	variableURL.erase(pos);
@@ -207,7 +202,7 @@ void			Request::SplitFirstLine(std::string &requestString)
 void    Request::SplitHeader(std::vector<std::string> vect, char c)
 {
     size_t pos = 0;
-    for(int i = 0; i < vect.size(); i++)
+    for(size_t i = 0; i < vect.size(); i++)
 		if((pos = vect[i].find(c)) != std::string::npos)
 			this->httpHeaders.insert(std::make_pair<std::string, std::string>(vect[i].substr(0, pos), vect[i].substr(pos + 2)));
 }
@@ -233,7 +228,7 @@ std::map<std::string, std::string>	&Request::getHttpHeaders(){
 	return httpHeaders;
 }
 
-std::map<std::string, std::string>	&Request::getURLVariable(){
+std::map<std::string, std::string>	&Request::get_url_var(){
 	return URLVariable;
 }
 
