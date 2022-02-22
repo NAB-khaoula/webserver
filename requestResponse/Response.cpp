@@ -93,7 +93,7 @@ void	Response::findLocation(){
 	{
 		if (!(it->first.compare("/")))
 			this->location = it->second;
-		if(!(tempString.compare(it->first))){
+		if(!(tempString.compare(it->first)) || !(tempString.compare(it->first + "/"))){
 			this->location = it->second;
 			return;
 		}
@@ -170,6 +170,7 @@ int     Response::buildResponse()
 	this->virtualServer = this->findVirtualServer();
 	this->findLocation();
 	this->filePath = virtualServer->get_root() + clientRequest.getPath();
+	std::cout << clientRequest.getPath() << "\n";
 	stat(filePath.c_str(), &buf);
 	if (clientRequest.getContentLength() > stoi(virtualServer->get_client_max_body()))
 		return(returnStatus(PAYLOADTOOLARGE, "Payload Too Large"));
@@ -220,6 +221,7 @@ int     Response::buildResponse()
 				{
 					if (filePath.back() != '/')
 					{
+						std::cout << "hna redirection\n";
 						redirection = clientRequest.getPath() + std::string("/");
 						return (returnStatus(MOVEDPERMANENTLY, std::string("Moved Permanently")));
 					}
@@ -227,8 +229,10 @@ int     Response::buildResponse()
 					{
 						if (!location.get_index().empty())
 						{
+							std::cout << "location " << this->location.get_path() << "\n";
 							for(size_t i = 0; i < this->location.get_index().size(); i++)
 							{
+								std::cout << "dkhlt hna " << this->location.get_index()[i] << "\n";
 								if (accessFile(filePath + '/' + location.get_index().at(i)))
 								{
 									filePath = filePath + '/' + location.get_index().at(i);
@@ -237,7 +241,6 @@ int     Response::buildResponse()
 									if(filePath.find(".py") != std::string::npos || filePath.find(".php") != std::string::npos)
 									{
 										try{
-
 											cgiString = runCgi(*this);
 										}
 										catch(std::exception e)
@@ -365,12 +368,15 @@ std::string &Response::indexFound(){
 		stringJoinedResponse +=  "Content-Type: text/css\r\n";
 	else if (this->clientRequest.getHttpHeaders().find("Sec-Fetch-Dest")->second == std::string("script"))
 		stringJoinedResponse +=  "Content-Type: text/javascript\r\n";
-	else if (this->clientRequest.getHttpHeaders().find("Sec-Fetch-Dest")->second == std::string("document"))
-		stringJoinedResponse +=  "Content-Type: text/html\r\n";
+	// else if (this->clientRequest.getHttpHeaders().find("Sec-Fetch-Dest")->second == std::string("document"))
+	// 	stringJoinedResponse +=  "Content-Type: text/html\r\n";
 	else
 		stringJoinedResponse += "Content-Type: */*\r\n";
 	stringJoinedResponse += "Date: ";
 	stringJoinedResponse += DateGMT();
 	stringJoinedResponse += htmlString;
+	std::ofstream resfile("response.txt", std::ios_base::app);
+	resfile << stringJoinedResponse << std::endl;
+	resfile.close();
 	return stringJoinedResponse;
 }

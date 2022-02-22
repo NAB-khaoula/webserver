@@ -96,7 +96,8 @@ std::string    runCgi(Response &response)
     }
     else
     {
-        write(fd_post[1], response.getClientRequest().getBody().c_str(), response.getClientRequest().getBody().size());
+		if (req_method != "GET")
+        	write(fd_post[1], response.getClientRequest().getBody().c_str(), response.getClientRequest().getBody().size());
         close(fd[1]);
         close(fd_post[0]);
         close(fd_post[1]);
