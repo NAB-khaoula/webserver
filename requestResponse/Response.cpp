@@ -286,10 +286,7 @@ int     Response::buildResponse()
 					if(!location.get_autoindex().compare("on"))
 					{
 						std::cout << "autoindex on need to create the appropriate webpage!!!" << std::endl;
-						filePath = virtualServer->get_root() + "/index.py"; //FIXME - need to update this path
-						std::cerr << filePath << std::endl;
-						std::cerr << "test" << std::endl;
-						cgiString = runCgi(*this);
+						cgiString = std::string("<?php\necho \"Here are our files\";$path = \".\";$dh = opendir($path);$i=1;while (($file = readdir($dh)) !== false) {if($file != \".\" && $file != \"..\" && $file != \"index.php\" && $file != \".htaccess\" && $file != \"error_log\" && $file != \"cgi-bin\") {echo \"<a href='$path/$file'>$file</a><br /><br />\";$i++;}}closedir($dh);?> ");
 						return(returnStatus(OK, "OK"));
 					}
 					return (returnStatus(NOTFOUND, "NOT FOUND"));
