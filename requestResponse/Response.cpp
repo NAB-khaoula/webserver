@@ -245,9 +245,9 @@ int     Response::buildResponse()
 										}
 										break;
 									}
-									return (returnStatus(statusCode, std::string(statusMessage)));
 								}
 							}
+							return (returnStatus(statusCode, std::string(statusMessage)));
 						}
 						else if(!location.get_autoindex().compare("on"))
 						{
