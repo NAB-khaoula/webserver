@@ -93,7 +93,7 @@ void	Response::findLocation(){
 	{
 		if (!(it->first.compare("/")))
 			this->location = it->second;
-		if(!(tempString.compare(it->first))){
+		if(!tempString.compare(it->first)){
 			this->location = it->second;
 			return;
 		}
@@ -257,8 +257,8 @@ int     Response::buildResponse()
 								cgiString += "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<title>Index Table</title>\n</head>\n<body><center><h1>Index Table</h1></center>\n<hr>\n</body>\n</html>";
 								while ((ent = readdir (dir)) != NULL)
 								{
-									cgiString += "<a href=\"/";
-									cgiString += ent->d_name;
+									cgiString += "<a href=\"";
+									cgiString += clientRequest.getPath() + ent->d_name;
 									cgiString += "\">";
 									cgiString += ent->d_name;
 									cgiString += "</a>";
