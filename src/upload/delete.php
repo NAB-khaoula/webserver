@@ -3,9 +3,8 @@
 	{
 		if ($_SERVER["CONTENT_TYPE"] == "text/plain")
 		{
-			// echo "Content type is raw\n";
 			$value = file_get_contents('php://input');
-			if (strstr( $value, '../' ) ) {
+			if (strstr($value, '../' ) || $value == "upload.php" || $value == "delete.php") {
 				echo "you dont have permission to delete this file : " . $value . " \n";
 				exit (1);
 			}
@@ -14,11 +13,10 @@
 		}
 		else if ($_SERVER["CONTENT_TYPE"] == "application/json")
 		{
-			// echo "Content type is application/json\n";
 			$body = json_decode(file_get_contents('php://input'), true);
 			foreach ($body as $key => $value) {
-				if (strstr( $value, '..' ) ) {
-					echo "you dont have permission to delete this file\n";
+				if (strstr($value, '../' ) || $value == "upload.php" || $value == "delete.php") {
+					echo "you dont have permission to delete this file : " . $value . " \n";
 					continue ;
 				}
 				unlink($value);
@@ -27,11 +25,10 @@
 		}
 		else if ($_SERVER["CONTENT_TYPE"] == "application/javascript")
 		{
-			// echo "Content type is application/javascript\n";
 			parse_str(file_get_contents('php://input'), $body);
 			foreach ($body as $key => $value) {
-				if (strstr( $value, '..' ) ) {
-					echo "you dont have permission to delete this file\n";
+				if (strstr($value, '../' ) || $value == "upload.php" || $value == "delete.php") {
+					echo "you dont have permission to delete this file : " . $value . " \n";
 					continue ;
 				}
 				unlink($value);
@@ -40,11 +37,10 @@
 		}
 		else if ($_SERVER["CONTENT_TYPE"] == "application/x-www-form-urlencoded")
 		{
-			// echo "Content type is x-www-form-urlencoded\n";
 			parse_str(file_get_contents('php://input'), $body);
 			foreach ($body as $key => $value) {
-				if (strstr( $value, '..' ) ) {
-					echo "you dont have permission to delete this file\n";
+				if (strstr($value, '../' ) || $value == "upload.php" || $value == "delete.php") {
+					echo "you dont have permission to delete this file : " . $value . " \n";
 					continue ;
 				}
 				unlink($value);
