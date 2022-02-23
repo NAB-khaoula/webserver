@@ -134,6 +134,9 @@ Request::Request(std::string requestString)
 	setContentLength();
 	setConnection();
 	reqBody = requestString;
+	std::ofstream refile("body.txt");
+	refile << getBody() << std::endl;
+	refile.close();
 	// parseBody(requestString);
 }
 
