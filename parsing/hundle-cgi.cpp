@@ -26,7 +26,7 @@ std::string    runCgi(Response &response)
         response.setStatusMesssage("Internal Server Error");
         throw std::runtime_error("Path CGI not found");
     }
-    std::string path_cgi_py = "/usr/bin/python";
+    std::string path_cgi_py = "/usr/bin/python3";
 
     //NOTE - The full path to the CGI script.
     setenv("SCRIPT_FILENAME", fullPath.c_str(), true);
@@ -44,6 +44,7 @@ std::string    runCgi(Response &response)
     setenv("CONTENT_LENGTH", (std::to_string(response.getClientRequest().getContentLength())).c_str(), true);
     //NOTE - The data type of the content. Used when the client is sending attached content to the server. For example, file upload.
     setenv("CONTENT_TYPE", response.getClientRequest().getContentType().c_str(), true);
+    std::cout << response.getClientRequest().getContentType().c_str() << std::endl;
     //NOTE - The URL-encoded information that is sent with GET method request.
     setenv("QUERY_STRING", response.getClientRequest().getParam().c_str(), true);
     //NOTE - The server's hostname or IP Address
