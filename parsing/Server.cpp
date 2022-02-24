@@ -25,19 +25,19 @@ bool                                    Server::get_df() {return _df;}
 
 void    Server::set_df(bool b) {_df = b;}
 
-void    Server::set_root(std::string root, int &nb_line)
+void    Server::set_root(std::string root, int &nb_line, t_WebServ &ws)
 {
     std::string str;
     if (this->get_root().empty())
     {
         root = rightTrim(root);
         if (root.find(" ") != std::string::npos || root.find("\t") != std::string::npos)
-            errors(10, nb_line, "root");
+            errors(10, nb_line, "root", ws);
         else
             _root = root;
     }
     else
-        errors(24, nb_line, root);
+        errors(24, nb_line, root, ws);
 }
 
 void    Server::set_listen(std::string listen, t_WebServ &ws, int &nb_line)
@@ -47,13 +47,13 @@ void    Server::set_listen(std::string listen, t_WebServ &ws, int &nb_line)
         listen = rightTrim(listen);
         int i = 0, len = 0;
         if (listen == "")
-            errors(5, nb_line, listen);
+            errors(5, nb_line, listen, ws);
         while (listen[i])
         {
             if (isdigit(listen[i]) == false)
-                errors(4, nb_line, listen);
+                errors(4, nb_line, listen, ws);
             if (listen.length() > 9)
-                errors(5, nb_line, listen);
+                errors(5, nb_line, listen, ws);
             i++;
             len++;
         }
@@ -67,9 +67,9 @@ void    Server::set_listen(std::string listen, t_WebServ &ws, int &nb_line)
             _df = false;
     }
     else
-        errors(21, nb_line, listen);
+        errors(21, nb_line, listen, ws);
 }
-void    Server::set_host(std::string host, int &nb_line)
+void    Server::set_host(std::string host, int &nb_line, t_WebServ &ws)
 {
     if (this->get_host().empty())
     {
@@ -84,7 +84,7 @@ void    Server::set_host(std::string host, int &nb_line)
                 for (size_t i = 0; i < vec.size(); i++)
                 {
                     if (vec[i].empty() || isNumber(vec[i]) == false)
-                        errors(6, nb_line, host);
+                        errors(6, nb_line, host, ws);
                     int nb = atoi(vec[i].c_str());
                     if (nb >= 0 && nb <= 255)
                     {
@@ -96,21 +96,21 @@ void    Server::set_host(std::string host, int &nb_line)
                     else
                     {
                         std::string str = std::to_string(nb);
-                        errors(6, nb_line, str);
+                        errors(6, nb_line, str, ws);
                     }
                 }
             }
             else
-                errors(6, nb_line, host);
+                errors(6, nb_line, host, ws);
         }
     }
     else
-        errors(22, nb_line, host);
+        errors(22, nb_line, host, ws);
 }
-void    Server::set_server_names(std::string value, int &nb_line)
+void    Server::set_server_names(std::string value, int &nb_line, t_WebServ &ws)
 {
     if (value.empty())
-        errors(7, nb_line, "server_name");
+        errors(7, nb_line, "server_name", ws);
     std::vector<std::string> vec = ft_splitSpace(value, ' ');
     for (size_t i = 0; i < vec.size(); i++)
     {
@@ -119,7 +119,7 @@ void    Server::set_server_names(std::string value, int &nb_line)
     }
 
 }
-void    Server::set_client_max_body(std::string client_max_body, int &nb_line)
+void    Server::set_client_max_body(std::string client_max_body, int &nb_line, t_WebServ &ws)
 {
     if (this->get_client_max_body().empty())
     {
@@ -137,10 +137,10 @@ void    Server::set_client_max_body(std::string client_max_body, int &nb_line)
                 i++;
             }
             else
-                errors(8, nb_line, client_max_body);
+                errors(8, nb_line, client_max_body, ws);
         }
         if (!check)
-            errors(8, nb_line, client_max_body);
+            errors(8, nb_line, client_max_body, ws);
         else
         {
             i = 0;
@@ -165,9 +165,9 @@ void    Server::set_client_max_body(std::string client_max_body, int &nb_line)
         }   
     }
     else
-        errors(23, nb_line, client_max_body);
+        errors(23, nb_line, client_max_body, ws);
 }
-void    Server::set_err_pages(std::string value, int &nb_line)
+void    Server::set_err_pages(std::string value, int &nb_line, t_WebServ &ws)
 {
     value = rightTrim(value);
     size_t pos = 0;
@@ -178,20 +178,20 @@ void    Server::set_err_pages(std::string value, int &nb_line)
         if (isNumber(f_str))
             key = atoi(f_str.c_str());
         else
-            errors(9, nb_line, f_str); 
+            errors(9, nb_line, f_str, ws); 
         int i = 0;
         std::string s_str = value.erase(0, pos + 1);
         while (s_str[i])
         {
             if ((s_str[i] == ' ' || s_str[i] == '\t'))
-                errors(9, nb_line, s_str);
+                errors(9, nb_line, s_str, ws);
             i++;
         }
         if (_err_pages.find(key) == _err_pages.end())
             _err_pages[key] = s_str;
     }
     else
-        errors(9, nb_line, value);
+        errors(9, nb_line, value, ws);
 }
 
 void    Server::set_location(Location &locat)
@@ -199,7 +199,7 @@ void    Server::set_location(Location &locat)
     _location.push_back(locat);
 }
 
-void    Server::set_map_loc(Location &locat, int &nb_line)
+void    Server::set_map_loc(Location &locat, int &nb_line, t_WebServ &ws)
 {
     if (_map_loc.find(locat.get_path()) == _map_loc.end())
     {
@@ -207,7 +207,7 @@ void    Server::set_map_loc(Location &locat, int &nb_line)
         _map_loc[locat.get_path()] = locat;
     }
     else
-        errors(20, nb_line, locat.get_path());
+        errors(20, nb_line, locat.get_path(), ws);
 }
 
 void    Server::set_brace_server(int brace_server) {_brace_server = brace_server;}
@@ -216,23 +216,23 @@ void    Server::set_brace_location(int brace_location) {_brace_location = brace_
 void fill_location(std::string &key, std::string &value, t_WebServ &ws, int &nb_line)
 {
     if (!key.compare("autoindex"))
-        ws.locat.set_autoindex(value, nb_line);
+        ws.locat.set_autoindex(value, nb_line, ws);
     else if (!key.compare("index"))
-        ws.locat.set_index(value, nb_line);
+        ws.locat.set_index(value, nb_line, ws);
     else if (key == "allow_methods")
-        ws.locat.set_methods(value, nb_line);
+        ws.locat.set_methods(value, nb_line, ws);
     else if (!key.compare("return"))
-        ws.locat.set_return(value, nb_line);
+        ws.locat.set_return(value, nb_line, ws);
     else if (!key.compare("fastcgi_pass"))
-        ws.locat.set_cgi(value, nb_line);
+        ws.locat.set_cgi(value, nb_line, ws);
     else if (!key.compare("upload_enable"))
-        ws.locat.set_upload_enble(value, nb_line);
+        ws.locat.set_upload_enble(value, nb_line, ws);
     else if (!key.compare("delete_enable"))
-        ws.locat.set_delete_enble(value, nb_line);
+        ws.locat.set_delete_enble(value, nb_line, ws);
     else if (!key.compare("upload_store"))
-        ws.locat.set_upload(value, nb_line);
+        ws.locat.set_upload(value, nb_line, ws);
     else
-        errors(3, nb_line, key);
+        errors(3, nb_line, key, ws);
 }
 
 void    fill_server(std::string key, std::string value, std::string &line, t_WebServ &ws, int &nb_line)
@@ -242,26 +242,26 @@ void    fill_server(std::string key, std::string value, std::string &line, t_Web
         if (!key.compare("listen"))
             ws.serv->set_listen(value, ws, nb_line);
         else if (!key.compare("host"))
-            ws.serv->set_host(value, nb_line);
+            ws.serv->set_host(value, nb_line, ws);
         else if (!key.compare("server_name"))
-            ws.serv->set_server_names(value, nb_line);
+            ws.serv->set_server_names(value, nb_line, ws);
         else if (!key.compare("client_max_body_size"))
-            ws.serv->set_client_max_body(value, nb_line);
+            ws.serv->set_client_max_body(value, nb_line, ws);
         else if (!key.compare("error_page"))
-            ws.serv->set_err_pages(value, nb_line);
+            ws.serv->set_err_pages(value, nb_line, ws);
         else if (!key.compare("root"))
-            ws.serv->set_root(value, nb_line);
+            ws.serv->set_root(value, nb_line, ws);
         else if (line.find("}") != std::string::npos && ws.serv->get_brace_location() == 2)
         {
             ws.serv->set_brace_location(0);
-            ws.serv->set_map_loc(ws.locat, nb_line);
+            ws.serv->set_map_loc(ws.locat, nb_line, ws);
             ws.locat.clear();
         }
         else if (line.find("}") != std::string::npos && ws.serv->get_brace_server() == 2)
         {
             ws.serv->set_brace_server(0);
             if (ws.serv->get_listen().empty() || ws.serv->get_host().empty() || ws.serv->get_root().empty())
-                errors(30, nb_line, "");
+                errors(30, nb_line, "", ws);
             ws.servers.push_back(*ws.serv);
             delete ws.serv;
             ws.serv = new Server();
@@ -269,14 +269,14 @@ void    fill_server(std::string key, std::string value, std::string &line, t_Web
         else if (ws.serv->get_brace_location() == 2)
             fill_location(key, value, ws, nb_line);
         else if (!check_directive_loc(key) && ws.serv->get_brace_location() == 1)
-            errors(11, nb_line, key);
+            errors(11, nb_line, key, ws);
         else
-            errors(3, nb_line, key);
+            errors(3, nb_line, key, ws);
     }
     else if ((!check_directives(key) || !check_directive_loc(key)) && ws.serv->get_brace_location() != 2)
-        errors(33, nb_line, "");
+        errors(33, nb_line, "", ws);
     else
-        errors(2, nb_line, "");
+        errors(2, nb_line, "", ws);
 }
 
 void     begin_parser(t_WebServ &ws, char **av)
@@ -298,7 +298,7 @@ void     begin_parser(t_WebServ &ws, char **av)
             check_braces(line, ws, i);
             if (line.empty())
                 continue;
-            check_semi(line, i);
+            check_semi(line, i, ws);
             split = ft_splitSpace(line, ';');
             k = 0;
             while (k < split.size())
@@ -316,7 +316,7 @@ void     begin_parser(t_WebServ &ws, char **av)
     else
         throw std::runtime_error("\033[1;31mFile Error: \033[0m\033[1;37mError Opening File Config.\033[0m");
     if (ws.serv->get_brace_server())
-        errors(32, i, "");
+        errors(32, i, "", ws);
     delete ws.serv;
 }
 

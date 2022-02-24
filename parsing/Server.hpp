@@ -8,7 +8,6 @@
 #include <cstring>
 #include "Location.hpp"
 #include "../WebServ.hpp"
-// #include "../WebServ.hpp"
 
 struct ws;
 
@@ -47,14 +46,14 @@ public:
 
     
     //NOTE - Setters
-    void                            set_root(std::string, int &);
+    void                            set_root(std::string, int &, struct ws &);
     void                            set_listen(std::string, struct ws &, int &);
-    void                            set_host(std::string, int &);
-    void                            set_server_names(std::string, int &);
-    void                            set_client_max_body(std::string, int &);
-    void                            set_err_pages(std::string, int &);
+    void                            set_host(std::string, int &, struct ws &);
+    void                            set_server_names(std::string, int &, struct ws &);
+    void                            set_client_max_body(std::string, int &, struct ws &);
+    void                            set_err_pages(std::string, int &, struct ws &);
     void                            set_location(Location &);
-    void                            set_map_loc(Location &, int &);
+    void                            set_map_loc(Location &, int &, struct ws &);
     void                            set_brace_server(int);
     void                            set_brace_location(int);
     void                            set_df(bool);
@@ -68,8 +67,8 @@ std::string                 get_value(std::string &, int &);
 std::vector<std::string>    ft_splitSpace(std::string, char);
 std::vector<std::string>    delete_brace(std::string );
 void                        check_braces(std::string &, struct ws &, int &);
-void                        check_semi(std::string, int &);
-void                        errors(int, int &, std::string);
+void                        check_semi(std::string, int &, struct ws &);
+void                        errors(int, int &, std::string, struct ws &);
 bool                        isNumber(std::string s);
 int                         check_directive_loc(std::string);
 int                         check_directives(std::string);

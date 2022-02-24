@@ -65,18 +65,18 @@ void    check_braces(std::string &line, t_WebServ &ws, int &nb_line)
         else if (!str_key.compare("server"))
         {
             if (!str_value.empty())
-                errors(0, nb_line, str_value);
+                errors(0, nb_line, str_value, ws);
             ws.serv->set_brace_server(2);
         }
         else if (!str_key.compare("location"))
         {
             if (str_value.empty())
-                errors(1, nb_line, str_value);
+                errors(1, nb_line, str_value, ws);
             ws.serv->set_brace_location(2);
-            ws.locat.set_path(str_value, nb_line);
+            ws.locat.set_path(str_value, nb_line, ws);
         }
         else
-            errors(31, nb_line, str_value);
+            errors(31, nb_line, str_value, ws);
         line.erase(0, i + 1);
     }
     else if (!line[i] && (line.find("server") != std::string::npos || line.find("location") != std::string::npos))
@@ -86,28 +86,28 @@ void    check_braces(std::string &line, t_WebServ &ws, int &nb_line)
         if (!str_key.compare("server") && str_value.empty())
         {
             if (ws.serv->get_brace_server())
-                errors(2, nb_line, "");
+                errors(2, nb_line, "", ws);
             ws.serv->set_brace_server(1);
             line.clear();
         }
         else if (!str_key.compare("location") && !str_value.empty())
         {
             if (ws.serv->get_brace_location())
-                errors(3, nb_line, "");
+                errors(3, nb_line, "", ws);
             else if (ws.serv->get_brace_location() || ws.serv->get_brace_server() != 2)
-                errors(33, nb_line, "");
-            ws.locat.set_path(str_value, nb_line);
+                errors(33, nb_line, "", ws);
+            ws.locat.set_path(str_value, nb_line, ws);
             ws.serv->set_brace_location(1);
             line.clear();
         }
         else if (!str_key.compare("server"))
-            errors(0, nb_line, str_key);
+            errors(0, nb_line, str_key, ws);
         else if (!str_key.compare("location"))
-            errors(1, nb_line, str_key);
+            errors(1, nb_line, str_key, ws);
     }
 }
 
-void    check_semi(std::string line, int &nb_line)
+void    check_semi(std::string line, int &nb_line, t_WebServ &ws)
 {
     int i = 0;
     std::string key = get_key(line, i);
@@ -115,7 +115,7 @@ void    check_semi(std::string line, int &nb_line)
 
     int len = value.length() - 1;
     if (value[len] != ';' && key.compare("}"))
-        errors(19, nb_line, key);
+        errors(19, nb_line, key, ws);
 }
 
 int check_directive_loc(std::string key)
@@ -137,7 +137,7 @@ int check_directives(std::string key)
     return 1;
 }
 
-void    errors(int index, int &nb_line, std::string line)
+void    errors(int index, int &nb_line, std::string line, t_WebServ &ws)
 {
     static std::string arr[] = 
     {
@@ -179,6 +179,7 @@ void    errors(int index, int &nb_line, std::string line)
         "\033[1;31mSyntax Error: \033[0m\033[1;37mduplicate delete_enable " + line + "\033[0m",//35
         "\033[1;31mSyntax Error: \033[0m\033[1;37mFastCGI binary is not correct fof 'PHP'\033[0m",//36
     };
+    delete ws.serv;
     std::string str = std::to_string(nb_line);
     throw std::runtime_error("\033[1;31m|line " + str + "| \033[0m" + arr[index]);
 }
