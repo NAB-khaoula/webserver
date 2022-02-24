@@ -8,8 +8,13 @@
 				echo "you dont have permission to delete this file : " . $value . " \n";
 				exit (1);
 			}
-			unlink($value);
-			echo $value . " deleted successfully\n";
+			if (file_exists($value))
+			{
+				unlink($value);
+				echo $value . " deleted successfully\n";
+			}
+			else
+				echo $value . ": No such file or directory\n";
 		}
 		else if ($_SERVER["CONTENT_TYPE"] == "application/json")
 		{
@@ -19,8 +24,13 @@
 					echo "you dont have permission to delete this file : " . $value . " \n";
 					continue ;
 				}
-				unlink($value);
-				echo $value . " deleted successfully\n";
+				if (file_exists($value))
+				{
+					unlink($value);
+					echo $value . " deleted successfully\n";
+				}
+				else
+					echo $value . ": No such file or directory\n";
 			}
 		}
 		else if ($_SERVER["CONTENT_TYPE"] == "application/javascript")
@@ -31,8 +41,13 @@
 					echo "you dont have permission to delete this file : " . $value . " \n";
 					continue ;
 				}
-				unlink($value);
-				echo $value . " deleted successfully\n";
+				if (file_exists($value))
+				{
+					unlink($value);
+					echo $value . " deleted successfully\n";
+				}
+				else
+					echo $value . ": No such file or directory\n";
 			}
 		}
 		else if ($_SERVER["CONTENT_TYPE"] == "application/x-www-form-urlencoded")
@@ -43,8 +58,13 @@
 					echo "you dont have permission to delete this file : " . $value . " \n";
 					continue ;
 				}
-				unlink($value);
-				echo $value . " deleted successfully\n";
+				if (file_exists($value))
+				{
+					unlink($value);
+					echo $value . " deleted successfully\n";
+				}
+				else
+					echo $value . ": No such file or directory\n";
 			}
 		}
 		else

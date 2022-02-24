@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mbelaman <mbelaman@student.42.fr>          +#+  +:+       +#+        */
+/*   By: ybouddou <ybouddou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/13 08:57:33 by ybouddou          #+#    #+#             */
-/*   Updated: 2022/02/22 13:11:56 by mbelaman         ###   ########.fr       */
+/*   Updated: 2022/02/24 12:05:03 by ybouddou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -134,12 +134,14 @@ void	sendResponse(t_WebServ& webserv)
 		std::cout << "\e[1;36m<-- Response has been sent successfully !!\e[0m\n\n";
 		if (response.getClientRequest().getConnection() == "close")
 		{
-			delete[] webserv.client;
+			delete webserv.client;
 			close(webserv.event.ident);
 			return ;
 		}
-		EV_SET(&webserv.event, webserv.client->socket, EVFILT_WRITE, EV_DELETE, 0, 0, (void *)(webserv.client));
+		delete webserv.client;
+		EV_SET(&webserv.event, webserv.client->socket, EVFILT_WRITE, EV_DELETE, 0, 0, NULL);
 		kevent(webserv.kq, &webserv.event, 1, NULL, 0, NULL);
+		webserv.client = new Client;
 		bzero(webserv.client, sizeof(Client));
 		webserv.client->socket = webserv.event.ident;
 		EV_SET(&webserv.event, webserv.client->socket, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, (void *)(webserv.client));
@@ -155,7 +157,7 @@ void	multipleServers(t_WebServ& webserv)
 	it = webserv.ports.begin();
 	while (it != webserv.ports.end())
 	{
-		memset(&webserv.event, 0, sizeof(webserv.event));
+		bzero(&webserv.event, sizeof(webserv.event));
 		webserv.port = it->second;
 		SetupSocket(webserv);
 		fcntl(webserv.sockfd, F_SETFL, O_NONBLOCK);
@@ -196,7 +198,7 @@ void	multipleClient(t_WebServ& webserv)
 		else if (isServer(webserv))
 		{
 			accept_connection(webserv);
-			webserv.client = new Client[1];
+			webserv.client = new Client;
 			bzero(webserv.client, sizeof(Client));
 			webserv.client->socket = webserv.acceptfd;
 			EV_SET(&webserv.event, webserv.acceptfd, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, (void *)(webserv.client));

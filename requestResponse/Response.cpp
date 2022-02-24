@@ -170,6 +170,7 @@ int     Response::buildResponse()
 	this->virtualServer = this->findVirtualServer();
 	this->findLocation();
 	this->filePath = virtualServer->get_root() + clientRequest.getPath();
+	std::cout << clientRequest.getPath() << std::endl;
 	stat(filePath.c_str(), &buf);
 	if (clientRequest.getContentLength() > stoi(virtualServer->get_client_max_body()))
 		return(returnStatus(PAYLOADTOOLARGE, "Payload Too Large"));
@@ -364,12 +365,11 @@ std::string &Response::indexFound(){
 		stringJoinedResponse +=  "Content-Type: text/css\r\n";
 	else if (this->clientRequest.getHttpHeaders().find("Sec-Fetch-Dest")->second == std::string("script"))
 		stringJoinedResponse +=  "Content-Type: text/javascript\r\n";
-	// else if (this->clientRequest.getHttpHeaders().find("Sec-Fetch-Dest")->second == std::string("document"))
-	// 	stringJoinedResponse +=  "Content-Type: text/html\r\n";
 	else
 		stringJoinedResponse += "Content-Type: */*\r\n";
 	stringJoinedResponse += "Date: ";
 	stringJoinedResponse += DateGMT();
 	stringJoinedResponse += htmlString;
+	delete virtualServer;
 	return stringJoinedResponse;
 }
