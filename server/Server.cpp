@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mbelaman <mbelaman@student.42.fr>          +#+  +:+       +#+        */
+/*   By: ybouddou <ybouddou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/13 08:57:33 by ybouddou          #+#    #+#             */
-/*   Updated: 2022/02/24 16:18:50 by mbelaman         ###   ########.fr       */
+/*   Updated: 2022/02/24 18:47:00 by ybouddou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -101,7 +101,11 @@ void	recvRequest(t_WebServ& webserv)
 	bzero(webserv.client->receive, 1024);
 	webserv.client->ret = recv(webserv.event.ident, webserv.client->receive, 1023, 0);
 	if (webserv.client->ret <= 0)
-		throw std::runtime_error("recv failed");
+	{
+		delete webserv.client;
+		close(webserv.event.ident);
+		return ;
+	}
 	webserv.client->req.append(webserv.client->receive, webserv.client->ret);
 	getReqHeader(webserv.client);
 	if (webserv.client->chunked && webserv.client->req.find("0\r\n\r\n") != std::string::npos)
@@ -121,6 +125,7 @@ void	recvRequest(t_WebServ& webserv)
 
 void	sendResponse(t_WebServ& webserv)
 {
+	size_t ret;
 	webserv.client = (Client *)webserv.event.udata;
 
 	Response response;
@@ -133,9 +138,14 @@ void	sendResponse(t_WebServ& webserv)
 		if (kevent(webserv.kq, &webserv.event, 1, NULL, 0, NULL))
 			throw std::runtime_error("kevent failed");
 	}
-	webserv.client->sent += send(webserv.event.ident, webserv.client->res.c_str() + webserv.client->sent, webserv.client->size - webserv.client->sent, 0);
-	if (webserv.client->sent <= 0)
-		throw std::runtime_error("send failed");
+	ret = send(webserv.event.ident, webserv.client->res.c_str() + webserv.client->sent, webserv.client->size - webserv.client->sent, 0);
+	if (ret <= 0)
+	{
+		delete webserv.client;
+		close(webserv.event.ident);
+		return ;
+	}
+	webserv.client->sent += ret;
 	if ((webserv.client->size - webserv.client->sent) == 0)
 	{
 		std::cout << "\e[1;36m<-- Response has been sent successfully !!\e[0m\n\n";
