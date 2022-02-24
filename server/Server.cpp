@@ -6,7 +6,7 @@
 /*   By: ybouddou <ybouddou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/13 08:57:33 by ybouddou          #+#    #+#             */
-/*   Updated: 2022/02/24 13:39:31 by ybouddou         ###   ########.fr       */
+/*   Updated: 2022/02/24 15:19:41 by ybouddou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,26 +48,28 @@ void	toHex(std::string hex, int& length)
 {
 	std::stringstream ss;
 
+	length = 0;
 	ss << std::hex << hex;
 	ss >> length;
 }
 
-void	unChunkRequest(std::string& req, int& chunk)
+void	unChunkRequest(Client *client)
 {
 	std::string	unchunked;
 	size_t	pos;
 	int		length;
 
-	while((pos = req.find("\r\n")) != std::string::npos)
+	client->lenght = 0;
+	while((pos = client->req.find("\r\n")) != std::string::npos)
 	{
-		length = 0;
-		toHex(req.substr(0, pos), length);
-		req.erase(0, pos + 2);
-		unchunked += req.substr(0, length);
-		req.erase(0, length + 2);
+		toHex(client->req.substr(0, pos), length);
+		client->lenght += length;
+		client->req.erase(0, pos + 2);
+		unchunked += client->req.substr(0, length);
+		client->req.erase(0, length + 2);
 	}
-	chunk = 2;
-	req = unchunked;
+	client->chunked = 2;
+	client->req = unchunked;
 }
 
 void	getReqHeader(Client *client)
@@ -99,18 +101,21 @@ void	recvRequest(t_WebServ& webserv)
 	webserv.client = (Client *)webserv.event.udata;
 	bzero(webserv.client->receive, 1024);
 	webserv.client->ret = recv(webserv.event.ident, webserv.client->receive, 1023, 0);
+	if (webserv.client->ret <= 0)
+		throw std::runtime_error("recv failed");
 	webserv.client->req.append(webserv.client->receive, webserv.client->ret);
 	getReqHeader(webserv.client);
 	if (webserv.client->chunked && webserv.client->req.find("0\r\n\r\n") != std::string::npos)
-			unChunkRequest(webserv.client->req, webserv.client->chunked);
-	if (!webserv.client->header.empty() && webserv.client->req.size() == webserv.client->lenght && webserv.client->chunked != 1)
+			unChunkRequest(webserv.client);
+	if ((!webserv.client->header.empty() && webserv.client->req.size() == webserv.client->lenght && webserv.client->chunked != 1))
 	{
 		std::cout << "\e[1;32m--> Request has been received successfully !!\e[0m\n\n";
 		webserv.client->req = webserv.client->header + webserv.client->req;
 		webserv.client->request = Request(webserv.client->req);
 		webserv.client->req = "";
 		EV_SET(&webserv.event, webserv.client->socket, EVFILT_READ, EV_DELETE, 0, 0, (void *)(webserv.client));
-		kevent(webserv.kq, &webserv.event, 1, NULL, 0, NULL);
+		if (kevent(webserv.kq, &webserv.event, 1, NULL, 0, NULL))
+			throw std::runtime_error("kevent failed");
 		sendResponse(webserv);
 	}
 }
@@ -126,9 +131,12 @@ void	sendResponse(t_WebServ& webserv)
 		webserv.client->res = response.returnResponse();
 		webserv.client->size = webserv.client->res.size();
 		EV_SET(&webserv.event, webserv.client->socket, EVFILT_WRITE, EV_ADD | EV_ENABLE, 0, 0, (void *)(webserv.client));
-		kevent(webserv.kq, &webserv.event, 1, NULL, 0, NULL);
+		if (kevent(webserv.kq, &webserv.event, 1, NULL, 0, NULL))
+			throw std::runtime_error("kevent failed");
 	}
 	webserv.client->sent += send(webserv.event.ident, webserv.client->res.c_str() + webserv.client->sent, webserv.client->size - webserv.client->sent, 0);
+	if (webserv.client->sent <= 0)
+		throw std::runtime_error("send failed");
 	if ((webserv.client->size - webserv.client->sent) == 0)
 	{
 		std::cout << "\e[1;36m<-- Response has been sent successfully !!\e[0m\n\n";
@@ -140,12 +148,14 @@ void	sendResponse(t_WebServ& webserv)
 		}
 		delete webserv.client;
 		EV_SET(&webserv.event, webserv.client->socket, EVFILT_WRITE, EV_DELETE, 0, 0, NULL);
-		kevent(webserv.kq, &webserv.event, 1, NULL, 0, NULL);
+		if (kevent(webserv.kq, &webserv.event, 1, NULL, 0, NULL))
+			throw std::runtime_error("kevent failed");
 		webserv.client = new Client;
 		bzero(webserv.client, sizeof(Client));
 		webserv.client->socket = webserv.event.ident;
 		EV_SET(&webserv.event, webserv.client->socket, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, (void *)(webserv.client));
-		kevent(webserv.kq, &webserv.event, 1, NULL, 0, NULL);
+		if (kevent(webserv.kq, &webserv.event, 1, NULL, 0, NULL))
+			throw std::runtime_error("kevent failed");
 	}
 }
 
@@ -154,6 +164,8 @@ void	multipleServers(t_WebServ& webserv)
 	std::map<std::string, int>::iterator it;
 
 	webserv.kq = kqueue();
+	if (webserv.kq < 0)
+		throw std::runtime_error("kqueue failed");
 	it = webserv.ports.begin();
 	while (it != webserv.ports.end())
 	{
@@ -162,7 +174,8 @@ void	multipleServers(t_WebServ& webserv)
 		SetupSocket(webserv);
 		fcntl(webserv.sockfd, F_SETFL, O_NONBLOCK);
 		EV_SET(&webserv.event, webserv.sockfd, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, NULL);
-		kevent(webserv.kq, &webserv.event, 1, NULL, 0, NULL);
+		if (kevent(webserv.kq, &webserv.event, 1, NULL, 0, NULL))
+			throw std::runtime_error("kevent failed");
 		webserv.sockets.push_back(webserv.sockfd);
 		it++;
 	}
@@ -189,7 +202,7 @@ void	multipleClient(t_WebServ& webserv)
 	{
 		webserv.nev = kevent(webserv.kq, NULL, 0, &webserv.event, 1, NULL);
 		if (webserv.nev < 0)
-			throw std::runtime_error("kevent");
+			throw std::runtime_error("kevent failed");
 		if (webserv.event.flags & EV_EOF)
 		{
 			std::cout << "\e[0;31mClient terminated the session\e[0m\n";

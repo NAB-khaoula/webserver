@@ -380,7 +380,7 @@ std::string &Response::indexFound(){
 		stringJoinedResponse += "Content-Type: */*\r\n";
 	stringJoinedResponse += "Date: ";
 	stringJoinedResponse += DateGMT();
-	stringJoinedResponse += htmlString;
+	stringJoinedResponse += htmlString + "\r\n";
 	delete virtualServer;
 	return stringJoinedResponse;
 }
