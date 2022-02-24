@@ -74,9 +74,6 @@ class Response
 		std::string	&returnResponse();
 		int			returnStatus(int, std::string);
 		std::string	&indexFound();
-		// std::string	indexNotFound();
-		// std::string	indexForbidden();
-		// std::string	indexMovedPermanently();
 };
 
 #endif
