@@ -170,7 +170,6 @@ int     Response::buildResponse()
 	this->virtualServer = this->findVirtualServer();
 	this->findLocation();
 	this->filePath = virtualServer->get_root() + clientRequest.getPath();
-	std::cout << clientRequest.getPath() << std::endl;
 	stat(filePath.c_str(), &buf);
 	if (clientRequest.getContentLength() > stoi(virtualServer->get_client_max_body()))
 		return(returnStatus(PAYLOADTOOLARGE, "Payload Too Large"));
