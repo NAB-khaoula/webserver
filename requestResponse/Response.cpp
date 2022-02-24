@@ -133,13 +133,16 @@ int		Response::returnStatus(int status_code, std::string status_message){
 		{
 			for(std::map<int, std::string>::iterator it = virtualServer->get_err_pages().begin(); it != virtualServer->get_err_pages().end(); it++)
 			{
-				if (it->first == statusCode)
+				if (it->first == statusCode && !access((virtualServer->get_root() + it->second).c_str(), F_OK))
 				{
 					filePath = virtualServer->get_root() + it->second;
 					return (statusCode);
 				}
 			}
-			filePath = virtualServer->get_root() + "/errors/" + std::to_string(statusCode) + ".html";
+			if (!access((virtualServer->get_root() + "/errors/" + std::to_string(statusCode) + ".html").c_str(), F_OK))
+				filePath = virtualServer->get_root() + "/errors/" + std::to_string(statusCode) + ".html";
+			else
+				this->cgiString = "<!DOCTYPE html>\n<html><title>40404</title><body>There was an error finding your error page</body></html>\n";
 		}
 	}
 	return (statusCode);
@@ -164,6 +167,13 @@ bool	Response::badRequest()
 	return false;
 }
 
+bool	Response::NoContent()
+{
+	if ((clientRequest.getMethod() == "POST" || clientRequest.getMethod() == "DELETE") && !clientRequest.getBodies().empty())
+		return(true);
+	return (false);
+}
+
 int     Response::buildResponse()
 {
 	struct stat buf;
@@ -173,6 +183,8 @@ int     Response::buildResponse()
 	stat(filePath.c_str(), &buf);
 	if (clientRequest.getContentLength() > stoi(virtualServer->get_client_max_body()))
 		return(returnStatus(PAYLOADTOOLARGE, "Payload Too Large"));
+	if (NoContent())
+		return(returnStatus(NOCONTENT, "No Content"));
 	if (badRequest())
 		return (returnStatus(BADREQUEST, std::string("Bad Request")));
 	if(this->clientRequest.getHttpHeaders().find("If-None-Match") != this->clientRequest.getHttpHeaders().end())

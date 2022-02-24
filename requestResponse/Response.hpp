@@ -20,6 +20,7 @@
 
 #define	OK						200
 #define CREATED					201 				
+#define NOCONTENT				204 				
 #define MOVEDPERMANENTLY 		301
 #define	NOTMODIFIED				304
 #define	BADREQUEST				400
@@ -64,6 +65,7 @@ class Response
 		Location	&get_location();
 		Request		&getClientRequest();
 		Server		*getServer();
+		bool		NoContent();
 		bool		badRequest();
 		int			buildResponse();
 		Server		*findVirtualServer();
