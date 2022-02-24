@@ -6,7 +6,7 @@
 /*   By: ybouddou <ybouddou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/13 08:57:33 by ybouddou          #+#    #+#             */
-/*   Updated: 2022/02/24 13:10:33 by ybouddou         ###   ########.fr       */
+/*   Updated: 2022/02/24 13:39:31 by ybouddou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -193,6 +193,8 @@ void	multipleClient(t_WebServ& webserv)
 		if (webserv.event.flags & EV_EOF)
 		{
 			std::cout << "\e[0;31mClient terminated the session\e[0m\n";
+			webserv.client = (Client *)webserv.event.udata;
+			delete webserv.client;
 			close(webserv.event.ident);
 		}
 		else if (isServer(webserv))
