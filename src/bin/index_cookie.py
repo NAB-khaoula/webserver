@@ -1,15 +1,13 @@
-#!/usr/bin/python
-
+#!/usr/bin/python3
 import os
 
 # Hello world python program
-print
+
 
 handler = {}
+page = ''
 if 'HTTP_COOKIE' in os.environ:
     cookies = os.environ['HTTP_COOKIE']
-
-    # print(cookies)
     cookies = cookies.split('&')
 
     for cookie in cookies:
@@ -17,4 +15,8 @@ if 'HTTP_COOKIE' in os.environ:
         handler[cookie[0]] = cookie[1]
 
 for k in handler:
-    print(f"<p> <span style='font-weight: bold'>{k} </span>: {handler[k]} </p>")
+    page += "<p> <span style='font-weight: bold'>" + k + "</span>: " + handler[k] + " </p>"
+    print ('Set-Cookie:' + k + '=' + handler[k])
+
+print ("Content-type:text/html\r\n\r\n")
+print (page)
