@@ -167,6 +167,13 @@ bool	Response::badRequest()
 	return false;
 }
 
+bool	Response::NoContent()
+{
+	if ((clientRequest.getMethod() == "POST" || clientRequest.getMethod() == "DELETE") && !clientRequest.getBodies().empty())
+		return(true);
+	return (false);
+}
+
 int     Response::buildResponse()
 {
 	struct stat buf;
@@ -176,6 +183,8 @@ int     Response::buildResponse()
 	stat(filePath.c_str(), &buf);
 	if (clientRequest.getContentLength() > stoi(virtualServer->get_client_max_body()))
 		return(returnStatus(PAYLOADTOOLARGE, "Payload Too Large"));
+	if (NoContent())
+		return(returnStatus(NOCONTENT, "No Content"));
 	if (badRequest())
 		return (returnStatus(BADREQUEST, std::string("Bad Request")));
 	if(this->clientRequest.getHttpHeaders().find("If-None-Match") != this->clientRequest.getHttpHeaders().end())
