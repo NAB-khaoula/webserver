@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ybouddou <ybouddou@student.42.fr>          +#+  +:+       +#+        */
+/*   By: mbelaman <mbelaman@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/13 08:57:33 by ybouddou          #+#    #+#             */
-/*   Updated: 2022/02/24 12:05:03 by ybouddou         ###   ########.fr       */
+/*   Updated: 2022/02/24 13:37:55 by mbelaman         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,6 @@ void	SetupSocket(t_WebServ& webserv)
 	webserv.servadd.sin_family = AF_INET;
 	webserv.servadd.sin_addr.s_addr = htonl(INADDR_ANY);
 	webserv.servadd.sin_port = htons(webserv.port);
-	
 	if (setsockopt(webserv.sockfd, SOL_SOCKET, SO_REUSEADDR, &flag, sizeof(int)) < 0)
 		throw std::runtime_error("setsockopt failed");
 	if (bind(webserv.sockfd, (const struct sockaddr *) &webserv.servadd, sizeof(webserv.servadd)) < 0)
