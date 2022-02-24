@@ -7,9 +7,8 @@
 				if ((isset($_FILES[$key]['tmp_name']))) {    
 					$name = $_FILES[$key]['name'];
 					move_uploaded_file($_FILES[$key]['tmp_name'], $name);
-					echo "File " . $name . " has been uploaded successfully to the server!!\n";  
-				} else {
-					echo "Uploading failed!\n";
+					if ($name != "")
+						echo "File " . $name . " has been uploaded successfully to the server!!\n\n";  
 				}
 			}
 		}
