@@ -6,7 +6,7 @@
 /*   By: ybouddou <ybouddou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/13 08:57:33 by ybouddou          #+#    #+#             */
-/*   Updated: 2022/02/24 11:52:20 by ybouddou         ###   ########.fr       */
+/*   Updated: 2022/02/24 12:05:03 by ybouddou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -135,7 +135,6 @@ void	sendResponse(t_WebServ& webserv)
 		if (response.getClientRequest().getConnection() == "close")
 		{
 			delete webserv.client;
-			std::cout << "client disconnected\n";
 			close(webserv.event.ident);
 			return ;
 		}
