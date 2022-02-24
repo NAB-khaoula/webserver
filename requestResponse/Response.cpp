@@ -84,7 +84,7 @@ void	Response::findLocation(){
 	struct stat buf;
 	size_t pos;
 	stat(tempString.c_str(), &buf);
-	if((!S_ISDIR(buf.st_mode) && !access(tempString.c_str(), F_OK)) || (tempString.back() == '/' && tempString.size() > 1))
+	if((!S_ISDIR(buf.st_mode)) || (tempString.back() == '/' && tempString.size() > 1))
 	{
 		if((pos = tempString.find_last_of('/')) != std::string::npos)
 			tempString.erase(pos);
