@@ -1,5 +1,5 @@
 <?php
-	if ($_SERVER["REQUEST_METHOD"] == "DELETE")
+	if ($_SERVER["REQUEST_METHOD"] == "DELETE" || $_SERVER["REQUEST_METHOD"] == "POST")
 	{
 		if ($_SERVER["CONTENT_TYPE"] == "text/plain")
 		{
