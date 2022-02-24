@@ -60,13 +60,13 @@ std::string    runCgi(Response &response)
     args[1] = NULL;
     if (fullPath.find(".php") != std::string::npos)
     {
-        args[0] = (char *)path_cgi_php.c_str();
-        args[1] = (char *)fullPath.c_str();
+        args[0] = strdup((char *)path_cgi_php.c_str());
+        args[1] = strdup((char *)fullPath.c_str());
     }
     else
     {
-        args[0] = (char *)path_cgi_py.c_str();
-        args[1] = getenv("SCRIPT_FILENAME");
+        args[0] = strdup((char *)path_cgi_py.c_str());
+        args[1] = strdup(getenv("SCRIPT_FILENAME"));
     }
     args[2] = NULL;
     
@@ -110,6 +110,11 @@ std::string    runCgi(Response &response)
         close(old_fd[1]);
         close(old_fd[0]);
     }
+    if (args[0])
+        delete args[0];
+    if (args[1])
+        delete args[1];
+    delete [] args;
     response.setCgiHeaders(str.substr(0, str.find("\r\n\r\n")));
     return str.substr(str.find("\r\n\r\n") + 4, str.length());
 }
